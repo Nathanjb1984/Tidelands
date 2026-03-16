@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TIDELINES — React Vertical Slice</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { background:#0a0a1a; }
-  </style>
-  <!-- React 18 from CDN — no build step required -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<meta charset="UTF-8"/>
+<meta http-equiv="refresh" content="0;url=tidelines.html"/>
+<title>TIDELINES — Cedar, Sea &amp; Legacy</title>
+<!--
+  DEPLOYMENT NOTE:
+  This file redirects to tidelines.html, the self-contained playable game.
+  For static hosting (Cloudflare Pages, Netlify, etc.), set the deploy
+  directory to:  web/react/
+  The game is a single-file React app — no build step required.
+-->
+<style>body{background:#060612;color:#e8dcc8;font-family:'Press Start 2P',monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:10px;text-align:center}</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" src="TidelinesApp.jsx"></script>
-  <script type="text/babel">
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(TidelinesApp));
-  </script>
+<p>Loading TIDELINES…<br><br><a href="tidelines.html" style="color:#d4b020">Click here if not redirected</a></p>
 </body>
 </html>
