@@ -83,6 +83,7 @@ const OUTCOME_LABEL={
   DECISIVE_VICTORY:{text:'DECISIVE VICTORY',icon:'⚜'},VICTORY:{text:'VICTORY',icon:'✦'},
   STALEMATE:{text:'STALEMATE',icon:'⊘'},DEFEAT:{text:'DEFEAT',icon:'✖'},
   DEVASTATING_DEFEAT:{text:'DEVASTATING DEFEAT',icon:'☠'},
+  TRADE_SUCCESS:{text:'TRADE SUCCESS',icon:'📦'},DIPLOMACY_SUCCESS:{text:'PEACE SECURED',icon:'🕊'},
 };
 const OUTCOME_NARR={
   DECISIVE_VICTORY:"Cedar Creek's line shatters. Warriors flee into the trees. The beach — their beach — belongs to you now.",
@@ -180,12 +181,17 @@ const PHASE_LOCATION_KEY={0:'home',1:'channel',2:'cedar',3:'cedar',4:'headland',
 
 /* ─ Onboarding hints (first raid only) ─ */
 const HINTS={
+  vil_dawn:'Home Waters is your village-opening choice. It sets what kind of season you are walking into before you commit to conflict.',
+  vil_expedition:'This determines the purpose of your voyage. Raiding is the old way. Trade and diplomacy build different kinds of power.',
   vil_intel:'This choice tells you what kind of shore you are sailing toward. Better intel makes the rest of the run easier to read.',
   vil_prep:'This is your last village decision before departure. Pick the advantage you want to feel most during the crossing and battle.',
+  trv_route:'The route shapes the journey. Safer water means slower progress. Open crossings risk weather but save time.',
+  trv_event:'Something on the water demands your attention. Your response shapes what you carry to the far shore.',
   trv_arrival:'Arrival timing shapes surprise. More surprise usually means a stronger opening and a clearer early advantage.',
   trv_form:'This decides whether your crew feels hidden or terrifying when Cedar Creek first sees you.',
   enc_tactic:'This is your main battle order. It changes how hard you hit and how much risk your crew carries.',
   wth_choose:'The raid is not over until you get home. Withdrawal decides how much you save, risk, or memorialize.',
+  aft_ceremony:'The return is only the beginning. How you share — or hold — what you brought back defines your legacy.',
 };
 
 /* ─── §4  Pure Helpers  (UNCHANGED) ───────────────────────────────────── */
@@ -261,7 +267,7 @@ function playContextLabel({playMode,isMobile,isPortrait}){
 }
 function phaseProgressLabel(phase){return `Phase ${phase+1} of ${PHASES.length}`;}
 function firstRunObjective(phase){
-  return phase===0?'Your goal: prepare a war canoe, cross north, confront Cedar Creek, and bring a story home.'
+  return phase===0?'Your goal: begin in Home Waters, steady the village, then prepare the war canoe for Cedar Creek.'
     :phase===1?'You are on the outward journey. Distance and timing now shape the rest of the raid.'
     :phase===2?'You have reached Cedar Creek. Your choices now decide fear, bloodshed, and leverage.'
     :phase===3?'The battle is the consequence of everything chosen before this moment.'
@@ -350,7 +356,7 @@ const SAVE_KEY='tidelines_save_v1';
 function loadPersist(){try{const r=localStorage.getItem(SAVE_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function savePersist(d){try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){}}
 function clearPersist(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
-function persistFromState(s){return{prestige:s.prestige,feudEscalation:s.feudEscalation,legacyEntries:s.legacyEntries,warTraits:s.warTraits,totalRaids:s.totalRaids,lastRun:s.lastRun};}
+function persistFromState(s){return{prestige:s.prestige,feudEscalation:s.feudEscalation,legacyEntries:s.legacyEntries,warTraits:s.warTraits,totalRaids:s.totalRaids,lastRun:s.lastRun,foodStores:s.foodStores,villageReadiness:s.villageReadiness,canoeReadiness:s.canoeReadiness,poleProgress:s.poleProgress};}
 
 /* ═══════════════════════════════════════════════════════════════════════
    §5.5  AUDIO ENGINE — Web Audio API synth, fully self-contained
@@ -547,12 +553,16 @@ function doCasualties(s){
 function initState(carry={}){
   const sv=carry._fromSave?carry:null;
   return{
-    step:'vil_intel',scene:'village',
-    log:[L(''),L('The decision has been made. Cedar Creek will answer for what they have taken.'),L(''),
-         L('Before the war canoe is loaded, you must learn what awaits.'),L('')],
+    step:'vil_dawn',scene:'village',
+    log:[L(''),L('Home Waters wakes under witness fires and low cedar smoke.'),L(''),
+         L('Before the war canoe is committed to Cedar Creek, the village must be steadied for the season ahead.'),L('')],
     morale:65,fear:0,canoeCondition:100,cargo:0,cargoCapacity:40,
     prestige:carry.prestige??sv?.prestige??200,
     feudEscalation:carry.feudEscalation??sv?.feudEscalation??8,
+    foodStores:carry.foodStores??sv?.foodStores??72,
+    villageReadiness:carry.villageReadiness??sv?.villageReadiness??58,
+    canoeReadiness:carry.canoeReadiness??sv?.canoeReadiness??60,
+    poleProgress:carry.poleProgress??sv?.poleProgress??12,
     crewSize:15,crewQuality:55,crewAlive:15,crewWounded:0,crewKilled:0,captivesTaken:0,
     intelQuality:'NONE',surpriseBonus:0,stealthBonus:0,
     intimidationBonus:0,approachTime:'dawn',formation:'single',attackerTactic:'measured_push',
@@ -569,7 +579,7 @@ function initState(carry={}){
     totalRaids:carry.totalRaids??sv?.totalRaids??0,
     lastRun:carry.lastRun??sv?.lastRun??null,
     traitsEarned:[],spoils:[],showDebug:false,showLegacy:false,impactFrame:null,
-    statDeltas:{},
+    statDeltas:{},expeditionType:'raid',voyageRoute:'coast',voyageWeather:'calm',voyageEventId:null,
   };
 }
 
@@ -577,6 +587,184 @@ function initState(carry={}){
 /*  UNCHANGED logic — added: statDeltas tracking, cause/effect log lines,
     impact frames for phase transitions, readable explanations.
     NO formula changes. */
+
+function pickHomeWaters(prev,id){
+  const s=dup(prev); s.statDeltas={};
+  switch(id){
+    case'provision_village':
+      s.foodStores=Math.min(100,s.foodStores+18);
+      s.villageReadiness+=10;
+      s.log.push(L('Smoke racks loaded, dried halibut bundled for the longhouse stores. The village eats well tonight.'));
+      s.log.push(L(''));s.log.push(L('Food stores ▲ · Village readiness ▲','green','stat'));
+      break;
+    case'ready_canoe':
+      s.canoeReadiness=Math.min(100,s.canoeReadiness+20);
+      s.morale+=3;
+      s.log.push(L('Fresh cedar planks bent and lashed — the war canoe sits higher, steadier. The crew feels it.'));
+      s.log.push(L(''));s.log.push(L('Canoe readiness ▲ · Morale ▲','green','stat'));
+      break;
+    case'consult_elders':
+      s.poleProgress+=8;
+      s.prestige+=10;
+      s.log.push(L('The elder carvers mark a new figure on the memorial pole. Word of your lineage spreads.'));
+      s.log.push(L(''));s.log.push(L('Pole progress ▲ · Prestige ▲','green','stat'));
+      break;
+    case'quiet_war_prep':
+      s.villageReadiness+=6;s.canoeReadiness+=8;s.morale+=2;
+      s.log.push(L('Weapons oiled, paddles stacked, the crew drills in silence. No one questions what comes next.'));
+      s.log.push(L(''));s.log.push(L('Readiness ▲ · Canoe ▲ · Morale ▲','green','stat'));
+      break;
+  }
+  s.log.push(L(''));s.log.push(L('The village is steadied. Now: what purpose drives this season\u2019s voyage?'));
+  s.step='vil_expedition';s.scene='village';
+  return s;
+}
+
+/* ── Expedition Type Selection ── */
+function pickExpedition(prev,id){
+  const s=dup(prev); s.statDeltas={};
+  s.expeditionType=id;
+  switch(id){
+    case'raid':
+      s.log.push(L('The war canoe will cross north. Cedar Creek will answer for what they have taken.'));
+      s.log.push(L(''));s.log.push(L('Expedition: RAID \u2014 prepare for conflict.','red','stat'));
+      s.step='vil_intel';s.scene='village';
+      break;
+    case'trade':
+      s.log.push(L('Canoe loaded with oil, dried fish, and woven cedar. The northern settlements trade copper and shell.'));
+      s.log.push(L(''));s.log.push(L('Expedition: TRADE \u2014 profit without blood.','green','stat'));
+      s.morale+=5;
+      s.step='vil_done';s.scene='village';
+      break;
+    case'diplomacy':
+      s.log.push(L('An elder boards the canoe carrying gifts and a carved speaking staff. Words are stronger than war sometimes.'));
+      s.log.push(L(''));s.log.push(L('Expedition: DIPLOMACY \u2014 seek peace or alliance.','blue','stat'));
+      s.prestige+=5;s.morale+=3;
+      s.step='vil_done';s.scene='village';
+      break;
+  }
+  return s;
+}
+
+/* ── Voyage Route Choice ── */
+function pickRoute(prev,id){
+  const s=dup(prev); s.statDeltas={};
+  const oldCanoe=s.canoeCondition,oldMorale=s.morale;
+  s.voyageRoute=id;
+  switch(id){
+    case'coast':
+      s.voyageWeather='calm';
+      s.log.push(L('The canoe hugs the shore, slipping between kelp beds and rocky points. Slow but steady.'));
+      s.log.push(L(''));s.log.push(L('Route: COASTAL \u2014 safe water, longer crossing.','dim','stat'));
+      break;
+    case'channel':
+      s.voyageWeather=Math.random()<0.35?'squall':'chop';
+      if(s.voyageWeather==='squall'){
+        s.canoeCondition=Math.max(0,s.canoeCondition-12);s.morale=cl(s.morale-5,0,100);
+        s.log.push(L('The channel opens wide and dark. Halfway across, the wind turns. Whitecaps slam the hull.','red'));
+        s.log.push(L(''));s.log.push(L('Squall! \u221212 Canoe \u00b7 \u22125 Morale','red','stat'));
+      }else{
+        s.log.push(L('The main channel runs grey and choppy. Your crew leans into the swells, paddles cutting white water.'));
+        s.log.push(L(''));s.log.push(L('Route: CHANNEL \u2014 moderate risk, moderate speed.','dim','stat'));
+      }
+      break;
+    case'open':
+      s.voyageWeather=Math.random()<0.50?'squall':'clear';
+      if(s.voyageWeather==='squall'){
+        s.canoeCondition=Math.max(0,s.canoeCondition-20);s.morale=cl(s.morale-8,0,100);
+        s.log.push(L('Open ocean. The swells build. A grey wall of rain sweeps across the bow and the canoe drops into a trough.','red'));
+        s.log.push(L(''));s.log.push(L('Storm! \u221220 Canoe \u00b7 \u22128 Morale','red','stat'));
+      }else{
+        s.surpriseBonus+=8;
+        s.log.push(L('Open water. No land in sight. The crew paddles in silence under an enormous sky. You arrive from a direction no one expects.'));
+        s.log.push(L(''));s.log.push(L('Route: OPEN CROSSING \u2014 fastest, +8 Surprise.','green','stat'));
+      }
+      break;
+  }
+  s.statDeltas={canoe:s.canoeCondition-oldCanoe,morale:s.morale-oldMorale};
+  /* Generate a random voyage event */
+  const events=['whale','rival_canoe','fog_bank','flotsam','calm_beauty','bird_omen'];
+  s.voyageEventId=pick(events);
+  s.log.push(L(''));
+  s.step='trv_event';
+  return s;
+}
+
+/* ── Mid-Voyage Event ── */
+function resolveVoyageEvent(prev,id){
+  const s=dup(prev); s.statDeltas={};
+  const oldMorale=s.morale,oldSurp=s.surpriseBonus,oldCanoe=s.canoeCondition;
+  const evt=s.voyageEventId;
+  switch(evt){
+    case'whale':
+      if(id==='follow'){
+        s.morale=cl(s.morale+8,0,100);
+        s.log.push(L('A grey whale surfaces alongside the canoe, breathing slow. Your crew watches in silence. The whale turns north \u2014 the same direction you are headed.'));
+        s.log.push(L(''));s.log.push(L('The crew takes it as a sign. +8 Morale.','green','stat'));
+      }else{
+        s.surpriseBonus+=5;
+        s.log.push(L('The whale surfaces but you press on, paddles never breaking rhythm. The crossing is what matters.'));
+        s.log.push(L(''));s.log.push(L('Focus held. +5 Surprise.','green','stat'));
+      }
+      break;
+    case'rival_canoe':
+      if(id==='follow'){
+        s.morale=cl(s.morale-3,0,100);s.surpriseBonus+=10;
+        s.log.push(L('A distant canoe \u2014 Skidegate colors. They have not seen you. Your crew drops low and waits until they pass beyond the headland.'));
+        s.log.push(L(''));s.log.push(L('Unseen. +10 Surprise \u00b7 \u22123 Morale (tension).','dim','stat'));
+      }else{
+        s.intimidationBonus+=5;
+        s.log.push(L('A distant canoe spots you and turns away. Your war crests are visible. Let them carry word north.'));
+        s.log.push(L(''));s.log.push(L('Reputation spreads. +5 Intimidation.','green','stat'));
+      }
+      break;
+    case'fog_bank':
+      if(id==='follow'){
+        s.surpriseBonus+=12;s.canoeCondition=Math.max(0,s.canoeCondition-5);
+        s.log.push(L('A wall of fog rolls across the channel. You steer into it. The world vanishes. When it lifts, the far shore is close \u2014 and no one saw you coming.'));
+        s.log.push(L(''));s.log.push(L('Hidden approach. +12 Surprise \u00b7 \u22125 Canoe (blind navigation).','dim','stat'));
+      }else{
+        s.morale+=3;
+        s.log.push(L('The fog thickens ahead. You steer wide, keeping the shoreline in view. Slower, but no one gets lost.'));
+        s.log.push(L(''));s.log.push(L('Safe passage. +3 Morale.','green','stat'));
+      }
+      break;
+    case'flotsam':
+      if(id==='follow'){
+        s.cargo+=5;s.canoeCondition=Math.max(0,s.canoeCondition-3);
+        s.log.push(L('Cedar planks and rope drift past \u2014 wreckage from a storm or a broken canoe. Your crew hauls it aboard.'));
+        s.log.push(L(''));s.log.push(L('Salvage. +5 Cargo \u00b7 \u22123 Canoe (extra weight).','dim','stat'));
+      }else{
+        s.log.push(L('Debris on the water. You steer clear. Whatever happened here is not your concern.'));
+        s.log.push(L(''));s.log.push(L('Passed without incident.','dim','stat'));
+      }
+      break;
+    case'calm_beauty':
+      s.morale=cl(s.morale+(id==='follow'?6:3),0,100);
+      if(id==='follow'){
+        s.log.push(L('The water goes glass-still. Mountains reflected perfectly. An eagle circles overhead. Your war singer begins a low chant and the crew joins.'));
+        s.log.push(L(''));s.log.push(L('The crew\u2019s spirits lift. +6 Morale.','green','stat'));
+      }else{
+        s.log.push(L('Beautiful water, but the mission is what matters. You push through without stopping.'));
+        s.log.push(L(''));s.log.push(L('Steady progress. +3 Morale.','green','stat'));
+      }
+      break;
+    case'bird_omen':
+      if(id==='follow'){
+        s.morale=cl(s.morale+5,0,100);s.surpriseBonus+=3;
+        s.log.push(L('A raven lands on the prow. It cocks its head, croaks three times, and flies north toward Cedar Creek. Your spiritual advisor smiles.'));
+        s.log.push(L(''));s.log.push(L('Good omen. +5 Morale \u00b7 +3 Surprise.','green','stat'));
+      }else{
+        s.log.push(L('A raven circles but you wave it off. Omens are for people who need reassurance. Your crew needs discipline.'));
+        s.log.push(L(''));s.log.push(L('Focus maintained.','dim','stat'));
+      }
+      break;
+  }
+  s.statDeltas={morale:s.morale-oldMorale,surprise:s.surpriseBonus-oldSurp,canoe:s.canoeCondition-oldCanoe};
+  s.log.push(L(''));
+  s.step='trv_arrival';
+  return s;
+}
 
 function pickIntel(prev,id){
   const s=dup(prev); s.statDeltas={};
@@ -619,11 +807,23 @@ function pickPrep(prev,id){
   s.step='vil_done';return s;
 }
 function enterTravel(prev){
-  const s=dup(prev);s.step='trv_arrival';s.scene='travel';s.statDeltas={};
+  const s=dup(prev);s.scene='travel';s.statDeltas={};
+  /* ── Non-raid expeditions resolve through travel quickly ── */
+  if(s.expeditionType==='trade') return resolveTradeExpedition(s);
+  if(s.expeditionType==='diplomacy') return resolveDiplomacyExpedition(s);
+  /* ── Raid voyage: full route → event → arrival → formation flow ── */
+  s.step='trv_route';
+  /* ── Home Waters carry-forward: village prep buffs the expedition ── */
+  const cReady=s.canoeReadiness||60;
+  const fStores=s.foodStores||72;
+  const canoeBonus=Math.round((cReady-60)*0.3);/* 0 at default, up to +12 at 100 */
+  const moraleBonus=Math.round((fStores-60)*0.2);/* 0-ish at default, up to +8 at 100 */
+  if(canoeBonus>0){s.canoeCondition=Math.min(100,s.canoeCondition+canoeBonus);s.log.push(L(`The well-prepared hull rides strong \u2014 +${canoeBonus} Canoe Condition.`,'green','stat'));}
+  if(moraleBonus>0){s.morale=cl(s.morale+moraleBonus,0,100);s.log.push(L(`Full stores aboard \u2014 the crew paddles with confidence. +${moraleBonus} Morale.`,'green','stat'));}
   s.log.push(L(''));
   s.log.push(L("The canoe leaves Stoneshell Inlet under the eyes of the witness poles. Cedar Creek lies beyond Seal Narrows and the long grey crossing north."));
   s.log.push(L(''));
-  s.log.push(L('Home smoke thins behind you. Every stroke widens the distance between your village and the shore where this feud must be answered.'));
+  s.log.push(L('Choose your route across the water.'));
   s.impactFrame={type:'phase_enter',phase:1,...phaseTransitionCopy(1,s)};
   return s;
 }
@@ -770,9 +970,18 @@ function enterAftermath(prev){
   const s=dup(prev);s.scene='village';s.statDeltas={};
   s.log.push(L(''));
   const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
-  if(isWin)s.log.push(L('Your canoe rounds the south headland and Stoneshell Inlet opens before you. People are already gathering on the beach — they have seen the loaded canoe, and they are cheering.'));
-  else if(s.outcome==='STALEMATE')s.log.push(L('Your canoe rounds the headland into home water. The village watches in silence. The canoe sits too high in the water — everyone can see it came back light.'));
-  else s.log.push(L('Your canoe limps around the headland into Stoneshell Inlet. The village sees the empty seats, the blood on the hull. No one cheers. The women begin to wail before you reach the shallows.'));
+  const vReady=s.villageReadiness||58;
+  const pProg=s.poleProgress||12;
+  if(isWin){
+    s.log.push(L('Your canoe rounds the south headland and Stoneshell Inlet opens before you. People are already gathering on the beach — they have seen the loaded canoe, and they are cheering.'));
+    if(vReady>=70)s.log.push(L('The village is thriving — the smoke racks are full, the longhouses prepared. Your people were ready for this homecoming.','green'));
+  }else if(s.outcome==='STALEMATE'){
+    s.log.push(L('Your canoe rounds the headland into home water. The village watches in silence. The canoe sits too high in the water — everyone can see it came back light.'));
+    if(vReady<40)s.log.push(L('The stores are thin. Coming home light will be felt through the winter.','red'));
+  }else{
+    s.log.push(L('Your canoe limps around the headland into Stoneshell Inlet. The village sees the empty seats, the blood on the hull. No one cheers. The women begin to wail before you reach the shallows.'));
+    if(vReady<40)s.log.push(L('The village was barely holding before you left. This loss cuts deeper than the wound.','red'));
+  }
   s.log.push(L(''));
   s.log.push(L(coastMemoryLine(s),'dim'));
   s.log.push(L(''));
@@ -794,9 +1003,14 @@ function enterAftermath(prev){
   s.log.push(L(''));
   if(s.outcome==='DECISIVE_VICTORY'){
     s.log.push(L('♫  A battle song is composed — "The Beach at Cedar Creek."','gold'));
-    s.log.push(L('🏔  Your master carver offers to begin a war history pole.','gold'));
+    if(pProg>=40) s.log.push(L('🪵  The memorial pole nears completion — figures crowd the cedar, each one a story carried home.','gold'));
+    else if(pProg>=20) s.log.push(L('🏔  Your master carver deepens the figures on the memorial pole. It grows with every expedition.','gold'));
+    else s.log.push(L('🏔  Your master carver offers to begin a war history pole.','gold'));
     s.log.push(L(''));
   }
+  /* Pole and village readiness carry-forward bonuses */
+  if(isWin&&pProg>=25){const pBonus=Math.round(pProg*0.15);s.prestige+=pBonus;s.log.push(L(`The growing memorial pole raises your standing. +${pBonus} Prestige.`,'gold','stat'));}
+  if(isWin&&vReady>=70){const vBonus=Math.round((vReady-60)*0.12);s.morale=cl(s.morale+vBonus,0,100);s.log.push(L(`A strong village welcomes warriors warmly. +${vBonus} Morale.`,'green','stat'));}
   // Trait explanation
   s.traitsEarned.forEach(t=>{
     if(t==='grief_hardened') s.log.push(L('Grief reshapes you. You carry the names of the fallen now.','gold','stat'));
@@ -812,6 +1026,11 @@ function enterAftermath(prev){
   leg+=` Prestige: ${signStr(s.prestigeChange)}. Feud: ${newFeud}.`;
   s.legacyEntries.push(leg);
   s.totalRaids+=1;
+  /* Season wear — village degrades, pole advances on victory */
+  if(isWin){s.poleProgress=Math.min(100,(s.poleProgress||12)+5);}
+  s.villageReadiness=Math.max(0,(s.villageReadiness||58)-6);
+  s.foodStores=Math.max(0,(s.foodStores||72)-8);
+  s.canoeReadiness=Math.max(0,(s.canoeReadiness||60)-10);
   s.lastRun={outcome:s.outcome,killed:s.crewKilled,wounded:s.crewWounded,
     spoils:s.spoils.map(sp=>`${sp.r} ×${sp.n}`).join(', ')||'None',
     prestige:signStr(s.prestigeChange),feud:newFeud,named_dead:dead};
@@ -823,8 +1042,92 @@ function enterAftermath(prev){
   savePersist(persistFromState(s));s.step='aft_show';return s;
 }
 
+/* ── Ceremony / Potlatch choice ── */
+function pickCeremony(prev,id){
+  const s=dup(prev); s.statDeltas={};
+  const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
+  switch(id){
+    case'potlatch':{
+      const spent=Math.min(s.cargo,Math.round(s.cargo*0.6));
+      const pGain=Math.round(spent*1.5);
+      s.cargo-=spent;s.prestige+=pGain;s.morale=cl(s.morale+10,0,100);
+      s.foodStores=Math.min(100,(s.foodStores||72)+8);
+      s.log.push(L('The feast fires burn high. Dried fish and cedar bark are laid out for every family. Songs rise. Names are spoken.'));
+      s.log.push(L(`You redistribute ${spent} cargo — the village remembers generosity.`));
+      s.log.push(L(''));s.log.push(L(`+${pGain} Prestige · +10 Morale · +8 Food · −${spent} Cargo`,'gold','stat'));
+      break;}
+    case'advance_pole':{
+      const pAdv=isWin?12:6;
+      s.poleProgress=Math.min(100,(s.poleProgress||12)+pAdv);
+      s.prestige+=8;
+      if(s.poleProgress>=80){
+        s.log.push(L('🪵 The memorial pole stands almost complete. Its figures tell the story of every crossing, every loss, every victory.','gold'));
+        s.log.push(L('When it is raised, the coast will see your lineage from the water.','gold'));
+      }else{
+        s.log.push(L('The carvers work through the night. Cedar chips pile around the base of the growing pole.'));
+        s.log.push(L('New figures emerge: the canoe, the warriors, the shore at Cedar Creek.'));
+      }
+      s.log.push(L(''));s.log.push(L(`+${pAdv} Pole Progress · +8 Prestige`,'gold','stat'));
+      break;}
+    case'peace_offering':{
+      const fReduce=Math.min(3,s.feudEscalation);
+      s.feudEscalation=Math.max(0,s.feudEscalation-fReduce);
+      s.prestige+=5;s.morale+=5;
+      s.log.push(L('A message-canoe is sent south with gifts: oil, woven blankets, and a carved peace speaker.'));
+      s.log.push(L('It will not end the feud. But it may slow the next retaliation.'));
+      s.log.push(L(''));s.log.push(L(`−${fReduce} Feud · +5 Prestige · +5 Morale`,'green','stat'));
+      break;}
+    case'reserve_stores':{
+      const fGain=Math.round((s.cargo||0)*0.4);
+      s.foodStores=Math.min(100,(s.foodStores||72)+fGain);
+      s.villageReadiness=Math.min(100,(s.villageReadiness||58)+10);
+      s.log.push(L('The spoils are carried to the longhouse stores. No feast tonight — but the village will eat through winter.'));
+      s.log.push(L(''));s.log.push(L(`+${fGain} Food Stores · +10 Village Readiness`,'green','stat'));
+      break;}
+  }
+  s.log.push(L(''));s.log.push(L('The witness fires die down. The season turns. Home Waters will wake again.'));
+  savePersist(persistFromState(s));
+  s.step='aft_done';return s;
+}
+
+/* ── Trade expedition resolution (simplified for now) ── */
+function resolveTradeExpedition(prev){
+  const s=dup(prev);s.statDeltas={};
+  s.scene='village';
+  const profit=ri(15,35);
+  s.cargo=profit;s.prestige+=Math.round(profit*0.5);
+  s.foodStores=Math.min(100,(s.foodStores||72)+12);
+  s.morale=cl(s.morale+8,0,100);
+  s.outcome='TRADE_SUCCESS';
+  s.log.push(L(''));s.log.push(L('The northern settlement welcomes your canoe. Copper and dentalium change hands. Both sides profit.'));
+  s.log.push(L(`Trade complete: +${profit} Cargo · +${Math.round(profit*0.5)} Prestige · +12 Food · +8 Morale`,'green','stat'));
+  s.log.push(L(''));s.log.push(L('Your canoe rounds the south headland. The village sees the loaded hull and begins to cheer.'));
+  s.impactFrame={type:'phase_enter',phase:5,title:'TRADE RETURN',subtitle:'Goods and goodwill. The canoe returns heavy with copper and shell.',place:WORLD.home.name,isWin:true};
+  savePersist(persistFromState(s));s.step='aft_show';return s;
+}
+
+/* ── Diplomacy expedition resolution (simplified for now) ── */
+function resolveDiplomacyExpedition(prev){
+  const s=dup(prev);s.statDeltas={};
+  s.scene='village';
+  const fReduce=ri(2,4);
+  s.feudEscalation=Math.max(0,s.feudEscalation-fReduce);
+  s.prestige+=15;s.morale=cl(s.morale+6,0,100);
+  s.outcome='DIPLOMACY_SUCCESS';
+  s.log.push(L(''));s.log.push(L('The speaking staff passes between chiefs. Words are measured. Gifts exchanged. No blood.'));
+  s.log.push(L(`Diplomacy: −${fReduce} Feud · +15 Prestige · +6 Morale`,'green','stat'));
+  s.log.push(L(''));s.log.push(L('The canoe returns under calm skies. The village sees the speaking staff raised high — a sign of words, not war.'));
+  s.impactFrame={type:'phase_enter',phase:5,title:'PEACE RETURN',subtitle:'Words instead of weapons. The feud cools — for now.',place:WORLD.home.name,isWin:true};
+  savePersist(persistFromState(s));s.step='aft_show';return s;
+}
+
 const CONT={vil_done:enterTravel,trv_done:enterEncounter,enc_fled:enterWithdrawal,
   enc_done:enterResolution,res_done:enterWithdrawal,wth_retreat:enterAftermath,wth_done:enterAftermath};
+/* pickHomeWaters: vil_dawn → vil_expedition (internal)
+   pickExpedition: vil_expedition → vil_intel (raid) or vil_done (trade/diplomacy)
+   pickRoute: trv_route → trv_event
+   resolveVoyageEvent: trv_event → trv_arrival
+   pickCeremony: aft_show → aft_done */
 
 /* ─── §10  CSS ────────────────────────────────────────────────────────── */
 const INJCSS=`
@@ -863,6 +1166,19 @@ const INJCSS=`
 @keyframes tl-scene-pressure{0%,100%{transform:translateX(0) translateY(0) scale(1)}20%{transform:translateX(-.7px) translateY(.3px) scale(1.003)}55%{transform:translateX(.8px) translateY(-.4px) scale(1.005)}80%{transform:translateX(-.3px) translateY(.2px) scale(1.002)}}
 @keyframes tl-home-glow{0%,100%{opacity:.45}50%{opacity:.9}}
 @keyframes tl-goods-glint{0%,100%{opacity:.15;transform:translateX(-10%)}50%{opacity:.45;transform:translateX(10%)}}
+/* ─ Home Waters village life animations ─ */
+@keyframes tl-fish-sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes tl-carve-strike{0%,100%{transform:rotate(0deg)}40%{transform:rotate(-12deg)}55%{transform:rotate(4deg)}}
+@keyframes tl-plank-steam{0%{opacity:.5;transform:translateY(0) scaleX(1)}60%{opacity:.25;transform:translateY(-8px) scaleX(1.8)}100%{opacity:0;transform:translateY(-16px) scaleX(2.2)}}
+@keyframes tl-worker-bend{0%,100%{transform:scaleY(1) translateY(0)}50%{transform:scaleY(.94) translateY(1px)}}
+@keyframes tl-torch-flicker{0%,100%{opacity:.7;transform:scaleY(1)}30%{opacity:1;transform:scaleY(1.2)}60%{opacity:.5;transform:scaleY(.9)}80%{opacity:.85;transform:scaleY(1.1)}}
+@keyframes tl-oil-gleam{0%,100%{opacity:.08}50%{opacity:.22}}
+.tl-fish-sway{animation:tl-fish-sway 3.2s ease-in-out infinite;transform-origin:50% 0%}
+.tl-carve-strike{animation:tl-carve-strike 1.8s ease-in-out infinite;transform-origin:100% 100%}
+.tl-plank-steam{animation:tl-plank-steam 3.5s ease-out infinite}
+.tl-worker-bend{animation:tl-worker-bend 2.8s ease-in-out infinite;transform-origin:50% 100%}
+.tl-torch-flicker{animation:tl-torch-flicker 1.2s ease-in-out infinite}
+.tl-oil-gleam{animation:tl-oil-gleam 4s ease-in-out infinite}
 @keyframes tl-battle-throb{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
 @keyframes tl-battle-surge-left{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 @keyframes tl-battle-surge-right{0%,100%{transform:translateX(0)}50%{transform:translateX(-5px)}}
@@ -1746,14 +2062,522 @@ function ApproachWarCanoe({left='10%',bottom=0,zIndex=8}){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   §10b  HOME WATERS — detailed village-life SVG components
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Fish Drying Racks — A-frame structures with hanging salmon ── */
+function DryingRacks({x='70%',bottom=0,zIndex=6}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:62,height:40}}>
+    <svg viewBox="0 0 62 40" width="62" height="40" style={{overflow:'visible'}}>
+      <defs>
+        <linearGradient id="hw-wood" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#6b4a2a"/><stop offset="100%" stopColor="#3d2810"/>
+        </linearGradient>
+        <linearGradient id="hw-fish" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#c47a4a"/><stop offset="50%" stopColor="#a85c38"/><stop offset="100%" stopColor="#7a3c22"/>
+        </linearGradient>
+      </defs>
+      {/* Rack 1 — left A-frame */}
+      <line x1="3" y1="38" x2="13" y2="6" stroke="url(#hw-wood)" strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="23" y1="38" x2="13" y2="6" stroke="url(#hw-wood)" strokeWidth="1.8" strokeLinecap="round"/>
+      {/* Cross-bars */}
+      <line x1="7" y1="16" x2="19" y2="16" stroke="#5a3e1e" strokeWidth="1.2"/>
+      <line x1="6" y1="24" x2="20" y2="24" stroke="#5a3e1e" strokeWidth="1.2"/>
+      <line x1="5" y1="32" x2="21" y2="32" stroke="#5a3e1e" strokeWidth="1"/>
+      {/* Hanging fish — row 1 (top bar) */}
+      <g className="tl-fish-sway" style={{animationDelay:'0s'}}><path d="M8,16 Q9,20 8,23 Q10,22 12,23 Q11,20 10,16" fill="url(#hw-fish)" opacity=".85"/><circle cx="8.5" cy="17" r=".5" fill="#2a1808"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'.4s'}}><path d="M12,16 Q13,20 12,23 Q14,22 16,23 Q15,20 14,16" fill="url(#hw-fish)" opacity=".78"/><circle cx="12.5" cy="17" r=".5" fill="#2a1808"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'.8s'}}><path d="M16,16 Q17,20 16,23 Q18,22 20,23 Q19,20 18,16" fill="url(#hw-fish)" opacity=".82"/><circle cx="16.5" cy="17" r=".5" fill="#2a1808"/></g>
+      {/* Hanging fish — row 2 (lower bar) */}
+      <g className="tl-fish-sway" style={{animationDelay:'.2s'}}><path d="M7,24 Q8,28 7,31 Q9,30 11,31 Q10,28 9,24" fill="url(#hw-fish)" opacity=".7"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'.6s'}}><path d="M13,24 Q14,28 13,31 Q15,30 17,31 Q16,28 15,24" fill="url(#hw-fish)" opacity=".75"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'1s'}}><path d="M18,24 Q19,28 18,31 Q20,30 22,31 Q21,28 20,24" fill="url(#hw-fish)" opacity=".68"/></g>
+
+      {/* Rack 2 — right A-frame */}
+      <line x1="33" y1="38" x2="43" y2="8" stroke="url(#hw-wood)" strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="53" y1="38" x2="43" y2="8" stroke="url(#hw-wood)" strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="37" y1="18" x2="49" y2="18" stroke="#5a3e1e" strokeWidth="1.2"/>
+      <line x1="36" y1="26" x2="50" y2="26" stroke="#5a3e1e" strokeWidth="1.2"/>
+      {/* Fish on rack 2 */}
+      <g className="tl-fish-sway" style={{animationDelay:'.3s'}}><path d="M38,18 Q39,22 38,25 Q40,24 42,25 Q41,22 40,18" fill="url(#hw-fish)" opacity=".8"/><circle cx="38.5" cy="19" r=".5" fill="#2a1808"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'.7s'}}><path d="M43,18 Q44,22 43,25 Q45,24 47,25 Q46,22 45,18" fill="url(#hw-fish)" opacity=".75"/><circle cx="43.5" cy="19" r=".5" fill="#2a1808"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'1.1s'}}><path d="M48,18 Q49,22 48,25 Q50,24 52,25 Q51,22 50,18" fill="url(#hw-fish)" opacity=".72"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'.5s'}}><path d="M40,26 Q41,30 40,33 Q42,32 44,33 Q43,30 42,26" fill="url(#hw-fish)" opacity=".65"/></g>
+      <g className="tl-fish-sway" style={{animationDelay:'.9s'}}><path d="M46,26 Q47,30 46,33 Q48,32 50,33 Q49,30 48,26" fill="url(#hw-fish)" opacity=".6"/></g>
+
+      {/* Smoke wisps from drying process */}
+      <g className="tl-plank-steam" style={{animationDelay:'0s'}}><ellipse cx="13" cy="10" rx="3" ry="1.5" fill="#a09080" opacity=".18"/></g>
+      <g className="tl-plank-steam" style={{animationDelay:'1.5s'}}><ellipse cx="43" cy="12" rx="3" ry="1.5" fill="#a09080" opacity=".15"/></g>
+
+      {/* Ground shadow */}
+      <ellipse cx="13" cy="39" rx="12" ry="2" fill="#0a0806" opacity=".18"/>
+      <ellipse cx="43" cy="39" rx="12" ry="2" fill="#0a0806" opacity=".15"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Canoe Workshop — hull under construction with workers ── */
+function CanoeWorkshop({x='15%',bottom=0,zIndex=6}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:82,height:34}}>
+    <svg viewBox="0 0 82 34" width="82" height="34" style={{overflow:'visible'}}>
+      <defs>
+        <linearGradient id="hw-hull" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8a5c36"/><stop offset="60%" stopColor="#5a3820"/><stop offset="100%" stopColor="#3a2210"/>
+        </linearGradient>
+        <linearGradient id="hw-plank" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#c09060"/><stop offset="100%" stopColor="#8a6040"/>
+        </linearGradient>
+      </defs>
+      {/* Log supports / sawhorses */}
+      <line x1="14" y1="30" x2="20" y2="20" stroke="#4a3218" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="28" y1="30" x2="22" y2="20" stroke="#4a3218" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="54" y1="30" x2="60" y2="20" stroke="#4a3218" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="68" y1="30" x2="62" y2="20" stroke="#4a3218" strokeWidth="2" strokeLinecap="round"/>
+      {/* Hull shape — canoe being built */}
+      <path d="M6,22 Q10,16 22,14 Q41,10 60,14 Q72,16 76,22 Q72,24 60,25 Q41,27 22,25 Q10,24 6,22Z" fill="url(#hw-hull)" stroke="#3a2210" strokeWidth=".6"/>
+      {/* Interior detail — ribs */}
+      <line x1="25" y1="15" x2="25" y2="24" stroke="#6a4828" strokeWidth=".6" opacity=".5"/>
+      <line x1="35" y1="13" x2="35" y2="25" stroke="#6a4828" strokeWidth=".6" opacity=".5"/>
+      <line x1="45" y1="13" x2="45" y2="25" stroke="#6a4828" strokeWidth=".6" opacity=".5"/>
+      <line x1="55" y1="14" x2="55" y2="24" stroke="#6a4828" strokeWidth=".6" opacity=".5"/>
+      {/* Gunwale highlight */}
+      <path d="M8,21 Q20,15 41,12 Q62,15 74,21" fill="none" stroke="#b88050" strokeWidth=".5" opacity=".5"/>
+      {/* Fresh cedar plank leaning against hull */}
+      <rect x="78" y="14" width="3" height="18" rx="1" fill="url(#hw-plank)" transform="rotate(12,78,14)" opacity=".85"/>
+      <rect x="75" y="16" width="2.5" height="16" rx="1" fill="url(#hw-plank)" transform="rotate(8,75,16)" opacity=".7"/>
+      {/* Steam from bending plank */}
+      <g className="tl-plank-steam" style={{animationDelay:'0s'}}><ellipse cx="41" cy="8" rx="5" ry="2" fill="#b0a090" opacity=".14"/></g>
+      <g className="tl-plank-steam" style={{animationDelay:'2s'}}><ellipse cx="50" cy="6" rx="4" ry="1.5" fill="#b0a090" opacity=".12"/></g>
+      {/* Worker 1 — bending over hull with tool */}
+      <g className="tl-worker-bend" style={{animationDelay:'0s'}}>
+        <circle cx="30" cy="5" r="2.5" fill="#c8a870"/>
+        <rect x="28.5" y="7.5" width="3" height="6" rx="1" fill="#2a2018"/>
+        <line x1="33" y1="8" x2="36" y2="14" stroke="#5a4020" strokeWidth="1" strokeLinecap="round"/>
+      </g>
+      {/* Worker 2 — at stern with adze */}
+      <g className="tl-worker-bend" style={{animationDelay:'.6s'}}>
+        <circle cx="62" cy="6" r="2.5" fill="#c8a870"/>
+        <rect x="60.5" y="8.5" width="3" height="6" rx="1" fill="#2a1a10"/>
+        <g className="tl-carve-strike"><line x1="65" y1="9" x2="69" y2="5" stroke="#8a7050" strokeWidth="1.2" strokeLinecap="round"/></g>
+      </g>
+      {/* Wood shavings scattered */}
+      <circle cx="34" cy="29" r="0.8" fill="#c09060" opacity=".35"/>
+      <circle cx="38" cy="30" r="0.6" fill="#c09060" opacity=".28"/>
+      <circle cx="48" cy="29" r="0.7" fill="#c09060" opacity=".32"/>
+      <circle cx="56" cy="30" r="0.5" fill="#c09060" opacity=".25"/>
+      {/* Ground shadow */}
+      <ellipse cx="41" cy="32" rx="32" ry="3" fill="#0a0806" opacity=".15"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Elder Carvers at Memorial Pole — figures working on a pole ── */
+function CarverWorkshop({x='52%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:46,height:58}}>
+    <svg viewBox="0 0 46 58" width="46" height="58" style={{overflow:'visible'}}>
+      <defs>
+        <linearGradient id="hw-pole" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8a6840"/><stop offset="30%" stopColor="#6a4828"/><stop offset="100%" stopColor="#4a3018"/>
+        </linearGradient>
+      </defs>
+      {/* Memorial pole — horizontal, being carved */}
+      <rect x="4" y="22" width="38" height="8" rx="3.5" fill="url(#hw-pole)" stroke="#3a2210" strokeWidth=".5"/>
+      {/* Carved figures emerging on pole */}
+      <circle cx="10" cy="26" r="2.5" fill="none" stroke="#b89060" strokeWidth=".6"/>
+      <path d="M9,24 L11,24 L10,22" fill="none" stroke="#b89060" strokeWidth=".5"/>
+      <ellipse cx="20" cy="26" rx="3" ry="2.5" fill="none" stroke="#b89060" strokeWidth=".6"/>
+      <path d="M18,24 Q20,22 22,24" fill="none" stroke="#b89060" strokeWidth=".5"/>
+      <ellipse cx="32" cy="26" rx="3" ry="2.8" fill="none" stroke="#a08050" strokeWidth=".5" opacity=".6"/>
+      {/* Log supports */}
+      <rect x="8" y="30" width="3" height="10" rx="1" fill="#3a2210"/>
+      <rect x="35" y="30" width="3" height="10" rx="1" fill="#3a2210"/>
+      {/* Master carver — seated, working */}
+      <circle cx="14" cy="14" r="3" fill="#c8a870"/>
+      <rect x="12" y="17" width="4" height="8" rx="1" fill="#3a2818"/>
+      <rect x="11" y="18" width="3" height="5" rx=".5" fill="#4a3828" opacity=".6"/>
+      {/* Carving tool in hand */}
+      <g className="tl-carve-strike" style={{animationDelay:'0s'}}>
+        <line x1="16" y1="18" x2="22" y2="24" stroke="#a08050" strokeWidth="1.2" strokeLinecap="round"/>
+        <circle cx="22" cy="24" r="1" fill="#c0a070" opacity=".6"/>
+      </g>
+      {/* Apprentice — standing, watching */}
+      <circle cx="36" cy="10" r="2.5" fill="#c8a870"/>
+      <rect x="34.5" y="12.5" width="3" height="8" rx="1" fill="#2a2018"/>
+      <rect x="33.5" y="14" width="2.5" height="5" rx=".5" fill="#3a3028" opacity=".5"/>
+      {/* Elder advisor — seated behind */}
+      <circle cx="26" cy="12" r="2.8" fill="#d0b880"/>
+      <rect x="24.2" y="14.8" width="3.6" height="7" rx="1" fill="#4a3020"/>
+      {/* Cedar shavings and chips */}
+      <circle cx="18" cy="38" r=".8" fill="#c09060" opacity=".3"/>
+      <circle cx="22" cy="39" r=".6" fill="#c09060" opacity=".25"/>
+      <circle cx="16" cy="40" r=".5" fill="#b08050" opacity=".2"/>
+      <path d="M24,37 Q25,36 26,37" fill="none" stroke="#c09060" strokeWidth=".4" opacity=".3"/>
+      <path d="M19,36 Q20,35 21,37" fill="none" stroke="#c09060" strokeWidth=".3" opacity=".25"/>
+      {/* Warm glow from work fire nearby */}
+      <circle cx="8" cy="42" r="8" fill="rgba(220,140,60,.06)"/>
+      {/* Ground shadow */}
+      <ellipse cx="23" cy="44" rx="18" ry="2.5" fill="#0a0806" opacity=".12"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Trade Goods & Oil Storage — cedar boxes, baskets, oil containers ── */
+function TradeGoodsPile({x='82%',bottom=0,zIndex=6}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:40,height:28}}>
+    <svg viewBox="0 0 40 28" width="40" height="28" style={{overflow:'visible'}}>
+      <defs>
+        <linearGradient id="hw-box" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#7a5430"/><stop offset="100%" stopColor="#4a3018"/>
+        </linearGradient>
+        <linearGradient id="hw-basket" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a08050"/><stop offset="50%" stopColor="#8a6840"/><stop offset="100%" stopColor="#6a4828"/>
+        </linearGradient>
+      </defs>
+      {/* Large bentwood box — back */}
+      <rect x="2" y="8" width="12" height="11" rx="1.5" fill="url(#hw-box)" stroke="#3a2210" strokeWidth=".5"/>
+      <line x1="4" y1="8" x2="4" y2="19" stroke="#5a3e20" strokeWidth=".4" opacity=".4"/>
+      <line x1="8" y1="8" x2="8" y2="19" stroke="#5a3e20" strokeWidth=".4" opacity=".4"/>
+      <rect x="3" y="9" width="10" height="2" rx=".5" fill="#8a6438" opacity=".3"/>
+      {/* Formline design on box */}
+      <path d="M5,12 Q8,10 11,12 Q8,14 5,12Z" fill="none" stroke="#b89060" strokeWidth=".5" opacity=".5"/>
+      {/* Medium box — stacked */}
+      <rect x="4" y="1" width="8" height="8" rx="1" fill="url(#hw-box)" stroke="#3a2210" strokeWidth=".4"/>
+      <path d="M6,4 Q8,2.5 10,4" fill="none" stroke="#a07840" strokeWidth=".4" opacity=".4"/>
+      {/* Woven basket — front right */}
+      <path d="M16,14 Q15,10 18,8 Q22,6 26,8 Q29,10 28,14 L28,22 Q22,24 16,22Z" fill="url(#hw-basket)" stroke="#5a4028" strokeWidth=".5"/>
+      {/* Basket weave pattern */}
+      <line x1="18" y1="10" x2="18" y2="22" stroke="#6a5038" strokeWidth=".3" opacity=".4"/>
+      <line x1="22" y1="8" x2="22" y2="23" stroke="#6a5038" strokeWidth=".3" opacity=".4"/>
+      <line x1="26" y1="10" x2="26" y2="22" stroke="#6a5038" strokeWidth=".3" opacity=".4"/>
+      <line x1="16" y1="14" x2="28" y2="14" stroke="#6a5038" strokeWidth=".3" opacity=".35"/>
+      <line x1="16" y1="18" x2="28" y2="18" stroke="#6a5038" strokeWidth=".3" opacity=".35"/>
+      {/* Oil container — round, with sheen */}
+      <ellipse cx="34" cy="18" rx="5" ry="6" fill="#4a3420" stroke="#3a2410" strokeWidth=".5"/>
+      <ellipse cx="34" cy="14" rx="4" ry="2" fill="#5a4430" stroke="#3a2410" strokeWidth=".4"/>
+      <ellipse className="tl-oil-gleam" cx="33" cy="16" rx="1.5" ry="3" fill="rgba(200,160,100,.12)"/>
+      {/* Small boxes scattered */}
+      <rect x="24" y="2" width="6" height="5" rx="1" fill="url(#hw-box)" opacity=".75" stroke="#3a2210" strokeWidth=".3"/>
+      <rect x="31" y="4" width="5" height="7" rx="1" fill="url(#hw-box)" opacity=".65" stroke="#3a2210" strokeWidth=".3"/>
+      {/* Ground shadow */}
+      <ellipse cx="20" cy="25" rx="16" ry="2.5" fill="#0a0806" opacity=".12"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Village Workers — figures doing daily tasks: carrying, cleaning, tending fire ── */
+function VillageWorkers({bottom=0,zIndex=6}){
+  return<>
+    {/* Worker carrying basket — walking right */}
+    <SceneLayer zIndex={zIndex} style={{left:'38%',bottom:bottom+2,width:14,height:22}}>
+      <svg viewBox="0 0 14 22" width="14" height="22">
+        <circle cx="7" cy="3" r="2.5" fill="#c8a870"/>
+        <rect x="5.5" y="5.5" width="3" height="7" rx="1" fill="#3a2818"/>
+        {/* Legs in walking pose */}
+        <line x1="6" y1="12" x2="4.5" y2="18" stroke="#3a2818" strokeWidth="1.2" strokeLinecap="round"/>
+        <line x1="8" y1="12" x2="9.5" y2="18" stroke="#3a2818" strokeWidth="1.2" strokeLinecap="round"/>
+        {/* Basket on back */}
+        <ellipse cx="10" cy="8" rx="3" ry="4" fill="#8a6840" stroke="#5a4028" strokeWidth=".4"/>
+        <line x1="10" y1="4" x2="8" y2="5" stroke="#6a5038" strokeWidth=".5"/>
+      </svg>
+    </SceneLayer>
+    {/* Worker tending shore fire */}
+    <SceneLayer zIndex={zIndex+1} style={{left:'64%',bottom:bottom+1,width:18,height:20}}>
+      <svg viewBox="0 0 18 20" width="18" height="20">
+        {/* Small cooking fire */}
+        <ellipse cx="12" cy="18" rx="4" ry="1.5" fill="#2a1808" opacity=".5"/>
+        <g className="tl-torch-flicker">
+          <path d="M11,18 Q10,14 12,12 Q14,14 13,18" fill="rgba(255,140,40,.55)"/>
+          <path d="M11.5,17 Q11,15 12,13.5 Q13,15 12.5,17" fill="rgba(255,200,80,.4)"/>
+        </g>
+        {/* Crouching figure */}
+        <circle cx="5" cy="10" r="2.5" fill="#c8a870"/>
+        <path d="M3.5,12.5 Q5,14 6.5,12.5 L7,16 L3,16Z" fill="#2a2018"/>
+        <line x1="7" y1="13" x2="10" y2="16" stroke="#5a4020" strokeWidth=".8" strokeLinecap="round"/>
+      </svg>
+    </SceneLayer>
+    {/* Two figures in conversation near longhouse */}
+    <SceneLayer zIndex={zIndex} style={{left:'28%',bottom:bottom+4,width:18,height:18}}>
+      <svg viewBox="0 0 18 18" width="18" height="18">
+        <g className="tl-breath-soft" style={{transformOrigin:'50% 100%'}}>
+          <circle cx="5" cy="3" r="2.2" fill="#c8a870"/>
+          <rect x="3.8" y="5.2" width="2.4" height="6" rx=".8" fill="#3a2818"/>
+          <line x1="4" y1="11" x2="3.5" y2="16" stroke="#3a2818" strokeWidth="1" strokeLinecap="round"/>
+          <line x1="6" y1="11" x2="6.5" y2="16" stroke="#3a2818" strokeWidth="1" strokeLinecap="round"/>
+        </g>
+        <g className="tl-breath-soft" style={{transformOrigin:'50% 100%',animationDelay:'.5s'}}>
+          <circle cx="13" cy="3.5" r="2.2" fill="#c8a870"/>
+          <rect x="11.8" y="5.7" width="2.4" height="6" rx=".8" fill="#2a2018"/>
+          <line x1="12" y1="11.5" x2="11.5" y2="16.5" stroke="#2a2018" strokeWidth="1" strokeLinecap="round"/>
+          <line x1="14" y1="11.5" x2="14.5" y2="16.5" stroke="#2a2018" strokeWidth="1" strokeLinecap="round"/>
+        </g>
+      </svg>
+    </SceneLayer>
+    {/* Child running near water */}
+    <SceneLayer zIndex={zIndex} style={{left:'8%',bottom:bottom,width:10,height:12}}>
+      <svg viewBox="0 0 10 12" width="10" height="12">
+        <circle cx="5" cy="2" r="1.8" fill="#d0b880"/>
+        <rect x="4" y="3.8" width="2" height="4" rx=".6" fill="#4a3828"/>
+        <line x1="4" y1="7.5" x2="2.5" y2="10.5" stroke="#4a3828" strokeWidth=".8" strokeLinecap="round"/>
+        <line x1="6" y1="7.5" x2="7.5" y2="10.5" stroke="#4a3828" strokeWidth=".8" strokeLinecap="round"/>
+      </svg>
+    </SceneLayer>
+  </>;
+}
+
+/* ── Dawn Smoke Columns — tall atmospheric smoke from village fires ── */
+function DawnSmoke({x='50%',bottom=0,zIndex=3}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:30,height:60}}>
+    <svg viewBox="0 0 30 60" width="30" height="60" style={{overflow:'visible'}}>
+      <g className="tl-plank-steam" style={{animationDelay:'0s'}}>
+        <ellipse cx="15" cy="20" rx="6" ry="3" fill="#8a8070" opacity=".08"/>
+      </g>
+      <g className="tl-plank-steam" style={{animationDelay:'1.2s'}}>
+        <ellipse cx="12" cy="10" rx="8" ry="4" fill="#8a8070" opacity=".06"/>
+      </g>
+      <g className="tl-plank-steam" style={{animationDelay:'2.4s'}}>
+        <ellipse cx="18" cy="15" rx="5" ry="2.5" fill="#8a8070" opacity=".07"/>
+      </g>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §10c  VOYAGE EVENT SVG — mid-crossing encounters
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Whale Breach — grey whale surfacing alongside canoe ── */
+function WhaleBreachSVG({x='35%',bottom=0,zIndex=8}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:70,height:42}}>
+    <svg viewBox="0 0 70 42" width="70" height="42" style={{overflow:'visible'}}>
+      <defs>
+        <linearGradient id="voy-whale" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5a6878"/><stop offset="50%" stopColor="#3a4858"/><stop offset="100%" stopColor="#2a3848"/>
+        </linearGradient>
+      </defs>
+      {/* Body arc — surfacing */}
+      <path d="M8,32 Q6,24 12,18 Q22,10 38,8 Q54,10 62,20 Q66,28 60,34" fill="url(#voy-whale)" stroke="#2a3040" strokeWidth=".6"/>
+      {/* Belly lighter */}
+      <path d="M14,30 Q24,34 50,32 Q56,30 58,28" fill="#6a7888" opacity=".4"/>
+      {/* Eye */}
+      <circle cx="18" cy="22" r="1.8" fill="#1a2028"/><circle cx="17.5" cy="21.5" r=".6" fill="#5a6878"/>
+      {/* Blowholes */}
+      <ellipse cx="26" cy="12" rx="1.2" ry=".8" fill="#4a5868" opacity=".7"/>
+      {/* Spray from blowhole */}
+      <g className="tl-plank-steam" style={{animationDelay:'0s'}}>
+        <path d="M25,10 Q24,4 26,0 Q28,4 27,10" fill="rgba(180,200,220,.15)"/>
+      </g>
+      <g className="tl-plank-steam" style={{animationDelay:'1.8s'}}>
+        <ellipse cx="26" cy="2" rx="3" ry="2" fill="rgba(180,200,220,.1)"/>
+      </g>
+      {/* Barnacle texture */}
+      <circle cx="32" cy="14" r=".8" fill="#8a9098" opacity=".3"/>
+      <circle cx="44" cy="16" r=".6" fill="#8a9098" opacity=".25"/>
+      <circle cx="22" cy="20" r=".7" fill="#8a9098" opacity=".28"/>
+      {/* Tail fluke hint */}
+      <path d="M58,28 Q62,22 68,18 Q66,24 64,30" fill="#3a4858" opacity=".6"/>
+      {/* Water displacement */}
+      <ellipse cx="35" cy="38" rx="28" ry="4" fill="rgba(100,140,180,.1)"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Rival Canoe — distant silhouette on horizon ── */
+function RivalCanoeSVG({x='60%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:48,height:18}}>
+    <svg viewBox="0 0 48 18" width="48" height="18" style={{overflow:'visible'}}>
+      {/* Distant hull — dark silhouette */}
+      <path d="M2,14 Q0,12 4,10 Q12,7 24,6 Q36,7 44,10 Q48,12 46,14Z" fill="#1a2028" opacity=".7"/>
+      {/* Crew silhouettes — tiny, clustered */}
+      {[8,14,20,26,32,38].map((cx,i)=>
+        <rect key={i} x={cx} y={3+Math.sin(i)*1.5} width="2" height={4+i%2} rx=".5" fill="#1a2028" opacity={.55-.05*i}/>
+      )}
+      {/* Crest/sail */}
+      <path d="M22,3 L24,0 L26,3" fill="#8a3020" opacity=".5"/>
+      {/* Wake */}
+      <path d="M0,16 Q24,14 48,16" fill="none" stroke="rgba(140,170,200,.15)" strokeWidth=".6"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Fog Wall — atmospheric rolling fog ── */
+function FogWallSVG({x='20%',bottom=0,zIndex=5}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:'60%',height:60}}>
+    <svg viewBox="0 0 200 60" width="100%" height="60" style={{overflow:'visible'}} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="voy-fog" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(140,150,160,.02)"/><stop offset="40%" stopColor="rgba(140,150,160,.12)"/><stop offset="100%" stopColor="rgba(140,150,160,.03)"/>
+        </linearGradient>
+      </defs>
+      <g className="tl-fog-drift" style={{animationDuration:'20s'}}>
+        <ellipse cx="60" cy="30" rx="70" ry="24" fill="url(#voy-fog)"/>
+        <ellipse cx="140" cy="25" rx="50" ry="20" fill="url(#voy-fog)"/>
+        <ellipse cx="100" cy="40" rx="80" ry="18" fill="rgba(160,170,180,.06)"/>
+      </g>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Flotsam / Wreckage — drifting debris on water ── */
+function FlotsamSVG({x='42%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:50,height:16}}>
+    <svg viewBox="0 0 50 16" width="50" height="16" style={{overflow:'visible'}}>
+      {/* Broken planks */}
+      <rect x="4" y="6" width="14" height="2.5" rx=".8" fill="#7a5430" transform="rotate(-5,11,7)"/>
+      <rect x="20" y="4" width="10" height="2" rx=".6" fill="#6a4828" transform="rotate(8,25,5)"/>
+      <rect x="34" y="7" width="8" height="2" rx=".5" fill="#5a3820" transform="rotate(-3,38,8)"/>
+      {/* Rope coil */}
+      <circle cx="16" cy="10" r="2.5" fill="none" stroke="#8a7050" strokeWidth=".8" opacity=".6"/>
+      <path d="M14,8 Q12,6 14,5" fill="none" stroke="#8a7050" strokeWidth=".5" opacity=".4"/>
+      {/* Small debris */}
+      <circle cx="30" cy="10" r="1" fill="#6a4828" opacity=".5"/>
+      <circle cx="42" cy="12" r=".8" fill="#5a3820" opacity=".4"/>
+      {/* Water disturbed */}
+      <ellipse cx="25" cy="14" rx="20" ry="2" fill="rgba(100,140,180,.06)"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Raven Omen — raven perched on canoe prow ── */
+function RavenOmenSVG({x='22%',bottom=0,zIndex=9}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:16,height:18}}>
+    <svg viewBox="0 0 16 18" width="16" height="18" style={{overflow:'visible'}}>
+      {/* Body */}
+      <path d="M6,10 Q4,6 6,4 Q8,2 10,4 Q12,6 10,10 Q8,14 6,12Z" fill="#1a1a20"/>
+      {/* Head */}
+      <circle cx="8" cy="4" r="2.5" fill="#1a1a20"/>
+      {/* Beak */}
+      <path d="M10,3.5 L14,4 L10,5" fill="#2a2a30" stroke="#0a0a10" strokeWidth=".3"/>
+      {/* Eye — bright, knowing */}
+      <circle cx="9" cy="3.5" r=".8" fill="#c0c0d0"/>
+      <circle cx="9.2" cy="3.3" r=".3" fill="#1a1a20"/>
+      {/* Wing detail */}
+      <path d="M5,7 Q2,5 3,9 Q4,11 6,10" fill="#222228" opacity=".8"/>
+      {/* Tail */}
+      <path d="M6,12 Q4,14 5,16 Q7,15 8,12" fill="#1a1a20"/>
+      {/* Talons gripping */}
+      <line x1="7" y1="14" x2="6" y2="17" stroke="#3a3a40" strokeWidth=".6" strokeLinecap="round"/>
+      <line x1="9" y1="14" x2="10" y2="17" stroke="#3a3a40" strokeWidth=".6" strokeLinecap="round"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §10d  CEREMONY SCENE SVG — potlatch, pole raising, feast
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Feast Fire — large ceremonial fire with gathered witnesses ── */
+function FeastFireSVG({x='48%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:44,height:38,transform:'translateX(-50%)'}}>
+    <svg viewBox="0 0 44 38" width="44" height="38" style={{overflow:'visible'}}>
+      {/* Ember bed */}
+      <ellipse cx="22" cy="34" rx="16" ry="3" fill="#3a1808" opacity=".6"/>
+      <ellipse className="tl-ember-pulse" cx="22" cy="34" rx="12" ry="2" fill="rgba(200,80,20,.3)"/>
+      {/* Log structure */}
+      <rect x="8" y="28" width="28" height="3" rx="1.5" fill="#4a2810" transform="rotate(-5,22,30)"/>
+      <rect x="10" y="26" width="24" height="3" rx="1.5" fill="#3a2008" transform="rotate(3,22,28)"/>
+      {/* Main flames */}
+      <g className="tl-torch-flicker">
+        <path d="M16,28 Q14,18 18,10 Q22,6 26,10 Q30,18 28,28Z" fill="rgba(255,140,40,.5)"/>
+        <path d="M18,26 Q17,18 21,12 Q24,16 26,26Z" fill="rgba(255,200,80,.35)"/>
+        <path d="M20,24 Q19,18 22,14 Q25,18 24,24Z" fill="rgba(255,230,140,.25)"/>
+      </g>
+      {/* Sparks */}
+      {[0,1,2,3,4].map(i=><circle key={i} className="tl-spark" cx={16+i*3} cy={12-i*2} r=".8" fill="rgba(255,200,80,.6)" style={{animationDelay:i*0.8+'s'}}/>)}
+      {/* Smoke column */}
+      <g className="tl-plank-steam" style={{animationDelay:'0s'}}><ellipse cx="22" cy="4" rx="8" ry="3" fill="#8a8070" opacity=".08"/></g>
+      <g className="tl-plank-steam" style={{animationDelay:'1.5s'}}><ellipse cx="24" cy="-2" rx="6" ry="2.5" fill="#8a8070" opacity=".06"/></g>
+      {/* Warmth glow on ground */}
+      <ellipse cx="22" cy="36" rx="20" ry="4" fill="rgba(220,140,60,.08)"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Feast Goods Display — redistributed spoils laid out ── */
+function FeastGoodsSVG({x='62%',bottom=0,zIndex=6}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:52,height:22}}>
+    <svg viewBox="0 0 52 22" width="52" height="22" style={{overflow:'visible'}}>
+      {/* Woven mat base */}
+      <rect x="2" y="14" width="48" height="6" rx="1" fill="#5a4828" opacity=".4"/>
+      <line x1="6" y1="14" x2="6" y2="20" stroke="#6a5838" strokeWidth=".3" opacity=".3"/>
+      <line x1="14" y1="14" x2="14" y2="20" stroke="#6a5838" strokeWidth=".3" opacity=".3"/>
+      <line x1="22" y1="14" x2="22" y2="20" stroke="#6a5838" strokeWidth=".3" opacity=".3"/>
+      <line x1="30" y1="14" x2="30" y2="20" stroke="#6a5838" strokeWidth=".3" opacity=".3"/>
+      <line x1="38" y1="14" x2="38" y2="20" stroke="#6a5838" strokeWidth=".3" opacity=".3"/>
+      <line x1="46" y1="14" x2="46" y2="20" stroke="#6a5838" strokeWidth=".3" opacity=".3"/>
+      {/* Fish bundles */}
+      <ellipse cx="8" cy="12" rx="4" ry="2.5" fill="#a85c38" opacity=".7"/>
+      <ellipse cx="8" cy="10" rx="3.5" ry="2" fill="#c47a4a" opacity=".6"/>
+      {/* Cedar bark rolls */}
+      <rect x="16" y="8" width="5" height="8" rx="2" fill="#8a5c36" opacity=".7"/>
+      <rect x="22" y="9" width="4" height="7" rx="2" fill="#7a4c28" opacity=".6"/>
+      {/* Copper piece — the prestige item */}
+      <path d="M32,6 L36,4 L40,6 L38,14 L34,14Z" fill="#b87040" stroke="#8a5030" strokeWidth=".5"/>
+      <line x1="36" y1="4" x2="36" y2="14" stroke="#d0904a" strokeWidth=".4" opacity=".4"/>
+      <ellipse className="tl-oil-gleam" cx="36" cy="8" rx="2" ry="3" fill="rgba(220,160,100,.15)"/>
+      {/* Dentalium shells */}
+      <ellipse cx="46" cy="11" rx="2.5" ry="1" fill="#e0d8c0" opacity=".6"/>
+      <ellipse cx="44" cy="13" rx="2" ry=".8" fill="#d8d0b8" opacity=".5"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Ceremony Witnesses — larger gathering than normal ── */
+function CeremonyGatheringSVG({x='30%',bottom=0,zIndex=6}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:80,height:22}}>
+    <svg viewBox="0 0 80 22" width="80" height="22" style={{overflow:'visible'}}>
+      {/* Row of witnesses — varied heights and poses */}
+      {[0,8,16,24,32,40,48,56,64,72].map((cx,i)=>{
+        const h=12+Math.sin(i*1.3)*3;const seated=i%4===0;
+        return<g key={i} className={seated?'tl-crowd-solemn':'tl-crowd-warm'} style={{animationDelay:i*0.15+'s'}}>
+          <circle cx={cx+4} cy={seated?14-h*0.4:22-h+2} r={2} fill="#c8a870"/>
+          <rect x={cx+3} y={seated?14-h*0.4+2:22-h+4} width={2.5} height={seated?h*0.35:h*0.55} rx={.6} fill={i%3===0?'#3a2818':'#2a2018'}/>
+          {!seated&&<line x1={cx+3.5} y1={22-h+4+h*0.55} x2={cx+3} y2={20} stroke={i%3===0?'#3a2818':'#2a2018'} strokeWidth=".8"/>}
+        </g>;
+      })}
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Pole Raising — tall pole being tilted upward ── */
+function PoleRaisingSVG({x='20%',bottom=0,zIndex=8}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:28,height:62}}>
+    <svg viewBox="0 0 28 62" width="28" height="62" style={{overflow:'visible'}}>
+      <defs>
+        <linearGradient id="cer-pole" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a08050"/><stop offset="30%" stopColor="#8a6838"/><stop offset="100%" stopColor="#5a4020"/>
+        </linearGradient>
+      </defs>
+      {/* Main pole shaft */}
+      <rect x="11" y="0" width="6" height="58" rx="2.5" fill="url(#cer-pole)" stroke="#3a2810" strokeWidth=".5"/>
+      {/* Carved figures on pole */}
+      <circle cx="14" cy="6" r="3" fill="none" stroke="#c0a060" strokeWidth=".7"/>
+      <path d="M12,4 L14,1 L16,4" fill="none" stroke="#c0a060" strokeWidth=".5"/>
+      <ellipse cx="14" cy="16" rx="3.5" ry="4" fill="none" stroke="#b89050" strokeWidth=".6"/>
+      <path d="M11,14 Q14,11 17,14" fill="none" stroke="#b89050" strokeWidth=".5"/>
+      <circle cx="14" cy="28" r="3.2" fill="none" stroke="#a08040" strokeWidth=".6"/>
+      <path d="M11,26 Q14,23 17,26" fill="none" stroke="#a08040" strokeWidth=".5"/>
+      <ellipse cx="14" cy="40" rx="3" ry="3.5" fill="none" stroke="#907030" strokeWidth=".5" opacity=".8"/>
+      {/* Wings/arms extending from top figure */}
+      <path d="M8,8 Q6,5 4,6 Q6,9 11,9" fill="#8a6838" opacity=".7"/>
+      <path d="M20,8 Q22,5 24,6 Q22,9 17,9" fill="#8a6838" opacity=".7"/>
+      {/* Base support */}
+      <path d="M6,58 L14,52 L22,58" fill="#3a2810" opacity=".5"/>
+      {/* Prestige glow */}
+      <ellipse cx="14" cy="6" rx="8" ry="8" fill="rgba(200,160,80,.06)"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    §11  PHASE SCENES — each uses shared building blocks above
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ═══ VILLAGE SCENE — ceremonial home with poles, fire & witness presence ═══ */
-function VillageScene({sceneH}){
+function VillageScene({sceneH,G}){
   const H=sceneH||220,skyH=H*0.28,mtH=H*0.12,shoreH=H*0.08;
   const landTop=skyH+mtH+shoreH;const groundH=H*0.22;const waterH=H-landTop-groundH;
   const gb=waterH+groundH;
+  const isHomeWaters=G&&G.step==='vil_dawn';
   return<div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.village}}>
     <StarField count={22} region={28}/>
     <SceneMoon right="16%" top="5%" size={18}/>
@@ -1765,6 +2589,19 @@ function VillageScene({sceneH}){
     <VillageSettlement groundBottom={gb} zIndex={5}/>
     <VillageCeremonyFront groundBottom={gb} zIndex={6}/>
     <BeachedCanoeDisplay left="3%" bottom={waterH-2} w={72} zIndex={5}/>
+    {/* ── Home Waters: rich village-life scene ── */}
+    {isHomeWaters&&<>
+      <DryingRacks x="68%" bottom={gb+1} zIndex={6}/>
+      <CanoeWorkshop x="12%" bottom={gb-1} zIndex={6}/>
+      <CarverWorkshop x="44%" bottom={gb+4} zIndex={7}/>
+      <TradeGoodsPile x="85%" bottom={gb+2} zIndex={6}/>
+      <VillageWorkers bottom={gb} zIndex={6}/>
+      <DawnSmoke x="16%" bottom={gb+20} zIndex={3}/>
+      <DawnSmoke x="50%" bottom={gb+24} zIndex={3}/>
+      <DawnSmoke x="74%" bottom={gb+18} zIndex={3}/>
+      {/* Extra warmth from workshop fires */}
+      <CeremonialFire x="66%" bottom={gb+2} size="small" zIndex={7}/>
+    </>}
     <WaterBody top={landTop+groundH}
       gradient="linear-gradient(180deg,#113053 0%,#0d2748 28%,#0a2140 58%,#081838 100%)"
       waveCount={5} phosphorCount={2}/>
@@ -1774,6 +2611,7 @@ function VillageScene({sceneH}){
     {/* Fire warmth reflected on water */}
     <FireGlow x="50%" bottom={0} r={130} color="200,140,60" intensity={0.07} zIndex={2}/>
     <FireGlow x="53%" bottom={gb-4} r={55} intensity={0.2} zIndex={4}/>
+    {isHomeWaters&&<FireGlow x="72%" bottom={gb-2} r={30} color="180,120,50" intensity={0.12} zIndex={4}/>}
     <SceneLayer zIndex={9} style={{inset:0,
       background:'linear-gradient(180deg,rgba(200,140,60,.03),transparent 24%,transparent 76%,rgba(200,140,60,.03))'}}/>
     <Vignette color="8,6,16" intensity={0.18} focus="52% 55%"/>
@@ -1938,7 +2776,7 @@ function AftermathScene({G,sceneH}){
   const landTop=skyH+mtH+shoreH;const groundH=H*0.22;const waterH=H-landTop-groundH;
   const gb=waterH+groundH;
   const isDecisive=G&&G.outcome==='DECISIVE_VICTORY';
-  const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY');
+  const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY'||G.outcome==='TRADE_SUCCESS'||G.outcome==='DIPLOMACY_SUCCESS');
   const isStale=G&&G.outcome==='STALEMATE';
   const isDef=G&&G.outcome==='DEFEAT';
   const isDev=G&&G.outcome==='DEVASTATING_DEFEAT';
@@ -2005,6 +2843,13 @@ function AftermathScene({G,sceneH}){
       <GoodsPile x="44%" bottom={gb+1} size="medium" zIndex={5}/></>}
     {isWin&&!isDecisive&&<GoodsPile x="61%" bottom={gb+1} size="medium" zIndex={5}/>}
     {(isWin&&G.cargo>25)&&<GoodsPile x="71%" bottom={gb+1} size="medium" zIndex={5}/>} 
+    {/* ── Ceremony SVGs — visible during ceremony choice ── */}
+    {G&&G.step==='aft_show'&&isWin&&<>
+      <FeastFireSVG x="55%" bottom={gb+6} zIndex={7}/>
+      <FeastGoodsSVG x="62%" bottom={gb+2} zIndex={6}/>
+      <CeremonyGatheringSVG x="30%" bottom={gb+1} zIndex={6}/>
+      {(G.poleProgress||0)>=20&&<PoleRaisingSVG x="18%" bottom={gb} zIndex={8}/>}
+    </>}
     {/* ── Homecoming Canoe at the shallows ── */}
     <ReturnCanoe left="4%" bottom={waterH-2} w={82} isWin={!!isWin} hasDead={!!hasDead} damaged={!!(isDev||isDef)} zIndex={6} anim="tl-canoe-home 6s ease-in-out infinite"/>
     <SceneLayer zIndex={6} style={{left:'23%',bottom:waterH+2,width:64,height:16,opacity:ci>=2?1:ci===1?.72:.58}}>
@@ -2036,7 +2881,7 @@ function AftermathScene({G,sceneH}){
 }
 
 /* ═══ TRAVEL SCENE — premium 16-bit composition ═══ */
-function TravelScene({sceneH}){
+function TravelScene({sceneH,G}){
   const H=sceneH||220;
   const skyH=H*0.30;  // sky band
   const mtH=H*0.14;   // distant mountains
@@ -2164,6 +3009,17 @@ function TravelScene({sceneH}){
 
       <TravelHeroCanoe left="26%" bottom={waterH*0.32} width={176} crew={crew} Paddler={Paddler} CYCLE={CYCLE} zIndex={8}/>
 
+      {/* ── Voyage Event SVGs — contextual to current event ── */}
+      {G&&G.step==='trv_event'&&G.voyageEventId==='whale'&&<WhaleBreachSVG x="55%" bottom={waterH*0.45} zIndex={7}/>}
+      {G&&G.step==='trv_event'&&G.voyageEventId==='rival_canoe'&&<RivalCanoeSVG x="65%" bottom={waterH*0.55} zIndex={7}/>}
+      {G&&G.step==='trv_event'&&G.voyageEventId==='fog_bank'&&<FogWallSVG x="15%" bottom={waterH*0.2} zIndex={6}/>}
+      {G&&G.step==='trv_event'&&G.voyageEventId==='flotsam'&&<FlotsamSVG x="50%" bottom={waterH*0.35} zIndex={7}/>}
+      {G&&G.step==='trv_event'&&G.voyageEventId==='bird_omen'&&<RavenOmenSVG x="32%" bottom={waterH*0.32+20} zIndex={9}/>}
+      {G&&G.voyageWeather==='squall'&&<>
+        <SceneLayer zIndex={10} style={{inset:0,background:'linear-gradient(180deg,rgba(20,30,40,.15),transparent 40%,transparent 60%,rgba(20,30,40,.1))',pointerEvents:'none'}}/>
+        <FogBand top={skyH} height={30} opacity={0.14} color="80,90,110" speed={8} zIndex={6}/>
+      </>}
+
       <SceneLayer zIndex={9} style={{left:0,right:0,bottom:0,height:waterH*0.3,
         background:'linear-gradient(180deg,transparent 0%,rgba(4,8,18,.15) 100%)'}}/>
       <Vignette color="4,8,18" intensity={0.18} focus="50% 45%"/>
@@ -2176,12 +3032,12 @@ function TravelScene({sceneH}){
    Each scene is 320px tall, using the same visual language.
    Pass G and phase so scenes can react to game state (outcome, etc). */
 function Scene({type,tall,G,phase,sceneH}){
-  if(phase===1) return <TravelScene sceneH={sceneH}/>;
+  if(phase===1) return <TravelScene sceneH={sceneH} G={G}/>;
   if(phase===4) return <WithdrawalScene G={G} sceneH={sceneH}/>;
   if(phase===5) return <AftermathScene G={G} sceneH={sceneH}/>;
   if(phase===2) return <EncounterScene sceneH={sceneH}/>;
   if(phase===3) return <BattleScene G={G} sceneH={sceneH}/>;
-  return <VillageScene sceneH={sceneH}/>;
+  return <VillageScene sceneH={sceneH} G={G}/>;
 }
 
 /* ═══ ROUTE STRIP ═══ */
@@ -2292,14 +3148,15 @@ const PHASE_STATS={
   2:['morale','crew','intimidation'],3:['morale','crew','canoe'],
   4:['morale','canoe','cargo'],5:['prestige','feud','cargo'],
 };
+const HOME_WATERS_STATS=['village','food','canoeReady'];
 const STAT_TOOLTIPS={
   morale:'Crew will to fight',surprise:'Opening strike bonus',intimidation:'Break enemy will',
   prestige:'Standing among nations',feud:'Cedar Creek hatred',cargo:'Spoils for home',
   crew:'Warriors ready',canoe:'Hull condition',
+  village:'Village season readiness',food:'Dried fish and oil stores',canoeReady:'War canoe preparation',pole:'Memorial pole carving',
 };
 function HudBar({G,phase,isFirstRaid}){
   const fearVal=cl(G.fear+(G.intimDelta<0?-G.intimDelta:0),0,100);
-  const primary=PHASE_STATS[phase]||PHASE_STATS[0];
   const d=G.statDeltas||{};
   const stats={
     morale:{icon:'♥',label:'MORALE',val:G.morale,max:100,col:P.green,warn:v=>v<30,delta:d.morale},
@@ -2310,9 +3167,14 @@ function HudBar({G,phase,isFirstRaid}){
     feud:{icon:'🔥',label:'FEUD',val:G.feudEscalation,max:20,col:P.cedar,warn:v=>v>12,delta:d.feud},
     surprise:{icon:'👁',label:'SURPRISE',val:G.surpriseBonus,max:50,col:P.purple,warn:()=>false,delta:d.surprise},
     intimidation:{icon:'💀',label:'INTIM',val:G.intimidationBonus,max:30,col:P.red,warn:()=>false,delta:d.intimidation},
+    village:{icon:'🏠',label:'VILLAGE',val:G.villageReadiness||0,max:100,col:P.green,warn:v=>v<30,delta:d.villageReadiness},
+    food:{icon:'🐟',label:'FOOD',val:G.foodStores||0,max:100,col:P.gold,warn:v=>v<30,delta:d.foodStores},
+    canoeReady:{icon:'🛶',label:'CANOE PREP',val:G.canoeReadiness||0,max:100,col:P.blue,warn:v=>v<30,delta:d.canoeReadiness},
+    pole:{icon:'🪵',label:'POLE',val:G.poleProgress||0,max:100,col:P.purple,warn:()=>false,delta:d.poleProgress},
   };
-  const all=['morale','crew','canoe','cargo','prestige','feud'];
-  const secondary=all.filter(k=>!primary.includes(k));
+  const isHomeWaters=G.step==='vil_dawn';
+  const primary=isHomeWaters?HOME_WATERS_STATS:(PHASE_STATS[phase]||PHASE_STATS[0]);
+  const all=['morale','crew','canoe','cargo','prestige','feud','village','food','canoeReady','pole'];  const secondary=all.filter(k=>!primary.includes(k));
   const renderDelta=(delta)=>{
     if(!delta||delta===0)return null;
     const col=delta>0?P.greenBright:P.redBright;
@@ -2718,7 +3580,7 @@ function TidelinesApp(){
   useEffect(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight;},[G.log.length]);
   const act=useCallback((fn,...a)=>setG(p=>fn(p,...a)),[]);
   const onContinue=useCallback(()=>{TL_Audio.sfxContinue();setG(p=>{const fn=CONT[p.step];return fn?fn(p):p;});},[]);
-  const onReset=useCallback(()=>setG(p=>initState({prestige:p.prestige,feudEscalation:p.feudEscalation,legacyEntries:p.legacyEntries,warTraits:p.warTraits,totalRaids:p.totalRaids,lastRun:p.lastRun})),[]);
+  const onReset=useCallback(()=>setG(p=>initState({prestige:p.prestige,feudEscalation:p.feudEscalation,legacyEntries:p.legacyEntries,warTraits:p.warTraits,totalRaids:p.totalRaids,lastRun:p.lastRun,foodStores:p.foodStores,villageReadiness:p.villageReadiness,canoeReadiness:p.canoeReadiness,poleProgress:p.poleProgress})),[]);
   const onFullReset=useCallback(()=>{clearPersist();setG(initState());},[]);
   const toggleDebug=useCallback(()=>{TL_Audio.sfxToggle();setG(p=>({...p,showDebug:!p.showDebug}));},[]);
   const toggleLegacy=useCallback(()=>{TL_Audio.sfxToggle();setG(p=>({...p,showLegacy:!p.showLegacy}));},[]);
@@ -3029,7 +3891,7 @@ function TidelinesApp(){
             </div>
           </>}
 
-          {G.step==='vil_intel'&&G.lastRun&&(
+          {(G.step==='vil_dawn'||G.step==='vil_intel')&&G.lastRun&&(
             <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
               <div style={{color:P.goldDim,fontSize:6,marginBottom:3,letterSpacing:.5}}>LAST EXPEDITION</div>
               <div style={{fontSize:7}}>
@@ -3039,6 +3901,19 @@ function TidelinesApp(){
               </div>
               <div style={{fontSize:6,color:P.dim,marginTop:2}}>{G.lastRun.prestige} prestige · {G.lastRun.feud}</div>
               {G.lastRun.named_dead?.length>0&&<div style={{fontSize:6,color:P.red,marginTop:2}}>Fallen: {G.lastRun.named_dead.join(', ')}</div>}
+            </div>
+          )}
+
+          {phase===0&&G.step==='vil_dawn'&&(
+            <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
+              <div style={{color:P.goldDim,fontSize:6,marginBottom:3,letterSpacing:.5}}>HOME WATERS</div>
+              <div style={{fontSize:6,color:P.dim,lineHeight:1.5}}>
+                Food: {Math.round(G.foodStores||0)}% · Village: {Math.round(G.villageReadiness||0)}%
+              </div>
+              <div style={{fontSize:6,color:P.dim,lineHeight:1.5}}>
+                Canoe: {Math.round(G.canoeReadiness||0)}% · Pole: {Math.round(G.poleProgress||0)}%
+              </div>
+              <div style={{fontSize:5,color:P.dim+'90',marginTop:3}}>Steady the village before committing the war canoe.</div>
             </div>
           )}
 
@@ -3134,6 +4009,62 @@ function TidelinesApp(){
           borderTop:`2px solid ${accent}`,
         }}>
 
+          {/* ─ Home Waters: Dawn ─ */}
+          {G.step==='vil_dawn'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'Home Waters wakes. Before the war canoe is committed, steady the village for the season ahead.':'The village stirs. Choose how to spend this morning.'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🐟" title="Provision the Village"
+                flavor="Load the smoke racks, bundle dried halibut, count the oil stores. The village eats before the warriors leave."
+                effect="+18 Food Stores · +10 Village Readiness"
+                archetype="Feed the people first"
+                onClick={()=>act(pickHomeWaters,'provision_village')}/>
+              <CommandCard icon="🛶" title="Ready the War Canoe"
+                flavor="Fresh cedar planks bent and lashed. The crew tests the hull in shallow water."
+                effect="+20 Canoe Readiness · +3 Morale"
+                archetype="Prepare the vessel"
+                onClick={()=>act(pickHomeWaters,'ready_canoe')}/>
+              <CommandCard icon="🪵" title="Consult the Elders"
+                flavor="The elder carvers mark a new figure on the memorial pole. Word of your lineage spreads along the coast."
+                effect="+8 Pole Progress · +10 Prestige"
+                archetype="Honour the ancestors"
+                onClick={()=>act(pickHomeWaters,'consult_elders')}/>
+              <CommandCard icon="⚔" title="Quiet War Preparation"
+                flavor="Weapons oiled, paddles stacked, the crew drills in silence. No one questions what comes next."
+                effect="+6 Village · +8 Canoe · +2 Morale"
+                archetype="Ready for what comes"
+                onClick={()=>act(pickHomeWaters,'quiet_war_prep')}/>
+            </div>
+          </>}
+
+          {/* ─ Village: Expedition Selection ─ */}
+          {G.step==='vil_expedition'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'The village is steadied. What purpose drives this season\'s voyage?':'Choose the purpose of your expedition:'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="⚔" title="Raid Cedar Creek"
+                flavor="The war canoe crosses north. Cedar Creek will answer for what they have taken. Blood and prestige are at stake."
+                effect="Full raid expedition — intel, travel, battle, withdrawal"
+                risk="Crew casualties, canoe damage, feud escalation"
+                archetype="The war chief's path"
+                onClick={()=>act(pickExpedition,'raid')}/>
+              <CommandCard icon="📦" title="Trade Voyage"
+                flavor="Oil, dried fish, and woven cedar loaded for the northern settlements. Copper and shell flow south. Profit without blood."
+                effect="Cargo + Prestige + Food Stores — no combat"
+                archetype="The merchant chief"
+                onClick={()=>act(pickExpedition,'trade')}/>
+              <CommandCard icon="🕊" title="Diplomatic Mission"
+                flavor="An elder boards with gifts and a carved speaking staff. Words are stronger than weapons sometimes. The feud may cool."
+                effect="Reduce Feud + Prestige + Morale — no combat"
+                archetype="The peacemaker"
+                onClick={()=>act(pickExpedition,'diplomacy')}/>
+            </div>
+          </>}
+
           {/* ─ Village: Intel ─ */}
           {G.step==='vil_intel'&&<>
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
@@ -3182,6 +4113,124 @@ function TidelinesApp(){
                 effect="+8 Morale · +5 Surprise"
                 archetype="Favored by unseen forces"
                 onClick={()=>act(pickPrep,'blessing')}/>
+            </div>
+          </>}
+
+          {/* ─ Travel: Route Choice ─ */}
+          {G.step==='trv_route'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'Three routes cross to Cedar Creek. Each carries different risks.':'Choose your crossing route:'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🏖" title="Hug the Coast"
+                flavor="Kelp beds, rocky points, sheltered coves. Slow but the hull never leaves sight of land. Calm water most of the way."
+                effect="Safe passage — no weather risk"
+                archetype="The cautious commander"
+                onClick={()=>act(pickRoute,'coast')}/>
+              <CommandCard icon="🌊" title="Cross the Channel"
+                flavor="The main channel runs grey and deep. Current pushes the canoe but the open water can turn choppy fast."
+                effect="Moderate speed"
+                risk="35% squall — canoe damage + morale loss"
+                archetype="The experienced navigator"
+                onClick={()=>act(pickRoute,'channel')}/>
+              <CommandCard icon="⚡" title="Open Water Crossing"
+                flavor="Straight across. No land in sight. If the weather holds, you arrive from a direction no one expects."
+                effect="Fastest route — +8 Surprise if clear"
+                risk="50% storm — heavy canoe damage + morale loss"
+                archetype="The bold risk-taker"
+                onClick={()=>act(pickRoute,'open')}/>
+            </div>
+          </>}
+
+          {/* ─ Travel: Voyage Event ─ */}
+          {G.step==='trv_event'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {(()=>{switch(G.voyageEventId){
+                case'whale':return 'A grey whale surfaces alongside the canoe, breathing slow. The crew watches.';
+                case'rival_canoe':return 'A distant canoe — unfamiliar colors. It has not changed course yet.';
+                case'fog_bank':return 'A wall of fog rolls across the channel ahead. Visibility drops to nothing.';
+                case'flotsam':return 'Cedar planks and rope drift past — wreckage on the water.';
+                case'calm_beauty':return 'The water goes glass-still. Mountains reflected perfectly. An eagle circles.';
+                case'bird_omen':return 'A raven lands on the prow and cocks its head.';
+                default:return 'Something on the water demands attention.';
+              }})()}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              {G.voyageEventId==='whale'&&<>
+                <CommandCard icon="🐋" title="Follow the Whale"
+                  flavor="Let the whale guide you. The crew is awed. Some things matter more than haste."
+                  effect="+8 Morale"
+                  archetype="Honour what the sea offers"
+                  onClick={()=>act(resolveVoyageEvent,'follow')}/>
+                <CommandCard icon="⭐" title="Press On"
+                  flavor="The whale is beautiful. The mission is more important. Keep paddling."
+                  effect="+5 Surprise"
+                  archetype="Mission focus"
+                  onClick={()=>act(resolveVoyageEvent,'ignore')}/>
+              </>}
+              {G.voyageEventId==='rival_canoe'&&<>
+                <CommandCard icon="🫣" title="Hide & Wait"
+                  flavor="Drop low. Let them pass. They never need to know you were here."
+                  effect="+10 Surprise · −3 Morale"
+                  archetype="Unseen predator"
+                  onClick={()=>act(resolveVoyageEvent,'follow')}/>
+                <CommandCard icon="🚩" title="Let Them See You"
+                  flavor="War crests raised. Let word of your coming run ahead of you."
+                  effect="+5 Intimidation"
+                  archetype="Announce your intent"
+                  onClick={()=>act(resolveVoyageEvent,'ignore')}/>
+              </>}
+              {G.voyageEventId==='fog_bank'&&<>
+                <CommandCard icon="🌫" title="Enter the Fog"
+                  flavor="Vanish. Navigate blind. Emerge close to shore, unseen and unheard."
+                  effect="+12 Surprise · −5 Canoe"
+                  risk="Blind navigation risks hull scrapes"
+                  archetype="Ghost on the water"
+                  onClick={()=>act(resolveVoyageEvent,'follow')}/>
+                <CommandCard icon="🏖" title="Steer Wide"
+                  flavor="Keep the shoreline visible. Slower, but the crew stays calm."
+                  effect="+3 Morale"
+                  archetype="Safe and steady"
+                  onClick={()=>act(resolveVoyageEvent,'ignore')}/>
+              </>}
+              {G.voyageEventId==='flotsam'&&<>
+                <CommandCard icon="🪵" title="Salvage the Wreckage"
+                  flavor="Cedar planks, rope, useful materials. Extra weight but extra value."
+                  effect="+5 Cargo · −3 Canoe"
+                  archetype="Waste nothing"
+                  onClick={()=>act(resolveVoyageEvent,'follow')}/>
+                <CommandCard icon="➡" title="Steer Clear"
+                  flavor="Whatever happened here is not your concern. Keep moving."
+                  effect="No change — clean passage"
+                  archetype="Stay focused"
+                  onClick={()=>act(resolveVoyageEvent,'ignore')}/>
+              </>}
+              {G.voyageEventId==='calm_beauty'&&<>
+                <CommandCard icon="🎶" title="Let the Crew Sing"
+                  flavor="The war singer begins a low chant. The crew joins. The mountains listen."
+                  effect="+6 Morale"
+                  archetype="Spirit and song"
+                  onClick={()=>act(resolveVoyageEvent,'follow')}/>
+                <CommandCard icon="⭐" title="Push Through"
+                  flavor="Beautiful water, but discipline matters. Keep the rhythm."
+                  effect="+3 Morale"
+                  archetype="Steady progress"
+                  onClick={()=>act(resolveVoyageEvent,'ignore')}/>
+              </>}
+              {G.voyageEventId==='bird_omen'&&<>
+                <CommandCard icon="🪶" title="Accept the Omen"
+                  flavor="The raven croaks three times and flies north. Your spiritual advisor smiles."
+                  effect="+5 Morale · +3 Surprise"
+                  archetype="The spirits walk with you"
+                  onClick={()=>act(resolveVoyageEvent,'follow')}/>
+                <CommandCard icon="✋" title="Wave It Off"
+                  flavor="Omens are for people who need reassurance. Your crew needs discipline."
+                  effect="No change — focus maintained"
+                  archetype="Rely on skill, not signs"
+                  onClick={()=>act(resolveVoyageEvent,'ignore')}/>
+              </>}
             </div>
           </>}
 
@@ -3288,10 +4337,54 @@ function TidelinesApp(){
             </div>
           </>}
 
-          {/* ─ Aftermath ─ */}
-          {G.step==='aft_show'&&(
+          {/* ─ Aftermath: Ceremony Choice ─ */}
+          {G.step==='aft_show'&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY'||G.outcome==='TRADE_SUCCESS'||G.outcome==='DIPLOMACY_SUCCESS')&&(
+            <>
+              <div style={{fontSize:7,color:P.goldDim,marginBottom:5,letterSpacing:.3}}>
+                The canoe has returned. How will the village remember this season?
+              </div>
+              <Hint text={hint}/>
+              <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+                <CommandCard icon="🍽" title="Hold a Potlatch"
+                  flavor="Feast fires. Songs. Names spoken before witnesses. Redistribute the spoils and let generosity build your standing."
+                  effect="Cargo → Prestige (1.5×) · +10 Morale · +8 Food"
+                  archetype="Generosity is power"
+                  onClick={()=>act(pickCeremony,'potlatch')}/>
+                <CommandCard icon="🪵" title="Advance the Pole"
+                  flavor="Cedar chips pile around the base. New figures emerge: the canoe, the warriors, the far shore."
+                  effect={`+${(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY')?12:6} Pole Progress · +8 Prestige`}
+                  archetype="Memory carved in cedar"
+                  onClick={()=>act(pickCeremony,'advance_pole')}/>
+                <CommandCard icon="🕊" title="Send a Peace Offering"
+                  flavor="A message-canoe sent south with oil and blankets. It will not end the feud — but it may slow retaliation."
+                  effect="−Feud · +5 Prestige · +5 Morale"
+                  archetype="The long view"
+                  onClick={()=>act(pickCeremony,'peace_offering')}/>
+                <CommandCard icon="🏠" title="Store for Winter"
+                  flavor="No feast tonight. The spoils go to the longhouse stores. The village will eat through the cold months."
+                  effect="Cargo → Food Stores · +10 Village Readiness"
+                  archetype="Practical leadership"
+                  onClick={()=>act(pickCeremony,'reserve_stores')}/>
+              </div>
+            </>
+          )}
+
+          {/* ─ Aftermath: Loss (no ceremony) ─ */}
+          {G.step==='aft_show'&&!(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY'||G.outcome==='TRADE_SUCCESS'||G.outcome==='DIPLOMACY_SUCCESS')&&(
             <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center',alignItems:'center'}}>
-              <ContinueBtn label="🔄  Launch Next Raid" onClick={onReset}/>
+              <ContinueBtn label="🔄  Begin Next Season" onClick={onReset}/>
+              <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Send feedback"/>
+              <button className="tl-action" style={{
+                display:'inline-block',background:P.panelHi,color:P.dim,border:`1px solid ${P.border}`,
+                borderRadius:4,padding:'10px 18px',fontFamily:font,fontSize:8,cursor:'pointer',
+              }} onClick={onFullReset}>✖  New Game</button>
+            </div>
+          )}
+
+          {/* ─ Season Complete ─ */}
+          {G.step==='aft_done'&&(
+            <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center',alignItems:'center'}}>
+              <ContinueBtn label="🔄  Begin Next Season" onClick={onReset}/>
               <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Send feedback"/>
               <button className="tl-action" style={{
                 display:'inline-block',background:P.panelHi,color:P.dim,border:`1px solid ${P.border}`,
@@ -3308,6 +4401,7 @@ function TidelinesApp(){
               G.step==='enc_done'||G.step==='enc_fled'?'🔥  Begin':
               G.step==='res_done'?'🛶  Withdraw':
               G.step==='wth_retreat'?'📜  Return Home':
+              G.step==='wth_done'?'🏠  Return Home':
               '▸  Continue'
             }/>
           </div>}
