@@ -114,6 +114,38 @@ const SCENE_SKY={
 const STAR_POS=[[8,10,2,0],[22,6,1.5,1.2],[38,16,1,.5],[52,5,2,1.8],[68,12,1.5,.3],[82,8,1,2.1],[15,20,1,1.5],[72,3,1.5,.8],[45,14,1,2.5],[90,18,1.5,.7]];
 const BUILD={label:'PRIVATE ALPHA',version:'v1.3a',build:'PA-2026-03-15',feedbackEmail:'alpha-feedback@example.com'};
 const ALPHA_LOG_KEY='tidelines_alpha_log_v1';
+const GFX2={
+  canoeWarHull:'assets/graphics2/canoe_war_hull.svg',
+  longhouse:'assets/graphics2/longhouse_main.svg',
+  hostileLonghouse:'assets/graphics2/longhouse_hostile.svg',
+  poleTotem:'assets/graphics2/pole_totem.svg',
+  poleCeremonial:'assets/graphics2/pole_ceremonial.svg',
+  poleMemorial:'assets/graphics2/pole_memorial.svg',
+  poleHostile:'assets/graphics2/pole_hostile_watch.svg',
+  hostileFrontage:'assets/graphics2/hostile_frontage.svg',
+  battleShieldWall:'assets/graphics2/battle_shield_wall.svg',
+  battleBurningDebris:'assets/graphics2/battle_burning_debris.svg',
+  battleWeaponCache:'assets/graphics2/battle_weapon_cache.svg',
+  figure:{
+    homeStanding:'assets/graphics2/figure_home_standing.svg',
+    homeWarrior:'assets/graphics2/figure_home_warrior.svg',
+    hostileWarrior:'assets/graphics2/figure_hostile_warrior.svg',
+    sittingSolemn:'assets/graphics2/figure_sitting_solemn.svg',
+    canoeNear:'assets/graphics2/figure_canoe_near.svg',
+    canoeFar:'assets/graphics2/figure_canoe_far.svg',
+    ceremonialLeader:'assets/graphics2/figure_ceremonial_leader.svg',
+    canoeLeader:'assets/graphics2/figure_canoe_leader.svg',
+    canoeSteersman:'assets/graphics2/figure_canoe_steersman.svg',
+    homeElder:'assets/graphics2/figure_home_elder.svg',
+    hostileChampion:'assets/graphics2/figure_hostile_champion.svg',
+  },
+  witness:{
+    warm:'assets/graphics2/witness_figure_warm.svg',
+    neutral:'assets/graphics2/witness_figure_neutral.svg',
+    solemn:'assets/graphics2/witness_figure_solemn.svg',
+    grief:'assets/graphics2/witness_figure_grief.svg',
+  },
+};
 
 const WORLD={
   home:{
@@ -816,6 +848,19 @@ const INJCSS=`
 @keyframes tl-route-flow{0%{background-position:0 0}100%{background-position:24px 0}}
 @keyframes tl-crowd-sway{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
 @keyframes tl-solemn-sway{0%,100%{transform:translateY(0)}50%{transform:translateY(.8px)}}
+@keyframes tl-breath-soft{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-.8px) scale(1.018)}}
+@keyframes tl-breath-deep{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1.2px) scale(1.024)}}
+@keyframes tl-role-poise{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-1px) rotate(.35deg)}}
+@keyframes tl-structure-settle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+@keyframes tl-ember-pulse{0%,100%{opacity:.28;transform:scaleX(1)}50%{opacity:.68;transform:scaleX(1.08)}}
+@keyframes tl-heat-haze{0%,100%{transform:translateX(-1%) scaleY(1);opacity:.16}50%{transform:translateX(1%) scaleY(1.04);opacity:.32}}
+@keyframes tl-water-depth-shift{0%,100%{transform:translateX(0);opacity:.12}50%{transform:translateX(3%);opacity:.22}}
+@keyframes tl-wake-shimmer{0%,100%{opacity:.26;filter:blur(0)}50%{opacity:.5;filter:blur(.4px)}}
+@keyframes tl-moon-halo{0%,100%{opacity:.45;transform:scale(1)}50%{opacity:.82;transform:scale(1.06)}}
+@keyframes tl-surf-shift{0%,100%{transform:translateX(0);opacity:.28}50%{transform:translateX(18px);opacity:.55}}
+@keyframes tl-surf-lace{0%,100%{opacity:.12;filter:blur(.3px)}50%{opacity:.34;filter:blur(0)}}
+@keyframes tl-scene-arrival{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1px) scale(1.006)}}
+@keyframes tl-scene-pressure{0%,100%{transform:translateX(0) translateY(0) scale(1)}20%{transform:translateX(-.7px) translateY(.3px) scale(1.003)}55%{transform:translateX(.8px) translateY(-.4px) scale(1.005)}80%{transform:translateX(-.3px) translateY(.2px) scale(1.002)}}
 @keyframes tl-home-glow{0%,100%{opacity:.45}50%{opacity:.9}}
 @keyframes tl-goods-glint{0%,100%{opacity:.15;transform:translateX(-10%)}50%{opacity:.45;transform:translateX(10%)}}
 @keyframes tl-battle-throb{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
@@ -835,6 +880,19 @@ const INJCSS=`
 .tl-pole-reveal{animation:tl-pole-reveal .6s ease-out;transform-origin:bottom center}
 .tl-crowd-warm{animation:tl-crowd-arrive .8s ease-out,tl-crowd-sway 4.6s ease-in-out infinite}
 .tl-crowd-solemn{animation:tl-crowd-arrive .8s ease-out,tl-solemn-sway 5.8s ease-in-out infinite}
+.tl-figure-idle{animation:tl-breath-soft 4.8s ease-in-out infinite}
+.tl-figure-solemn{animation:tl-breath-deep 6.2s ease-in-out infinite}
+.tl-role-poise{animation:tl-role-poise 5.4s ease-in-out infinite}
+.tl-structure-life{animation:tl-structure-settle 7.5s ease-in-out infinite}
+.tl-ember-pulse{animation:tl-ember-pulse 2.1s ease-in-out infinite}
+.tl-heat-haze{animation:tl-heat-haze 5.6s ease-in-out infinite}
+.tl-water-depth{animation:tl-water-depth-shift 8s ease-in-out infinite}
+.tl-wake-shimmer{animation:tl-wake-shimmer 2.4s ease-in-out infinite}
+.tl-moon-halo{animation:tl-moon-halo 8.5s ease-in-out infinite}
+.tl-surf-shift{animation:tl-surf-shift 5.6s ease-in-out infinite}
+.tl-surf-lace{animation:tl-surf-lace 3.8s ease-in-out infinite}
+.tl-scene-arrival{animation:tl-scene-arrival 7.5s ease-in-out infinite;transform-origin:50% 60%}
+.tl-scene-pressure{animation:tl-scene-pressure 3.6s ease-in-out infinite;transform-origin:50% 48%}
 .tl-home-glow{animation:tl-home-glow 3.8s ease-in-out infinite}
 .tl-battle-throb{animation:tl-battle-throb 1.8s ease-in-out infinite}
 .tl-battle-surge-left{animation:tl-battle-surge-left 2.2s ease-in-out infinite}
@@ -1139,6 +1197,8 @@ function SceneMoon({right='14%',top='6%',size=22}){
     background:'radial-gradient(circle at 40% 40%,#e8e0c8 0%,#c8c0a8 50%,#a8a088 100%)',
     boxShadow:'0 0 20px rgba(200,190,160,.25),0 0 60px rgba(200,190,160,.08)',
   }}>
+    <div className="tl-moon-halo" style={{position:'absolute',inset:-10,borderRadius:'50%',
+      background:'radial-gradient(circle,rgba(216,206,174,.16) 0%,rgba(216,206,174,.06) 42%,transparent 72%)'}}/>
     <div style={{position:'absolute',top:'27%',left:'36%',width:'18%',height:'14%',borderRadius:'50%',background:'rgba(0,0,0,.08)'}}/>
     <div style={{position:'absolute',top:'55%',left:'23%',width:'14%',height:'10%',borderRadius:'50%',background:'rgba(0,0,0,.06)'}}/>
   </div>;
@@ -1185,6 +1245,10 @@ function WaterBody({top,gradient,waveCount=6,shimmer=true,phosphorCount=0,zIndex
   return<div style={{position:'absolute',top,left:0,right:0,bottom:0,zIndex,
     background:gradient||'linear-gradient(180deg,#14385e 0%,#103050 20%,#0c2848 45%,#082040 70%,#061838 100%)',
   }}>
+    <div className="tl-water-depth" style={{position:'absolute',top:0,left:'-6%',width:'58%',bottom:0,
+      background:'linear-gradient(90deg,rgba(4,10,20,.16),rgba(8,18,34,.07),transparent)'}}/>
+    <div className="tl-water-depth" style={{position:'absolute',top:'6%',right:'-8%',width:'42%',height:'58%',animationDelay:'2.1s',
+      background:'linear-gradient(270deg,rgba(120,160,210,.08),rgba(70,110,170,.03),transparent)'}}/>
     {Array.from({length:waveCount},(_,i)=>{const y=3+i*Math.floor(110/waveCount);
       return<div key={i} className="tl-wave-1" style={{position:'absolute',top:y,left:'-100%',right:'-100%',
         height:i<2?2:1,
@@ -1201,6 +1265,22 @@ function WaterBody({top,gradient,waveCount=6,shimmer=true,phosphorCount=0,zIndex
       animation:`tl-phosphor ${3+p.d*0.5}s ease-in-out infinite`,animationDelay:p.d+'s',
     }}/>)}
   </div>;
+}
+
+function SurfBand({top,left=0,right=0,height=10,foam='220,232,244',undertow='110,150,190',intensity=1,zIndex=6}){
+  return <>
+    <SceneLayer zIndex={zIndex} className="tl-surf-shift" style={{top,left,right,height}}>
+      <div style={{position:'absolute',top:0,left:'-10%',width:'120%',height:Math.max(2,height*0.34),
+        background:`repeating-linear-gradient(90deg,transparent 0px,transparent 12px,rgba(${foam},${0.12*intensity}) 12px,rgba(${foam},${0.28*intensity}) 22px,transparent 30px,transparent 42px)`,
+        borderRadius:height}}/>
+      <div className="tl-surf-lace" style={{position:'absolute',top:height*0.22,left:'-8%',width:'116%',height:Math.max(2,height*0.28),animationDelay:'1.1s',
+        background:`linear-gradient(90deg,transparent 0%,rgba(${foam},${0.08*intensity}) 14%,rgba(${foam},${0.18*intensity}) 32%,rgba(${foam},${0.24*intensity}) 50%,rgba(${foam},${0.18*intensity}) 68%,rgba(${foam},${0.08*intensity}) 86%,transparent 100%)`,
+        borderRadius:height}}/>
+      <div style={{position:'absolute',bottom:0,left:'-6%',width:'112%',height:Math.max(2,height*0.36),
+        background:`linear-gradient(90deg,transparent 0%,rgba(${undertow},${0.07*intensity}) 22%,rgba(${undertow},${0.15*intensity}) 50%,rgba(${undertow},${0.07*intensity}) 78%,transparent 100%)`,
+        filter:'blur(1px)',borderRadius:height}}/>
+    </SceneLayer>
+  </>;
 }
 
 /* ── Fog Band ── */
@@ -1220,40 +1300,39 @@ function Vignette({color='4,8,18',intensity=0.35,focus='50% 45%'}){
 
 /* ── Totem / Carved Post (sprite-ready slot) ── */
 function TotemPole({x,h=40,bottom=0,zIndex=5}){
-  return<div style={{position:'absolute',left:x,bottom,width:10,height:h,zIndex}}>
-    <div style={{position:'absolute',bottom:0,left:2,width:6,height:h,
-      background:'linear-gradient(180deg,#2a1a08 0%,#1a1004 100%)',borderRadius:'2px 2px 0 0'}}/>
-    <div style={{position:'absolute',top:0,left:-1,width:12,height:10,
-      background:'#2a1a08',borderRadius:'3px 3px 1px 1px',border:'1px solid #3a2a1050',
-    }}>
-      <div style={{position:'absolute',top:2,left:2,width:2,height:1.5,background:P.gold+'40',borderRadius:'50%'}}/>
-      <div style={{position:'absolute',top:2,right:2,width:2,height:1.5,background:P.gold+'40',borderRadius:'50%'}}/>
-      <div style={{position:'absolute',top:5,left:4,width:2,height:3,background:'#1a1004',borderRadius:'0 0 1px 1px'}}/>
-    </div>
-    {h>28&&<div style={{position:'absolute',top:Math.floor(h*0.4),left:0,width:10,height:8,background:'#251608',borderRadius:1}}>
-      <div style={{position:'absolute',top:2,left:2,width:2,height:1,background:'#3a2a1060',borderRadius:'50%'}}/>
-      <div style={{position:'absolute',top:2,right:2,width:2,height:1,background:'#3a2a1060',borderRadius:'50%'}}/>
-    </div>}
-    <div style={{position:'absolute',bottom:0,left:0,width:10,height:3,background:'#1a1004',borderRadius:1}}/>
+  return<div style={{position:'absolute',left:x,bottom,width:Math.max(12,Math.round(h*0.27)),height:h,zIndex}}>
+    <img src={GFX2.poleTotem} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 5px rgba(0,0,0,.3))',userSelect:'none',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',left:'18%',bottom:Math.round(h*0.72),width:'64%',height:Math.max(4,Math.round(h*0.14)),
+      background:`radial-gradient(ellipse,${P.gold}10,transparent 70%)`,pointerEvents:'none'}}/>
   </div>;
 }
 
 /* ── Longhouse Structure (sprite-ready slot) ── */
 function Longhouse({x,w=50,h=18,bottom=0,smoke=true,fireGlow=false,zIndex=5}){
   const rH=Math.floor(h*0.45);
-  return<div style={{position:'absolute',left:x,bottom,width:w,height:h+rH,zIndex}}>
-    <div style={{position:'absolute',top:0,left:-2,width:w+4,height:rH,
-      background:'#1a1004',clipPath:'polygon(0% 100%,50% 0%,100% 100%)'}}/>
-    <div style={{position:'absolute',bottom:0,left:0,width:w,height:h,
-      background:'linear-gradient(180deg,#2a1a08 0%,#201408 100%)',
-      border:'1px solid #3a2a1040',borderTop:'none',borderRadius:'0 0 2px 2px'}}/>
-    <div style={{position:'absolute',bottom:0,left:w*0.4,width:Math.max(w*0.2,6),height:h*0.55,
-      background:'#0a0604',borderRadius:'2px 2px 0 0'}}/>
-    <div style={{position:'absolute',top:rH+2,left:w*0.3,width:w*0.4,height:2,
-      background:`linear-gradient(90deg,transparent,${P.gold}15,${P.gold}22,${P.gold}15,transparent)`}}/>
+  return<div className="tl-structure-life" style={{position:'absolute',left:x,bottom,width:w,height:h+rH,zIndex}}>
+    <img src={GFX2.longhouse} alt="" draggable="false" style={{position:'absolute',left:-2,bottom:0,width:w+4,height:h+rH,objectFit:'fill',filter:'drop-shadow(0 3px 7px rgba(0,0,0,.35))',userSelect:'none',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',top:rH+2,left:w*0.26,width:w*0.48,height:2,
+      background:`linear-gradient(90deg,transparent,${P.gold}14,${P.gold}24,${P.gold}14,transparent)`}}/>
+    <div className="tl-heat-haze" style={{position:'absolute',left:w*0.14,bottom:h*0.18,width:w*0.68,height:h*0.9,
+      background:'linear-gradient(180deg,rgba(220,150,90,.07),rgba(220,150,90,.02),transparent)',filter:'blur(2px)',pointerEvents:'none'}}/>
     {smoke&&<div className="tl-smoke" style={{position:'absolute',top:-(rH+8),left:w*0.48,zIndex:zIndex+1}}/>}
-    {fireGlow&&<div style={{position:'absolute',bottom:-3,left:w*0.25,width:w*0.5,height:h*0.7,
+    {fireGlow&&<div className="tl-ember-pulse" style={{position:'absolute',bottom:-3,left:w*0.25,width:w*0.5,height:h*0.7,
       background:'radial-gradient(ellipse,rgba(200,120,40,.12) 0%,transparent 70%)',zIndex:zIndex-1}}/>}
+  </div>;
+}
+
+function HostileLonghouse({x,w=50,h=18,bottom=0,smoke=true,emberGlow=false,zIndex=5}){
+  const rH=Math.floor(h*0.45);
+  return<div className="tl-structure-life" style={{position:'absolute',left:x,bottom,width:w,height:h+rH,zIndex}}>
+    <img src={GFX2.hostileLonghouse} alt="" draggable="false" style={{position:'absolute',left:-2,bottom:0,width:w+4,height:h+rH,objectFit:'fill',filter:'drop-shadow(0 3px 8px rgba(0,0,0,.38))',userSelect:'none',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',top:rH+3,left:w*0.22,width:w*0.56,height:2,
+      background:`linear-gradient(90deg,transparent,${P.red}12,${P.red}20,${P.red}12,transparent)`}}/>
+    <div className="tl-heat-haze" style={{position:'absolute',left:w*0.12,bottom:h*0.16,width:w*0.72,height:h,
+      background:'linear-gradient(180deg,rgba(170,70,40,.08),rgba(120,40,30,.03),transparent)',filter:'blur(2px)',pointerEvents:'none'}}/>
+    {smoke&&<div className="tl-smoke" style={{position:'absolute',top:-(rH+10),left:w*0.48,zIndex:zIndex+1,opacity:.92}}/>}
+    {emberGlow&&<div className="tl-ember-pulse" style={{position:'absolute',bottom:-4,left:w*0.18,width:w*0.64,height:h*0.76,
+      background:'radial-gradient(ellipse,rgba(180,60,30,.12) 0%,transparent 70%)',zIndex:zIndex-1}}/>}
   </div>;
 }
 
@@ -1266,27 +1345,56 @@ function FireGlow({x,bottom,r=50,color='200,120,40',intensity=0.15,zIndex=4}){
 }
 
 /* ── Person Silhouette (sprite-ready slot) ── */
-function Figure({x,bottom=0,type='standing',hasWeapon=false,hasHat=true,facing='right',zIndex=5}){
-  const sit=type==='sitting';const h=sit?14:20;const flip=facing==='left'?'scaleX(-1)':'';
-  return<div style={{position:'absolute',left:x,bottom,width:10,height:h,zIndex,transform:flip}}>
-    {hasHat&&<div style={{position:'absolute',top:0,left:1,width:8,height:4,
-      background:'linear-gradient(180deg,#3a2a10,#2a1a08)',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>}
-    <div style={{position:'absolute',top:hasHat?3:0,left:2,width:6,height:5,background:'#1a0e04',borderRadius:'40%'}}/>
-    <div style={{position:'absolute',top:hasHat?7:4,left:1,width:8,height:sit?6:9,
-      background:'#120a02',borderRadius:'2px 2px 1px 1px'}}/>
-    {!sit&&<><div style={{position:'absolute',bottom:0,left:1,width:3,height:5,background:'#0e0802'}}/>
-      <div style={{position:'absolute',bottom:0,right:1,width:3,height:5,background:'#0e0802'}}/></>}
-    {hasWeapon&&<div style={{position:'absolute',top:hasHat?5:2,right:-2,width:2,height:14,
-      background:'#3a2808',borderRadius:1,transform:'rotate(15deg)'}}/>}
+function Figure({x,bottom=0,type='standing',hasWeapon=false,hasHat=true,facing='right',tone='home',zIndex=5}){
+  const sit=type==='sitting';
+  const h=sit?14:20;
+  const w=sit?12:10;
+  const flip=facing==='left'?'scaleX(-1)':'';
+  const motionClass=sit||tone==='solemn'||tone==='grief'?'tl-figure-solemn':'tl-figure-idle';
+  const spriteSrc=sit?GFX2.figure.sittingSolemn:(tone==='hostile'||hasWeapon&&tone==='battle-hostile')?GFX2.figure.hostileWarrior:(hasWeapon?GFX2.figure.homeWarrior:GFX2.figure.homeStanding);
+  const opacity=hasHat||hasWeapon||sit?1:0.94;
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:h,zIndex,transform:flip,opacity}}>
+    <div className={motionClass} style={{position:'absolute',inset:0,transformOrigin:'50% 100%'}}>
+      <img src={spriteSrc} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none',filter:tone==='hostile'||tone==='battle-hostile'?'drop-shadow(0 0 4px rgba(160,50,40,.12))':'drop-shadow(0 0 3px rgba(0,0,0,.15))'}}/>
+      {!hasHat&&!sit&&<div style={{position:'absolute',top:'10%',left:'26%',width:'48%',height:'28%',borderRadius:'50%',background:'rgba(18,10,6,.18)'}}/>}
+    </div>
   </div>;
 }
 
 /* ── Warrior Formation (sprite-ready group) ── */
-function WarriorLine({x,count=5,bottom=0,spread=12,facing='right',zIndex=5}){
+function WarriorLine({x,count=5,bottom=0,spread=12,facing='right',tone='home',zIndex=5}){
   return<>{Array.from({length:count},(_,i)=>(
     <Figure key={i} x={parseInt(x)+i*spread} bottom={bottom+(i%2)*2}
-      type='standing' hasWeapon={true} hasHat={i%3!==2} facing={facing} zIndex={zIndex}/>
+      type='standing' hasWeapon={true} hasHat={i%3!==2} facing={facing} tone={tone} zIndex={zIndex}/>
   ))}</>;
+}
+
+function CanoeCrewFigure({x,bottom=0,side='near',facing='right',zIndex=6,delay=0}){
+  const src=side==='near'?GFX2.figure.canoeNear:GFX2.figure.canoeFar;
+  const flip=facing==='left'?'scaleX(-1)':'';
+  const swingClass=side==='near'?'tl-row-port':'tl-row-star';
+  return <div className={swingClass} style={{position:'absolute',left:x,bottom,width:12,height:22,zIndex,transform:flip,animationDelay:delay+'s'}}>
+    <img src={src} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+function RoleFigure({role,x,bottom=0,facing='right',zIndex=6,animation='',transformOrigin='50% 100%',glow='',opacity=1}){
+  const roles={
+    ceremonialLeader:{src:GFX2.figure.ceremonialLeader,w:18,h:34},
+    canoeLeader:{src:GFX2.figure.canoeLeader,w:16,h:31},
+    canoeSteersman:{src:GFX2.figure.canoeSteersman,w:17,h:31},
+    elder:{src:GFX2.figure.homeElder,w:16,h:30},
+    hostileChampion:{src:GFX2.figure.hostileChampion,w:17,h:32},
+  };
+  const cfg=roles[role]||roles.elder;
+  const flip=facing==='left'?'scaleX(-1)':'';
+  const motion=animation?`${animation}, tl-role-poise 5.4s ease-in-out infinite`:'tl-role-poise 5.4s ease-in-out infinite';
+  return <div style={{position:'absolute',left:x,bottom,width:cfg.w,height:cfg.h,zIndex,transform:flip,opacity}}>
+    <div style={{position:'absolute',inset:0,animation:motion,transformOrigin}}>
+      <img src={cfg.src} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      {glow&&<div style={{position:'absolute',left:'-30%',top:'-10%',width:'160%',height:'115%',background:glow,pointerEvents:'none'}}/>}
+    </div>
+  </div>;
 }
 
 /* ── Gravel Beach Strip ── */
@@ -1305,70 +1413,40 @@ function BeachStrip({top,height=14,zIndex=4}){
 }
 
 /* ── Simple War Canoe (compact, for non-travel scenes; sprite-ready) ── */
-function SimpleCanoe({x,bottom,w=80,facing='right',rocking=true,damaged=false,zIndex=6}){
+function SimpleCanoe({x,bottom,w=80,facing='right',rocking=true,damaged=false,zIndex=6,hullScaleY=1,frameH=28,trimBottom=9,reflectionBottom=-3,depthBottom=-6}){
   const cls=rocking?'tl-canoe-rock':'';const flip=facing==='left'?'scaleX(-1)':'';
-  const bowW=Math.max(w*0.18,12),hullW=w-bowW*1.4,sternW=Math.max(w*0.12,8);
-  return<div className={cls} style={{position:'absolute',left:x,bottom,width:w,height:28,zIndex,transform:flip}}>
-    {/* hull body */}
-    <div style={{position:'absolute',bottom:0,left:bowW*0.6,width:hullW,height:12,
-      background:damaged?'linear-gradient(180deg,#3a1800,#2a0e00)':'linear-gradient(180deg,#5a2000 0%,#3a1400 60%,#2a0e00 100%)',
-      borderRadius:'2px 2px 8px 8px',border:'1px solid #6a2800',borderTop:'none',
-      boxShadow:'0 2px 8px rgba(0,0,0,.45)'}}/>
-    {/* gunwale */}
-    <div style={{position:'absolute',bottom:10,left:bowW*0.5,width:hullW+4,height:3,
-      background:'linear-gradient(90deg,#4a1a00,#7a3200,#4a1a00)',borderRadius:'2px 2px 0 0'}}/>
-    {/* hull decoration */}
-    <div style={{position:'absolute',bottom:5,left:bowW*0.6+4,width:hullW-8,height:1,
-      background:`linear-gradient(90deg,transparent,${P.gold}15,${P.gold}25,${P.gold}15,transparent)`}}/>
-    {/* bow — swept prow */}
-    <div style={{position:'absolute',bottom:4,left:0,width:bowW,height:bowW*1.3,zIndex:1}}>
-      <div style={{position:'absolute',bottom:0,left:3,width:bowW-3,height:bowW*1.1,
-        background:'linear-gradient(180deg,#3a1400,#4a1a00)',
-        clipPath:'polygon(35% 0%,65% 0%,100% 75%,100% 100%,0% 100%,0% 55%)'}}/>
-      <div style={{position:'absolute',top:0,left:bowW*0.2,width:bowW*0.5,height:bowW*0.4,
-        background:`radial-gradient(ellipse at 50% 40%,${P.gold}35,${P.cedar}50)`,
-        borderRadius:'40% 40% 25% 25%'}}/>
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:frameH,zIndex,transform:flip}}>
+    <div className={cls} style={{position:'absolute',inset:0,transformOrigin:'50% 70%'}}>
+      <img src={GFX2.canoeWarHull} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',transform:`scaleY(${hullScaleY})`,transformOrigin:'50% 100%',filter:'drop-shadow(0 2px 8px rgba(0,0,0,.45))',userSelect:'none',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',bottom:trimBottom,left:w*0.16,width:w*0.62,height:2,
+        background:`linear-gradient(90deg,transparent,${P.gold}08,rgba(255,220,170,.15),${P.gold}08,transparent)`,opacity:.7}}/>
     </div>
-    {/* stern */}
-    <div style={{position:'absolute',bottom:5,right:0,width:sternW,height:sternW*1.5,
-      background:'linear-gradient(180deg,#3a1400,#4a1a00)',
-      clipPath:'polygon(0% 55%,70% 0%,100% 0%,100% 100%,0% 100%)'}}/>
     {/* reflection */}
-    <div style={{position:'absolute',bottom:-3,left:bowW*0.6+2,width:hullW-4,height:4,
+    <div className="tl-wake-shimmer" style={{position:'absolute',bottom:reflectionBottom,left:w*0.22,width:w*0.56,height:4,
       background:'linear-gradient(180deg,rgba(60,30,0,.12),transparent)',filter:'blur(1px)',borderRadius:'0 0 4px 4px'}}/>
     {damaged&&<div style={{position:'absolute',bottom:2,left:w*0.4,width:w*0.15,height:4,
       background:'#1a0800',borderRadius:1,transform:'rotate(-8deg)'}}/>}
+    <div className="tl-water-depth" style={{position:'absolute',bottom:depthBottom,left:w*0.1,width:w*0.78,height:8,
+      background:'radial-gradient(ellipse,rgba(70,120,170,.12),transparent 72%)',animationDelay:'1.1s'}}/>
   </div>;
 }
 
 /* ── Ceremonial Pole (detailed, sprite-ready — prestige or memorial) ── */
 function CeremonialPole({x,h=55,bottom=0,gold=true,memorial=false,zIndex=6}){
-  const segments=Math.max(2,Math.floor(h/18));
-  const ac=memorial?P.red+'50':P.gold+'40';
-  const wd=memorial?'#1a0808':'#2a1a08';const wl=memorial?'#2a1010':'#3a2810';
-  return<div className="tl-pole-reveal" style={{position:'absolute',left:x,bottom,width:14,height:h,zIndex}}>
-    <div style={{position:'absolute',bottom:0,left:3,width:8,height:h,
-      background:`linear-gradient(180deg,${wl},${wd})`,borderRadius:'3px 3px 0 0',
-      boxShadow:'1px 0 3px rgba(0,0,0,.3)'}}/>
-    <div style={{position:'absolute',top:0,left:-2,width:18,height:14,
-      background:wl,borderRadius:'4px 4px 2px 2px',border:`1px solid ${wd}60`}}>
-      <div style={{position:'absolute',top:3,left:3,width:3,height:2,background:ac,borderRadius:'50%'}}/>
-      <div style={{position:'absolute',top:3,right:3,width:3,height:2,background:ac,borderRadius:'50%'}}/>
-      <div style={{position:'absolute',top:7,left:5,width:4,height:4,background:wd,borderRadius:'1px 1px 3px 3px'}}/>
-      <div style={{position:'absolute',top:1,left:-4,width:5,height:6,background:wl,borderRadius:'3px 0 0 2px',opacity:.7}}/>
-      <div style={{position:'absolute',top:1,right:-4,width:5,height:6,background:wl,borderRadius:'0 3px 2px 0',opacity:.7}}/>
-    </div>
-    {Array.from({length:segments-1},(_,i)=>{const sy=14+i*Math.floor((h-14)/segments);
-      return<div key={i} style={{position:'absolute',top:sy,left:0,width:14,height:12,background:i%2===0?wd:wl,borderRadius:1}}>
-        <div style={{position:'absolute',top:2,left:3,width:2.5,height:1.5,background:ac,borderRadius:'50%'}}/>
-        <div style={{position:'absolute',top:2,right:3,width:2.5,height:1.5,background:ac,borderRadius:'50%'}}/>
-        {i%2===0&&<div style={{position:'absolute',top:5,left:4,width:3,height:4,background:wd+'80',borderRadius:1}}/>}
-      </div>;})}
-    <div style={{position:'absolute',bottom:0,left:1,width:12,height:4,background:wd,borderRadius:'0 0 1px 1px'}}/>
+  return<div className="tl-pole-reveal" style={{position:'absolute',left:x,bottom,width:Math.max(16,Math.round(h*0.26)),height:h,zIndex}}>
+    <img src={memorial?GFX2.poleMemorial:GFX2.poleCeremonial} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 7px rgba(0,0,0,.38))',userSelect:'none',pointerEvents:'none'}}/>
     {gold&&!memorial&&<div style={{position:'absolute',top:-4,left:-6,width:26,height:h+8,
       background:`radial-gradient(ellipse at 50% 20%,${P.gold}06,transparent 60%)`,pointerEvents:'none'}}/>}
     {memorial&&<div style={{position:'absolute',top:-4,left:-6,width:26,height:h+8,
       background:`radial-gradient(ellipse at 50% 20%,${P.red}04,transparent 60%)`,pointerEvents:'none'}}/>}
+  </div>;
+}
+
+function HostileWatchPole({x,h=55,bottom=0,zIndex=6}){
+  return<div className="tl-pole-reveal" style={{position:'absolute',left:x,bottom,width:Math.max(16,Math.round(h*0.25)),height:h,zIndex}}>
+    <img src={GFX2.poleHostile} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 7px rgba(0,0,0,.4))',userSelect:'none',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',top:-3,left:-6,width:28,height:h+8,
+      background:`radial-gradient(ellipse at 50% 20%,${P.red}05,transparent 62%)`,pointerEvents:'none'}}/>
   </div>;
 }
 
@@ -1380,6 +1458,8 @@ function CeremonialFire({x,bottom,size='medium',zIndex=7,mood='warm'}){
   const inner=warm?'rgba(255,220,100,.5)':'rgba(220,180,160,.22)';
   const ember=warm?'rgba(200,80,20,.35)':'rgba(110,80,100,.22)';
   return<div style={{position:'absolute',left:x,bottom,width:sz.w*3,height:sz.h*3,zIndex,transform:'translateX(-50%)'}}>
+    <div className="tl-heat-haze" style={{position:'absolute',bottom:sz.h*0.15,left:'50%',transform:'translateX(-50%)',
+      width:sz.glow*0.6,height:sz.glow*0.9,background:`radial-gradient(ellipse,rgba(${warm?'220,140,80':'160,120,140'},.12) 0%,transparent 72%)`,filter:'blur(4px)'}}/>
     <div className="tl-fire" style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',
       width:sz.w,height:sz.h,
       background:`radial-gradient(ellipse at 50% 80%,${outer} 0%,rgba(255,100,20,.3) 40%,transparent 70%)`}}/>
@@ -1393,7 +1473,7 @@ function CeremonialFire({x,bottom,size='medium',zIndex=7,mood='warm'}){
       width:sz.glow,height:sz.glow*0.4,
       background:`radial-gradient(ellipse,rgba(${warm?'200,120,40':'120,90,110'},.2) 0%,transparent 70%)`}}/>
     {/* Ember bed */}
-    <div style={{position:'absolute',bottom:-1,left:'50%',transform:'translateX(-50%)',
+    <div className="tl-ember-pulse" style={{position:'absolute',bottom:-1,left:'50%',transform:'translateX(-50%)',
       width:sz.w*1.2,height:3,borderRadius:2,
       background:`radial-gradient(ellipse,${ember} 0%,rgba(120,40,10,.15) 60%,transparent 100%)`}}/>
   </div>;
@@ -1405,7 +1485,7 @@ function WitnessCluster({x,bottom=0,count=4,mood='neutral',zIndex=6}){
     dx:i*9-(count*4.5),type:i%3===0?'sitting':'standing',
     hat:i%2===0,h:i%3===0?12:17+Math.random()*3,
   })),[count]);
-  const tone=mood==='warm'?'#2a1a08':mood==='grief'?'#140808':'#1a1208';
+  const spriteSrc=GFX2.witness[mood]||GFX2.witness.neutral;
   const crowdClass=mood==='warm'?'tl-crowd-warm':mood==='grief'||mood==='solemn'?'tl-crowd-solemn':'tl-crowd-arrive';
   return<>{figs.map((f,i)=><div key={i} className={crowdClass} style={{
     position:'absolute',left:`calc(${x} + ${f.dx}px)`,bottom:bottom+(i%2)*2,
@@ -1413,13 +1493,7 @@ function WitnessCluster({x,bottom=0,count=4,mood='neutral',zIndex=6}){
     opacity:mood==='grief'?.55:mood==='solemn'?.7:1,
     animationDelay:(i*0.1)+'s',animationFillMode:'backwards',
   }}>
-    {f.hat&&<div style={{position:'absolute',top:0,left:0,width:8,height:3.5,
-      background:`linear-gradient(180deg,${tone},#0e0a04)`,clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>}
-    <div style={{position:'absolute',top:f.hat?3:0,left:1,width:6,height:4,background:tone,borderRadius:'40%'}}/>
-    <div style={{position:'absolute',top:f.hat?6:3,left:0,width:8,height:f.type==='sitting'?5:8,
-      background:`linear-gradient(180deg,${tone},#0c0804)`,borderRadius:'2px 2px 1px 1px'}}/>
-    {f.type==='standing'&&<><div style={{position:'absolute',bottom:0,left:0,width:3,height:4,background:'#0a0604'}}/>
-      <div style={{position:'absolute',bottom:0,right:0,width:3,height:4,background:'#0a0604'}}/></>}
+    <img src={spriteSrc} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'fill',userSelect:'none',pointerEvents:'none',filter:mood==='warm'?'drop-shadow(0 0 3px rgba(220,170,80,.12))':'none'}}/>
   </div>)}</>;
 }
 
@@ -1440,6 +1514,229 @@ function GoodsPile({x,bottom=0,size='medium',zIndex=5}){
   </div>;
 }
 
+function BattleShieldWall({x,bottom=0,w=76,zIndex=5,opacity=1}){
+  return <div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*0.44),zIndex,opacity}}>
+    <img src={GFX2.battleShieldWall} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 6px rgba(0,0,0,.35))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+function BattleBurningDebris({x,bottom=0,w=64,zIndex=5,smoke=true}){
+  return <div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*0.58),zIndex}}>
+    <img src={GFX2.battleBurningDebris} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 8px rgba(0,0,0,.38))',userSelect:'none',pointerEvents:'none'}}/>
+    {smoke&&<div className="tl-smoke" style={{position:'absolute',top:-Math.round(w*0.22),left:'46%',width:Math.max(4,Math.round(w*0.08)),height:Math.round(w*0.55),zIndex:zIndex+1,
+      background:'linear-gradient(180deg,transparent,rgba(120,100,80,.2))',animationDuration:'5.5s'}}/>}
+  </div>;
+}
+
+function BattleWeaponCache({x,bottom=0,w=46,zIndex=5,opacity=1}){
+  return <div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*0.56),zIndex,opacity}}>
+    <img src={GFX2.battleWeaponCache} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 5px rgba(0,0,0,.32))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+function HostileFrontage({x,bottom=0,w=80,zIndex=5,opacity=1}){
+  return <div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*0.38),zIndex,opacity}}>
+    <img src={GFX2.hostileFrontage} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 5px rgba(0,0,0,.34))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* ── Graphics 2.0 scene-layer helpers ── */
+function SceneLayer({zIndex=1,className='',style={},children}){
+  return <div className={className} style={{position:'absolute',zIndex,pointerEvents:'none',...style}}>{children}</div>;
+}
+
+function BeaconLights({right='10%',top=0,count=3,tone='warm',spread=2.5,zIndex=6}){
+  const cols=tone==='warm'?['220,180,80','210,150,70']:tone==='solemn'?['150,130,140','120,110,130']:['120,110,130','95,90,110'];
+  return<>{Array.from({length:count},(_,i)=><div key={i} className="tl-home-glow" style={{position:'absolute',right:`calc(${right} + ${i*spread}%)`,top:top+(i%2)*3,width:4,height:10,zIndex,
+    background:`linear-gradient(180deg,transparent,rgba(${cols[i%cols.length]},.6))`,animationDelay:(i*.5)+'s'}}/>)}</>;
+}
+
+function MemoryShore({top,left='3%',isBurning=false,zIndex=5,opacity=.5}){
+  return(
+    <SceneLayer zIndex={zIndex} style={{top,left,opacity}}>
+      <Longhouse x={0} w={28} h={10} bottom={0} smoke={true}/>
+      {isBurning&&<div className="tl-smoke" style={{position:'absolute',top:-12,left:'10%',width:4,height:26,zIndex:zIndex+1,opacity:.4,animationDelay:'1s'}}/>}
+      <div style={{position:'absolute',left:-10,top:-8,width:50,height:24,
+        background:'radial-gradient(ellipse,rgba(120,40,30,.08),transparent 72%)'}}/>
+    </SceneLayer>
+  );
+}
+
+function HomeShore({top,right='6%',waterH=80,mood='warm',zIndex=5}){
+  const warm=mood==='warm';
+  const solemn=mood==='solemn';
+  const witnessMood=warm?'warm':solemn?'solemn':'grief';
+  const witnessCount=warm?4:solemn?2:1;
+  const settlementOpacity=warm?1:solemn?.65:.42;
+  const glowColor=warm?'200,140,60':solemn?'130,120,130':'110,100,118';
+  return(
+    <>
+      <SceneLayer zIndex={zIndex} style={{top,right,opacity:settlementOpacity,width:110,height:54}}>
+        <Longhouse x={0} w={30} h={12} bottom={0} smoke={warm} fireGlow={warm||solemn}/>
+        <TotemPole x={72} h={24} bottom={1} zIndex={zIndex+1}/>
+        {(warm||solemn)&&<div className="tl-home-glow" style={{position:'absolute',right:18,top:8,width:40,height:18,zIndex:zIndex+1,
+          background:`radial-gradient(ellipse,rgba(${glowColor},.18) 0%,transparent 70%)`}}/>}
+        <BeaconLights right="6%" top={4} count={warm?4:solemn?2:1} tone={warm?'warm':solemn?'solemn':'grief'} zIndex={zIndex+1}/>
+      </SceneLayer>
+      <SceneLayer zIndex={zIndex+2} style={{left:'76%',bottom:waterH-2,width:54,height:18,opacity:warm?1:solemn?.7:.52}}>
+        <WitnessCluster x="26px" bottom={4} count={witnessCount} mood={witnessMood} zIndex={zIndex+3}/>
+      </SceneLayer>
+    </>
+  );
+}
+
+function WakeTrail({left='30%',bottom=0,width=60,strength='medium',zIndex=7}){
+  const scale=strength==='strong'?1:strength==='light'?.72:.86;
+  return(
+    <SceneLayer zIndex={zIndex} style={{left,bottom,width,height:5}}>
+      {[0,1,2].map(i=><div key={i} className="tl-wake-shimmer" style={{position:'absolute',top:i*1.5,left:-i*8,width:(35+i*10)*scale,height:1.5,
+        background:`linear-gradient(90deg,rgba(80,120,160,${(.18-i*.04)*scale}),transparent)`,borderRadius:1,
+        animation:'tl-wake 3.5s ease-out infinite',animationDelay:(i*0.5)+'s'}}/>) }
+    </SceneLayer>
+  );
+}
+
+function ReturnCanoe({left='28%',bottom=0,w=110,isWin=false,hasDead=false,damaged=false,zIndex=8,anim='tl-canoe-home 5.5s ease-in-out infinite'}){
+  const bowX=Math.round(w*0.14);
+  const crewPos=[0.24,0.38,0.51,0.64].map(n=>Math.round(w*n));
+  const sternX=Math.round(w*0.78);
+  const goodsA=Math.round(w*0.31);
+  const goodsB=Math.round(w*0.53);
+  const lossX=Math.round(w*0.47);
+  return(
+    <SceneLayer zIndex={zIndex} className="tl-canoe-rock" style={{left,bottom,animation:anim}}>
+      <SimpleCanoe x={0} bottom={0} w={w} damaged={damaged} hullScaleY={0.74} frameH={24} trimBottom={8} reflectionBottom={-2} depthBottom={-5}/>
+      {isWin&&<><GoodsPile x={goodsA} bottom={8} size="medium" zIndex={zIndex+1}/><GoodsPile x={goodsB} bottom={7} size="medium" zIndex={zIndex+1}/></>}
+      {hasDead&&<div style={{position:'absolute',bottom:13,left:lossX,width:Math.max(10,Math.round(w*0.1)),height:3,zIndex:zIndex+1,background:'linear-gradient(90deg,rgba(40,10,10,.4),rgba(10,6,8,.1))',borderRadius:2}}/>}
+      <RoleFigure role="canoeLeader" x={bowX-4} bottom={11} zIndex={zIndex+3} glow="radial-gradient(ellipse at 50% 30%,rgba(212,176,32,.06),transparent 70%)"/>
+      {crewPos.map((cx,i)=>{const isP=i%2===0;return <CanoeCrewFigure key={i} x={cx} bottom={isP?4:16} side={isP?'near':'far'} zIndex={isP?zIndex+2:zIndex+1} delay={i*0.06}/>;})}
+      <RoleFigure role="canoeSteersman" x={sternX-4} bottom={10} zIndex={zIndex+3}/>
+    </SceneLayer>
+  );
+}
+
+function TravelHeroCanoe({left='18%',bottom=32,width=260,crew,Paddler,CYCLE,zIndex=8}){
+  return(
+    <SceneLayer zIndex={zIndex} className="tl-canoe-rock" style={{left,bottom,width,height:78}}>
+      <div style={{position:'absolute',left:0,right:0,bottom:2,height:62,zIndex:8,overflow:'visible'}}>
+        <img src={GFX2.canoeWarHull} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'auto',transform:'scaleY(.62)',transformOrigin:'50% 100%',filter:'drop-shadow(0 4px 12px rgba(0,0,0,.42))',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      <div style={{position:'absolute',bottom:16,left:26,width:208,height:2,zIndex:9,
+        background:`linear-gradient(90deg,transparent 2%,${P.gold}10 12%,${P.gold}24 30%,${P.gold}34 50%,${P.gold}24 70%,${P.gold}10 88%,transparent 98%)`}}/>
+      <div style={{position:'absolute',bottom:4,left:30,width:198,height:8,zIndex:3,
+        background:'linear-gradient(180deg,rgba(80,40,0,.16) 0%,rgba(60,30,0,.06) 50%,transparent 100%)',filter:'blur(1.5px)',borderRadius:'0 0 6px 6px'}}/>
+      <div style={{position:'absolute',bottom:17,left:24,width:212,height:12,zIndex:9,
+        background:'radial-gradient(ellipse at 50% 100%,rgba(18,10,4,.16),transparent 72%)',pointerEvents:'none'}}/>
+
+      {crew.map((s,i)=><Paddler key={i} x={s.x} side={s.side} delay={s.delay}/>) }
+
+      {crew.map((s,i)=>{const isP=s.side==='p';return<div key={'wd'+i} style={{position:'absolute',
+        bottom:isP?-2:14,left:s.x+(isP?-1:8),width:10,height:4,zIndex:2,
+        background:`radial-gradient(ellipse,rgba(80,140,180,${isP?.14:.06}),transparent)`,borderRadius:'50%',
+        animation:`tl-paddle-splash ${CYCLE}s ease-in-out ${s.delay}s infinite`,
+      }}/>;})}
+
+      <RoleFigure role="ceremonialLeader" x={34} bottom={15} zIndex={zIndex+3} animation="tl-bless-sway 5s ease-in-out infinite" glow={`radial-gradient(ellipse at 50% 30%,${P.gold}08,transparent 70%)`} />
+      <RoleFigure role="canoeSteersman" x={208} bottom={13} zIndex={zIndex+3}/>
+
+      <div style={{position:'absolute',bottom:8,right:-55,width:85,height:12,zIndex:1}}>
+        {[0,1,2,3].map(i=>(<div key={i} className="tl-wake-shimmer" style={{
+          position:'absolute',top:i*2.8,left:0,width:50+i*12,height:2-i*0.3,
+          background:`linear-gradient(90deg,rgba(100,150,190,${.3-i*.06}),transparent)`,borderRadius:1,
+          animation:'tl-wake 3.2s ease-out infinite',animationDelay:(i*0.5)+'s',
+        }}/>))}
+      </div>
+
+      <div style={{position:'absolute',bottom:9,left:-8,width:16,height:12,zIndex:1}}>
+        <div style={{position:'absolute',bottom:2,left:0,width:12,height:6,background:'radial-gradient(ellipse,rgba(120,180,220,.2) 0%,transparent 70%)'}}/>
+        <div style={{position:'absolute',bottom:0,left:3,width:7,height:3,background:'radial-gradient(ellipse,rgba(200,220,240,.1) 0%,transparent 70%)',animation:'tl-water-shimmer 2s ease-in-out infinite'}}/>
+      </div>
+    </SceneLayer>
+  );
+}
+
+function VillageShoreGround({top,height,zIndex=4}){
+  return(
+    <SceneLayer zIndex={zIndex} style={{top,left:0,right:0,height,
+      background:'linear-gradient(180deg,#0c1a0c 0%,#0e1a08 30%,#141808 60%,#181a0c 100%)'}}>
+      {[5,12,20,30,42,55,65,78,88,95].map((x,i)=><div key={i} style={{position:'absolute',top:-3-(i%3)*2,left:x+'%',
+        width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
+        borderBottom:`${5+(i%2)*3}px solid #0c1a0c`}}/>) }
+    </SceneLayer>
+  );
+}
+
+function VillageSettlement({groundBottom,zIndex=5}){
+  return(
+    <>
+      <Longhouse x="10%" w={55} h={20} bottom={groundBottom-1} smoke={true} fireGlow={true} zIndex={zIndex}/>
+      <Longhouse x="36%" w={82} h={28} bottom={groundBottom} smoke={true} fireGlow={true} zIndex={zIndex}/>
+      <Longhouse x="78%" w={48} h={20} bottom={groundBottom-1} smoke={true} fireGlow={true} zIndex={zIndex}/>
+      <SceneLayer zIndex={zIndex+1} style={{bottom:groundBottom+10,left:'40%',width:72,height:3,
+        background:`linear-gradient(90deg,transparent,${P.gold}10,${P.gold}22,${P.gold}28,${P.gold}22,${P.gold}10,transparent)`}}/>
+      <CeremonialPole x="33%" h={52} bottom={groundBottom} zIndex={zIndex+2}/>
+      <CeremonialPole x="72%" h={42} bottom={groundBottom-1} zIndex={zIndex+2}/>
+      <TotemPole x="92%" h={30} bottom={groundBottom-1} zIndex={zIndex+1}/>
+      <SceneLayer zIndex={zIndex-1} className="tl-home-glow" style={{left:'42%',bottom:groundBottom-4,width:110,height:34,
+        background:'radial-gradient(ellipse,rgba(220,160,80,.1),transparent 72%)'}}/>
+    </>
+  );
+}
+
+function VillageCeremonyFront({groundBottom,zIndex=6}){
+  return(
+    <>
+      <CeremonialFire x="53%" bottom={groundBottom+2} size="medium" zIndex={zIndex+1}/>
+      <WitnessCluster x="48%" bottom={groundBottom+2} count={4} mood="warm" zIndex={zIndex}/>
+      <WitnessCluster x="62%" bottom={groundBottom+2} count={3} mood="neutral" zIndex={zIndex}/>
+      <RoleFigure role="ceremonialLeader" x="20%" bottom={groundBottom+2} zIndex={zIndex} glow={`radial-gradient(ellipse at 50% 40%,${P.gold}06,transparent 72%)`} />
+      <RoleFigure role="elder" x="74%" bottom={groundBottom+1} zIndex={zIndex} opacity={0.92}/>
+      <SceneLayer zIndex={zIndex-1} style={{left:'42%',bottom:groundBottom-2,width:70,height:28,
+        background:'radial-gradient(ellipse,rgba(220,170,80,.08),transparent 72%)'}}/>
+    </>
+  );
+}
+
+function BeachedCanoeDisplay({left='3%',bottom=0,w=72,zIndex=5}){
+  return(
+    <SceneLayer zIndex={zIndex} style={{left,bottom}}>
+      <SimpleCanoe x={0} bottom={0} w={w} rocking={false} zIndex={zIndex}/>
+      <div style={{position:'absolute',left:6,bottom:-2,width:w-10,height:6,
+        background:'linear-gradient(180deg,rgba(70,40,10,.16),transparent)',filter:'blur(1px)',borderRadius:'0 0 6px 6px'}}/>
+      <div style={{position:'absolute',left:8,bottom:8,width:w-18,height:1.5,
+        background:`linear-gradient(90deg,transparent,${P.gold}10,${P.gold}18,${P.gold}10,transparent)`}}/>
+    </SceneLayer>
+  );
+}
+
+function HostileShore({shoreBottom,zIndex=5}){
+  return(
+    <>
+      <HostileLonghouse x="60%" w={42} h={15} bottom={shoreBottom+2} smoke={true} emberGlow={true} zIndex={zIndex}/>
+      <HostileLonghouse x="78%" w={30} h={12} bottom={shoreBottom+1} smoke={true} zIndex={zIndex}/>
+      <HostileWatchPole x="56%" h={30} bottom={shoreBottom+1} zIndex={zIndex+1}/>
+      <HostileFrontage x="66%" w={62} bottom={shoreBottom+1} zIndex={zIndex}/>
+      <WarriorLine x={142} count={4} bottom={shoreBottom+2} spread={10} facing="left" tone="hostile" zIndex={zIndex+1}/>
+      <RoleFigure role="hostileChampion" x="56%" bottom={shoreBottom+1} facing="left" zIndex={zIndex+2} glow="radial-gradient(ellipse at 50% 40%,rgba(208,48,32,.08),transparent 72%)"/>
+      <SceneLayer zIndex={zIndex+1} style={{left:'54%',bottom:shoreBottom+8,width:102,height:30,
+        background:'radial-gradient(ellipse,rgba(130,40,30,.09),transparent 72%)'}}/>
+    </>
+  );
+}
+
+function ApproachWarCanoe({left='10%',bottom=0,zIndex=8}){
+  return(
+    <SceneLayer zIndex={zIndex} className="tl-canoe-rock" style={{left,bottom}}>
+      <SimpleCanoe x={0} bottom={0} w={110} rocking={false}/>
+      <RoleFigure role="canoeLeader" x={9} bottom={14} zIndex={zIndex+2}/>
+      {[22,40,56,72,86].map((cx,i)=>{const isP=i%2===0;return <CanoeCrewFigure key={i} x={cx} bottom={isP?6:22} side={isP?'near':'far'} zIndex={isP?zIndex+2:zIndex} delay={i*0.08}/>;})}
+      <RoleFigure role="canoeSteersman" x={92} bottom={13} zIndex={zIndex+2}/>
+      <SceneLayer zIndex={zIndex-1} style={{left:-8,bottom:-2,width:120,height:12,
+        background:'radial-gradient(ellipse,rgba(80,130,180,.16),transparent 72%)'}}/>
+    </SceneLayer>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    §11  PHASE SCENES — each uses shared building blocks above
    ═══════════════════════════════════════════════════════════════════════ */
@@ -1449,48 +1746,28 @@ function VillageScene({sceneH}){
   const H=sceneH||220,skyH=H*0.28,mtH=H*0.12,shoreH=H*0.08;
   const landTop=skyH+mtH+shoreH;const groundH=H*0.22;const waterH=H-landTop-groundH;
   const gb=waterH+groundH;
-  return<div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.village}}>
+  return<div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.village}}>
     <StarField count={22} region={28}/>
     <SceneMoon right="16%" top="5%" size={18}/>
     <MountainRange yTop={skyH-10} height={mtH+18} fill1="#0c0e20" fill2="#0e1228"/>
     <ForestLine yTop={skyH+mtH-14} height={shoreH+22} color="#0c1a10" altColor="#081408"/>
     <FogBand top={skyH+mtH-2} opacity={0.06} speed={16}/>
     <FogBand top={skyH+mtH+shoreH-4} opacity={0.04} delay={6} speed={20}/>
-    {/* Shore ground */}
-    <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,
-      background:'linear-gradient(180deg,#0c1a0c 0%,#0e1a08 30%,#141808 60%,#181a0c 100%)'}}>
-      {[5,12,20,30,42,55,65,78,88,95].map((x,i)=><div key={i} style={{position:'absolute',top:-3-(i%3)*2,left:x+'%',
-        width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
-        borderBottom:`${5+(i%2)*3}px solid #0c1a0c`}}/>)}
-    </div>
-    {/* ── Longhouses with carved frontage ── */}
-    <Longhouse x="10%" w={55} h={20} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>
-    <Longhouse x="36%" w={82} h={28} bottom={gb} smoke={true} fireGlow={true} zIndex={5}/>
-    <Longhouse x="78%" w={48} h={20} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>
-    {/* Carved band on main longhouse */}
-    <div style={{position:'absolute',bottom:gb+10,left:'40%',width:72,height:3,zIndex:6,
-      background:`linear-gradient(90deg,transparent,${P.gold}10,${P.gold}22,${P.gold}28,${P.gold}22,${P.gold}10,transparent)`}}/>
-    {/* ── Ceremonial Poles (prominent) ── */}
-    <CeremonialPole x="33%" h={52} bottom={gb} zIndex={7}/>
-    <CeremonialPole x="72%" h={42} bottom={gb-1} zIndex={7}/>
-    <TotemPole x="92%" h={30} bottom={gb-1} zIndex={6}/>
-    {/* ── Central Ceremonial Fire ── */}
-    <CeremonialFire x="53%" bottom={gb+2} size="medium" zIndex={7}/>
-    {/* ── Witness clusters around fire ── */}
-    <WitnessCluster x="48%" bottom={gb+2} count={4} mood="warm" zIndex={6}/>
-    <WitnessCluster x="62%" bottom={gb+2} count={3} mood="neutral" zIndex={6}/>
-    {/* Elder watching sea */}
-    <Figure x="22%" bottom={gb+2} type="standing" hasHat={true} hasWeapon={false} zIndex={6}/>
-    {/* ── Beached War Canoe ── */}
-    <SimpleCanoe x="3%" bottom={waterH-2} w={72} rocking={false} zIndex={5}/>
-    {/* Water */}
-    <div className="tl-water" style={{position:'absolute',bottom:0,left:0,right:0,height:waterH,zIndex:3}}>
-      <div className="tl-wave-1" style={{position:'absolute',top:3,left:'-50%',right:'-50%',height:2}}/>
-      <div className="tl-wave-2" style={{position:'absolute',top:10,left:'-50%',right:'-50%',height:1}}/>
-    </div>
+    <VillageShoreGround top={landTop} height={groundH} zIndex={4}/>
+    <VillageSettlement groundBottom={gb} zIndex={5}/>
+    <VillageCeremonyFront groundBottom={gb} zIndex={6}/>
+    <BeachedCanoeDisplay left="3%" bottom={waterH-2} w={72} zIndex={5}/>
+    <WaterBody top={landTop+groundH}
+      gradient="linear-gradient(180deg,#113053 0%,#0d2748 28%,#0a2140 58%,#081838 100%)"
+      waveCount={5} phosphorCount={2}/>
+    <SurfBand top={landTop+groundH-4} height={11} foam="226,214,188" undertow="120,150,180" intensity={0.72} zIndex={6}/>
+    <SceneLayer zIndex={4} style={{left:'6%',bottom:waterH+2,width:78,height:18,
+      background:'radial-gradient(ellipse,rgba(100,70,30,.08),transparent 72%)'}}/>
     {/* Fire warmth reflected on water */}
     <FireGlow x="50%" bottom={0} r={130} color="200,140,60" intensity={0.07} zIndex={2}/>
     <FireGlow x="53%" bottom={gb-4} r={55} intensity={0.2} zIndex={4}/>
+    <SceneLayer zIndex={9} style={{inset:0,
+      background:'linear-gradient(180deg,rgba(200,140,60,.03),transparent 24%,transparent 76%,rgba(200,140,60,.03))'}}/>
     <Vignette color="8,6,16" intensity={0.18} focus="52% 55%"/>
   </div>;
 }
@@ -1502,56 +1779,28 @@ function EncounterScene({sceneH}){
   return<div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.encounter}}>
     <StarField count={8} brightness="#a0a0c8" region={20}/>
     {/* Dawn glow on horizon */}
-    <div style={{position:'absolute',top:skyH-20,left:0,right:0,height:30,zIndex:1,
+    <SceneLayer zIndex={1} style={{top:skyH-20,left:0,right:0,height:30,
       background:'linear-gradient(180deg,transparent,rgba(120,40,30,.06),transparent)'}}/>
     <MountainRange yTop={skyH-8} height={mtH+14} fill1="#120c18" fill2="#0e0a14"/>
     <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#0c120e" altColor="#08100a"/>
-    {/* Cedar Creek settlement — visible across the water */}
-    <Longhouse x="62%" w={38} h={14} bottom={waterH+beachH+2} smoke={true} zIndex={5}/>
-    <Longhouse x="78%" w={28} h={12} bottom={waterH+beachH+1} smoke={true} zIndex={5}/>
-    <TotemPole x="58%" h={28} bottom={waterH+beachH+1} zIndex={5}/>
-    {/* Beach */}
+    <HostileShore shoreBottom={waterH+beachH} zIndex={5}/>
     <BeachStrip top={landTop} height={beachH} zIndex={4}/>
-    {/* Defender figures on beach */}
-    <WarriorLine x={Math.floor(H*0.62)} count={4} bottom={waterH+beachH+2} spread={10} facing="left" zIndex={6}/>
-    <Figure x="58%" bottom={waterH+beachH+2} type="standing" hasWeapon={false} hasHat={true} zIndex={6}/>
-    {/* Fog — tension */}
     <FogBand top={skyH+mtH} opacity={0.06} speed={16} color="160,140,140"/>
     <FogBand top={landTop+beachH-4} opacity={0.05} delay={4} speed={20} color="140,120,130"/>
-    {/* Water */}
+    <SceneLayer zIndex={5} style={{left:'58%',top:landTop-16,width:'34%',height:42,
+      background:'radial-gradient(ellipse,rgba(150,50,40,.08),transparent 72%)',filter:'blur(2px)'}}/>
     <WaterBody top={landTop+beachH}
       gradient="linear-gradient(180deg,#123058 0%,#0e2848 30%,#0a2040 60%,#081838 100%)"
-      waveCount={5}/>
-    {/* Your canoe approaching */}
-    <div className="tl-canoe-rock" style={{position:'absolute',bottom:waterH*0.25,left:'10%',zIndex:8}}>
-      <SimpleCanoe x={0} bottom={0} w={110} rocking={false}/>
-      {/* Bow figure — small standing silhouette at front */}
-      <div style={{position:'absolute',bottom:16,left:12,width:8,height:16,zIndex:10}}>
-        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#3a2a10',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
-        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1c1208',borderRadius:'40%'}}/>
-        <div style={{position:'absolute',top:6,left:0,width:8,height:7,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
-        <div style={{position:'absolute',top:3,left:-2,width:2,height:8,background:'#2a1c08',borderRadius:1,transform:'rotate(-10deg)'}}/>
-      </div>
-      {/* Alternating crew — port low, starboard high */}
-      {[22,40,56,72,86].map((cx,i)=>{const isP=i%2===0;return<div key={i} style={{position:'absolute',bottom:isP?6:22,left:cx,width:8,height:13,zIndex:isP?10:8}}>
-        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:isP?'#3a2a10':'#282010',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
-        <div style={{position:'absolute',top:3,left:1,width:6,height:3,background:isP?'#1c1208':'#120c04',borderRadius:'40%'}}/>
-        <div style={{position:'absolute',top:5,left:0,width:8,height:6,background:isP?'#160c04':'#0e0802',borderRadius:'2px 2px 0 0'}}/>
-        <div style={{position:'absolute',top:5,left:isP?-3:9,width:2,height:10,background:isP?'#4a3010':'#2a1c08',borderRadius:1,transform:`rotate(${isP?25:-25}deg)`}}/>
-      </div>;})}
-      {/* Stern steersman silhouette */}
-      <div style={{position:'absolute',bottom:14,left:94,width:8,height:16,zIndex:10}}>
-        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#3a2a10',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
-        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1c1208',borderRadius:'40%'}}/>
-        <div style={{position:'absolute',top:6,left:0,width:8,height:7,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
-        <div style={{position:'absolute',top:7,right:-3,width:2,height:12,background:'#3a2808',borderRadius:1,transform:'rotate(8deg)'}}/>
-      </div>
-    </div>
-    {/* Red tension atmosphere */}
+      waveCount={5} phosphorCount={2}/>
+    <SurfBand top={landTop+beachH-4} height={10} foam="214,224,236" undertow="96,132,174" intensity={0.84} zIndex={6}/>
+    <ApproachWarCanoe left="10%" bottom={waterH*0.25} zIndex={8}/>
+    <WakeTrail left="8%" bottom={waterH*0.22} width={72} strength="medium" zIndex={7}/>
     <div style={{position:'absolute',bottom:0,left:0,right:0,height:'40%',zIndex:9,pointerEvents:'none',
       background:'linear-gradient(180deg,transparent,rgba(140,20,10,.05))'}}/>
     <div style={{position:'absolute',top:0,left:0,right:0,height:'30%',zIndex:9,pointerEvents:'none',
       background:'linear-gradient(180deg,rgba(140,20,10,.04),transparent)'}}/>
+    <SceneLayer zIndex={9} style={{inset:0,
+      background:'linear-gradient(180deg,rgba(130,40,30,.03),transparent 26%,transparent 74%,rgba(130,40,30,.04))'}}/>
     <Vignette color="18,6,6" intensity={0.2}/>
   </div>;
 }
@@ -1561,31 +1810,50 @@ function BattleScene({sceneH,G}){
   const H=sceneH||220;const groundTop=Math.floor(H*0.45);const groundH=H-groundTop;
   const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY');
   const isLoss=G&&(G.outcome==='DEFEAT'||G.outcome==='DEVASTATING_DEFEAT');
+  const isStale=G&&G.outcome==='STALEMATE';
   const shockColor=isWin?'96,190,96':isLoss?'190,64,64':'220,140,60';
   const surgeShift=isWin?10:isLoss?-10:0;
-  return<div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.battle}}>
-    <div style={{position:'absolute',top:0,left:0,right:0,height:H*0.25,zIndex:1,
+  return<div className="tl-scene-pressure" style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.battle}}>
+    <SceneLayer zIndex={1} style={{top:0,left:0,right:0,height:H*0.25,
       background:'linear-gradient(180deg,rgba(40,8,8,.45),transparent)'}}/>
     <ForestLine yTop={H*0.25} height={40} color="#0e0808" altColor="#120a08" density={60} speed="far"/>
-    <div style={{position:'absolute',top:H*0.28,right:'20%',width:36,height:18,
-      background:'#1a0a04',border:'1px solid #2a1408',zIndex:5}}>
-      <div className="tl-fire" style={{position:'absolute',top:-10,left:'25%',width:12,height:14,
-        background:'radial-gradient(ellipse,rgba(255,120,30,.5) 0%,transparent 70%)',zIndex:6}}/>
-    </div>
-    <div className="tl-smoke" style={{position:'absolute',top:H*0.14,right:'22%',width:6,height:44,zIndex:7,
+    <SceneLayer zIndex={4} style={{right:'7%',top:H*0.22,width:118,height:66,opacity:isWin?0.48:0.74}}>
+      <HostileLonghouse x="22%" w={58} h={22} bottom={8} smoke={true} emberGlow={!isWin} zIndex={4}/>
+      <HostileWatchPole x="8%" h={42} bottom={8} zIndex={5}/>
+      <HostileFrontage x="36%" w={72} bottom={6} zIndex={4}/>
+    </SceneLayer>
+    <SceneLayer zIndex={5} style={{top:H*0.24,right:'18%',width:76,height:44,opacity:isLoss?1:isWin?0.72:0.86}}>
+      <BattleBurningDebris x={0} bottom={0} w={76} zIndex={5} smoke={false}/>
+      <div className="tl-fire" style={{position:'absolute',top:2,left:'34%',width:16,height:18,
+        background:'radial-gradient(ellipse,rgba(255,120,30,.55) 0%,transparent 70%)',zIndex:6}}/>
+    </SceneLayer>
+    <SceneLayer zIndex={5} style={{top:H*0.31,left:'9%',width:90,height:40,opacity:isWin?0.7:0.88}}>
+      <BattleShieldWall x={0} bottom={0} w={90} zIndex={5}/>
+    </SceneLayer>
+    <SceneLayer zIndex={5} style={{top:H*0.37,left:'71%',width:48,height:24,opacity:isStale?0.72:isLoss?0.92:0.6}}>
+      <BattleWeaponCache x={0} bottom={0} w={48} zIndex={5}/>
+    </SceneLayer>
+    <div className="tl-smoke" style={{position:'absolute',top:H*0.12,right:'22%',width:6,height:48,zIndex:7,
       background:'linear-gradient(180deg,transparent,rgba(120,100,80,.2))',animationDuration:'5s'}}/>
     <div className="tl-smoke" style={{position:'absolute',top:H*0.18,left:'45%',width:5,height:38,zIndex:7,
       background:'linear-gradient(180deg,transparent,rgba(120,100,80,.15))',animationDelay:'2s',animationDuration:'6s'}}/>
     <div className="tl-smoke" style={{position:'absolute',top:H*0.22,left:'30%',width:4,height:30,zIndex:7,
       background:'linear-gradient(180deg,transparent,rgba(100,80,60,.12))',animationDelay:'3.5s',animationDuration:'5.5s'}}/>
     <BeachStrip top={groundTop} height={groundH} zIndex={4}/>
+    <SurfBand top={groundTop-3} height={8} foam="210,190,172" undertow="130,100,88" intensity={0.52} zIndex={5}/>
+    <SceneLayer zIndex={5} style={{left:'39%',bottom:groundH-5,width:64,height:34,opacity:isLoss?1:0.9}}>
+      <BattleBurningDebris x={0} bottom={0} w={64} zIndex={5}/>
+    </SceneLayer>
+    <SceneLayer zIndex={5} style={{left:'14%',bottom:groundH-2,width:46,height:22,opacity:isWin?0.95:0.7}}>
+      <BattleWeaponCache x={0} bottom={0} w={46} zIndex={5}/>
+    </SceneLayer>
     <div className="tl-battle-surge-left" style={{position:'absolute',left:0,right:'48%',top:groundTop-10,bottom:0,zIndex:5,transform:`translateX(${Math.max(surgeShift,0)}px)`}}>
-      <WarriorLine x={20} count={6} bottom={groundH-8} spread={14} facing="right" zIndex={6}/>
-      <Figure x="23%" bottom={groundH-5} type="standing" hasWeapon={true} hasHat={true} zIndex={7}/>
+      <WarriorLine x={20} count={6} bottom={groundH-8} spread={14} facing="right" tone="home" zIndex={6}/>
+      <RoleFigure role="ceremonialLeader" x="22%" bottom={groundH-6} zIndex={7} opacity={0.94}/>
     </div>
     <div className="tl-battle-surge-right" style={{position:'absolute',left:'49%',right:0,top:groundTop-10,bottom:0,zIndex:5,transform:`translateX(${Math.min(surgeShift,0)}px)`}}>
-      <WarriorLine x={220} count={5} bottom={groundH-6} spread={13} facing="left" zIndex={6}/>
-      <Figure x="70%" bottom={groundH-6} type="standing" hasWeapon={true} hasHat={true} facing="left" zIndex={7}/>
+      <WarriorLine x={220} count={5} bottom={groundH-6} spread={13} facing="left" tone="hostile" zIndex={6}/>
+      <RoleFigure role="hostileChampion" x="69%" bottom={groundH-7} facing="left" zIndex={7} glow="radial-gradient(ellipse at 50% 40%,rgba(208,48,32,.06),transparent 70%)"/>
     </div>
     <div className="tl-battle-throb" style={{position:'absolute',left:'49%',top:'47%',width:70,height:38,zIndex:7,transform:'translate(-50%,-50%)',
       background:'radial-gradient(ellipse,rgba(255,110,40,.28) 0%,rgba(255,110,40,.08) 45%,transparent 75%)'}}/>
@@ -1601,9 +1869,9 @@ function BattleScene({sceneH,G}){
     <FireGlow x="48%" bottom={groundH-20} r={80} color="200,60,20" intensity={0.12} zIndex={3}/>
     <FogBand top={H*0.35} opacity={0.1} speed={10} color="140,100,80" height={24}/>
     <FogBand top={H*0.55} opacity={0.07} delay={3} speed={14} color="120,90,70" height={18}/>
-    <div style={{position:'absolute',left:0,top:'34%',bottom:'18%',width:'32%',zIndex:4,pointerEvents:'none',
+    <SceneLayer zIndex={4} style={{left:0,top:'34%',bottom:'18%',width:'32%',
       background:isWin?'linear-gradient(90deg,rgba(70,140,70,.1),transparent)':'linear-gradient(90deg,rgba(120,30,20,.08),transparent)'}}/>
-    <div style={{position:'absolute',right:0,top:'32%',bottom:'16%',width:'34%',zIndex:4,pointerEvents:'none',
+    <SceneLayer zIndex={4} style={{right:0,top:'32%',bottom:'16%',width:'34%',
       background:isLoss?'linear-gradient(270deg,rgba(160,40,30,.12),transparent)':'linear-gradient(270deg,rgba(120,50,30,.08),transparent)'}}/>
     <div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
       background:'radial-gradient(ellipse at 48% 46%,rgba(180,30,10,.08),transparent 55%)',
@@ -1619,71 +1887,39 @@ function WithdrawalScene({G,sceneH}){
   const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY');
   const isStale=G&&G.outcome==='STALEMATE';
   const hasDead=G&&G.crewKilled>0;
-  return<div style={{height:H,position:'relative',overflow:'hidden',
+  const shoreMood=isWin?'warm':isStale?'solemn':'grief';
+  return<div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',
     background:SCENE_SKY.withdrawal}}>
     <StarField count={10} brightness="#a0a0c0" region={22}/>
     <MountainRange yTop={skyH-6} height={mtH+12} fill1="#0a0e18" fill2="#0c1020"/>
     <ForestLine yTop={skyH+mtH-10} height={shoreH+16} color="#0a140e" altColor="#081008"/>
-    {/* Fading Cedar Creek behind (left) */}
-    <div style={{position:'absolute',top:skyH+mtH+2,left:'3%',zIndex:5,opacity:0.5}}>
-      <Longhouse x={0} w={28} h={10} bottom={0} smoke={true}/>
-    </div>
-    {isWin&&<div className="tl-smoke" style={{position:'absolute',top:skyH+mtH-10,left:'6%',width:4,height:26,
-      zIndex:6,opacity:0.4,animationDelay:'1s'}}/>}
-    <div style={{position:'absolute',top:skyH+mtH-2,right:'6%',zIndex:5,opacity:isWin?1:isStale?.6:.42}}>
-      <Longhouse x={0} w={30} h={12} bottom={0} smoke={isWin} fireGlow={isWin||isStale}/>
-    </div>
-    <TotemPole x="90%" h={24} bottom={waterH+1} zIndex={6}/>
-    {(isWin||isStale)&&<div className="tl-home-glow" style={{position:'absolute',right:'10%',top:waterTop+8,width:40,height:18,zIndex:6,
-      background:`radial-gradient(ellipse,rgba(${isWin?'200,140,60':'130,120,130'},.18) 0%,transparent 70%)`}}/>}
-    {Array.from({length:isWin?4:isStale?2:1},(_,i)=><div key={i} className="tl-home-glow" style={{position:'absolute',right:`${12+i*2.5}%`,top:waterTop-4+(i%2)*3,width:4,height:10,zIndex:6,
-      background:`linear-gradient(180deg,transparent,rgba(${isWin?'220,180,80':'150,130,140'},.6))`,animationDelay:(i*.5)+'s'}}/>)}
+    <MemoryShore top={skyH+mtH+2} left="3%" isBurning={!!isWin} zIndex={5} opacity={0.5}/>
+    <HomeShore top={skyH+mtH-2} right="6%" waterH={waterH} mood={shoreMood} zIndex={5}/>
     <FogBand top={skyH+mtH-2} opacity={0.08} speed={18}/>
     <FogBand top={waterTop+waterH*0.3} opacity={0.05} delay={5} speed={22}/>
+    <SceneLayer zIndex={6} style={{top:waterTop-10,left:'54%',right:'8%',height:36,
+      background:isWin?'linear-gradient(90deg,transparent,rgba(200,150,70,.05),rgba(200,150,70,.09),transparent)'
+        :isStale?'linear-gradient(90deg,transparent,rgba(120,120,150,.05),rgba(120,120,150,.08),transparent)'
+        :'linear-gradient(90deg,transparent,rgba(90,90,120,.04),rgba(90,90,120,.07),transparent)',
+      filter:'blur(4px)'}}/>
     {/* Water */}
     <WaterBody top={waterTop}
       gradient="linear-gradient(180deg,#123058 0%,#0e2848 25%,#0a2040 55%,#081838 100%)"
       waveCount={7} phosphorCount={8}/>
-    {/* Canoe heading home */}
-    <div className="tl-canoe-rock" style={{position:'absolute',bottom:waterH*0.3,left:'28%',zIndex:8,animation:'tl-canoe-home 5.5s ease-in-out infinite'}}>
-      <SimpleCanoe x={0} bottom={0} w={110} damaged={G&&G.canoeCondition<50}/>
-      {isWin&&<><GoodsPile x={34} bottom={10} size="medium" zIndex={9}/><GoodsPile x={58} bottom={9} size="medium" zIndex={9}/></>}
-      {hasDead&&<div style={{position:'absolute',bottom:16,left:52,width:10,height:3,zIndex:9,background:'linear-gradient(90deg,rgba(40,10,10,.4),rgba(10,6,8,.1))',borderRadius:2}}/>}
-      {/* Bow figure */}
-      <div style={{position:'absolute',bottom:16,left:12,width:8,height:14,zIndex:10}}>
-        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#342410',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
-        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1a0e04',borderRadius:'40%'}}/>
-        <div style={{position:'absolute',top:6,left:0,width:8,height:6,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
-        <div style={{position:'absolute',top:3,left:-2,width:2,height:8,background:'#2a1c08',borderRadius:1,transform:'rotate(-10deg)'}}/>
-      </div>
-      {/* Alternating crew */}
-      {[22,38,54,68].map((cx,i)=>{const isP=i%2===0;return<div key={i} style={{position:'absolute',bottom:isP?6:22,left:cx,width:8,height:12,zIndex:isP?10:8}}>
-        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#342410',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
-        <div style={{position:'absolute',top:3,left:1,width:6,height:3,background:'#1a0e04',borderRadius:'40%'}}/>
-        <div style={{position:'absolute',top:5,left:0,width:8,height:5,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
-        <div style={{position:'absolute',top:5,left:isP?-3:9,width:2,height:9,background:isP?'#3a2810':'#2a1c08',borderRadius:1,transform:`rotate(${isP?25:-25}deg)`}}/>
-      </div>;})}
-      {/* Stern steersman */}
-      <div style={{position:'absolute',bottom:14,left:84,width:8,height:15,zIndex:10}}>
-        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#342410',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
-        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1a0e04',borderRadius:'40%'}}/>
-        <div style={{position:'absolute',top:6,left:0,width:8,height:6,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
-        <div style={{position:'absolute',top:7,right:-3,width:2,height:10,background:'#3a2808',borderRadius:1,transform:'rotate(8deg)'}}/>
-      </div>
-    </div>
-    {/* Wake trail */}
-    <div style={{position:'absolute',bottom:waterH*0.28,left:'30%',width:60,height:4,zIndex:7}}>
-      {[0,1,2].map(i=><div key={i} style={{position:'absolute',top:i*1.5,left:-i*8,width:35+i*10,height:1.5,
-        background:`linear-gradient(90deg,rgba(80,120,160,${.15-i*.04}),transparent)`,borderRadius:1,
-        animation:'tl-wake 3.5s ease-out infinite',animationDelay:(i*0.5)+'s',
-      }}/>)}
-    </div>
-    <div style={{position:'absolute',left:'76%',bottom:waterH-2,width:48,height:18,zIndex:7,opacity:isWin?1:isStale?.65:.5}}>
-      <WitnessCluster x="24px" bottom={4} count={isWin?4:isStale?2:1} mood={isWin?'warm':hasDead?'grief':'solemn'} zIndex={8}/>
-    </div>
+    <SurfBand top={waterTop-4} height={10} foam={isWin?'230,220,194':isStale?'196,198,220':'182,186,208'} undertow={isWin?'124,152,184':isStale?'104,118,160':'92,108,146'} intensity={isWin?0.88:isStale?0.66:0.54} zIndex={6}/>
+    <WakeTrail left="30%" bottom={waterH*0.28} width={60} strength={isWin?'strong':isStale?'medium':'light'} zIndex={7}/>
+    <ReturnCanoe left="28%" bottom={waterH*0.3} isWin={!!isWin} hasDead={!!hasDead} damaged={!!(G&&G.canoeCondition<50)} zIndex={8}/>
+    <SceneLayer zIndex={8} style={{left:'24%',bottom:waterH*0.3+18,width:120,height:26,
+      background:isWin?'radial-gradient(ellipse,rgba(220,170,80,.08),transparent 72%)'
+        :isStale?'radial-gradient(ellipse,rgba(140,130,150,.06),transparent 72%)'
+        :'radial-gradient(ellipse,rgba(80,70,100,.05),transparent 72%)'}}/>
     {/* Foreground darkening */}
     <div style={{position:'absolute',bottom:0,left:0,right:0,height:waterH*0.25,zIndex:9,pointerEvents:'none',
       background:'linear-gradient(180deg,transparent,rgba(4,8,18,.25))'}}/>
+    <SceneLayer zIndex={9} style={{inset:0,
+      background:isWin?'linear-gradient(180deg,rgba(200,140,60,.04),transparent 28%,transparent 70%,rgba(200,140,60,.03))'
+        :isStale?'linear-gradient(180deg,rgba(110,110,140,.04),transparent 30%,transparent 68%,rgba(110,110,140,.05))'
+        :'linear-gradient(180deg,rgba(16,12,26,.08),transparent 32%,transparent 64%,rgba(12,10,22,.12))'}}/>
     <Vignette color="6,8,16" intensity={0.2} focus="55% 45%"/>
   </div>;
 }
@@ -1704,16 +1940,17 @@ function AftermathScene({G,sceneH}){
   const fireSize=ci>=3?'large':ci>=1?'medium':'small';
   const crowdN=ci>=3?8:ci>=2?6:ci>=1?4:isDef?2:1;
   const crowdMood=ci>=2?'warm':ci<=0?(hasDead?'grief':'solemn'):'neutral';
+  const shoreMood=ci>=2?'warm':ci>=1?'solemn':hasDead?'grief':'solemn';
   const skyGrad=isWin?SCENE_SKY.aftermath_w:SCENE_SKY.aftermath_l;
   const starBright=isWin?'#c0c0e8':isDev?'#606070':'#808098';
-  return<div style={{height:H,position:'relative',overflow:'hidden',background:skyGrad}}>
+  return<div className={isWin?'tl-scene-arrival':''} style={{height:H,position:'relative',overflow:'hidden',background:skyGrad}}>
     <StarField count={isWin?24:isDev?6:12} brightness={starBright} region={28}/>
     {isWin&&<SceneMoon right="12%" top="4%" size={16}/>}
     <MountainRange yTop={skyH-8} height={mtH+14} fill1="#0c0e1a" fill2="#0e1020"/>
     <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#0c1a10" altColor="#081408"/>
     <FogBand top={skyH+mtH-2} opacity={isWin?0.04:0.07} speed={18}/>
     {isDev&&<FogBand top={skyH+mtH+shoreH} opacity={0.08} speed={22} color="100,90,100"/>}
-    {isWin&&<div className="tl-home-glow" style={{position:'absolute',left:'36%',top:skyH+mtH+4,width:120,height:40,zIndex:2,
+    {isWin&&<SceneLayer zIndex={2} className="tl-home-glow" style={{left:'36%',top:skyH+mtH+4,width:120,height:40,
       background:'radial-gradient(ellipse,rgba(210,150,70,.08),transparent 70%)'}}/>}
     {/* Shore ground */}
     <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,
@@ -1726,7 +1963,7 @@ function AftermathScene({G,sceneH}){
     <Longhouse x="14%" w={56} h={22} bottom={gb-1} smoke={true} fireGlow={ci>=1} zIndex={5}/>
     <Longhouse x="46%" w={74} h={26} bottom={gb} smoke={true} fireGlow={ci>=1} zIndex={5}/>
     {ci>=2&&<Longhouse x="82%" w={44} h={18} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>}
-    {ci>=2&&<div className="tl-home-glow" style={{position:'absolute',left:'46%',bottom:gb-2,width:100,height:34,zIndex:4,
+    {ci>=2&&<SceneLayer zIndex={4} className="tl-home-glow" style={{left:'46%',bottom:gb-2,width:100,height:34,
       background:'radial-gradient(ellipse,rgba(220,160,80,.12),transparent 72%)'}}/>}
     {/* Carved frontage on main longhouse (victory ceremony) */}
     {isWin&&<div style={{position:'absolute',bottom:gb+8,left:'50%',width:64,height:3,zIndex:6,
@@ -1744,6 +1981,8 @@ function AftermathScene({G,sceneH}){
     {hasDead&&<CeremonialPole x={isWin?"90%":"32%"} h={32} bottom={gb} gold={false} memorial={true} zIndex={7}/>}
     {/* ── Central Ceremonial Fire (ceremony warmth) ── */}
     <CeremonialFire x="55%" bottom={gb+2} size={fireSize} zIndex={7} mood={hasDead&&!isWin?'grief':'warm'}/>
+    {ci>=2&&<RoleFigure role="ceremonialLeader" x="51%" bottom={gb+4} zIndex={7} glow={`radial-gradient(ellipse at 50% 35%,${P.gold}06,transparent 72%)`} />}
+    {(ci>=1||hasDead)&&<RoleFigure role="elder" x={hasDead&&!isWin?'28%':'73%'} bottom={gb+2} zIndex={6} opacity={ci>=2?0.95:0.88}/>} 
     {/* Small secondary fire for victory feast */}
     {isDecisive&&<CeremonialFire x="35%" bottom={gb+1} size="small" zIndex={7} mood="warm"/>}
     {/* ── Witness Clusters — village gathering ── */}
@@ -1752,42 +1991,38 @@ function AftermathScene({G,sceneH}){
     {ci>=3&&<WitnessCluster x="36%" bottom={gb+2} count={4} mood="warm" zIndex={6}/>}
     {ci>=2&&<WitnessCluster x="84%" bottom={gb+1} count={2} mood={isWin?'warm':'neutral'} zIndex={6}/>}
     {/* Solitary mourner near memorial (defeat + dead) */}
-    {!isWin&&hasDead&&<Figure x="30%" bottom={gb+2} type="sitting" hasHat={false} hasWeapon={false} zIndex={6}/>}
+    {!isWin&&hasDead&&<Figure x="30%" bottom={gb+2} type="sitting" hasHat={false} hasWeapon={false} tone="home" zIndex={6}/>}
     {/* ── Goods / Offerings displayed (prestige / generosity) ── */}
     {isDecisive&&<><GoodsPile x="58%" bottom={gb+2} size="large" zIndex={5}/>
       <GoodsPile x="44%" bottom={gb+1} size="medium" zIndex={5}/></>}
     {isWin&&!isDecisive&&<GoodsPile x="61%" bottom={gb+1} size="medium" zIndex={5}/>}
     {(isWin&&G.cargo>25)&&<GoodsPile x="71%" bottom={gb+1} size="medium" zIndex={5}/>} 
     {/* ── Homecoming Canoe at the shallows ── */}
-    <div style={{position:'absolute',left:'4%',bottom:waterH-2,zIndex:6,animation:'tl-canoe-home 6s ease-in-out infinite'}}>
-      <SimpleCanoe x={0} bottom={0} w={82} rocking={true} damaged={isDev||isDef}/>
-      {isWin&&<><GoodsPile x={18} bottom={8} size="medium" zIndex={7}/><GoodsPile x={42} bottom={7} size="medium" zIndex={7}/></>}
-      {hasDead&&<div style={{position:'absolute',left:44,bottom:14,width:14,height:3,borderRadius:2,background:'linear-gradient(90deg,rgba(40,12,12,.45),rgba(10,8,10,.05))',zIndex:7}}/>}
-    </div>
-    <div style={{position:'absolute',left:'23%',bottom:waterH+2,width:64,height:16,zIndex:6}}>
-      <WitnessCluster x="28px" bottom={1} count={isWin?4:isStale?2:1} mood={isWin?'warm':hasDead?'grief':'solemn'} zIndex={7}/>
-    </div>
+    <ReturnCanoe left="4%" bottom={waterH-2} w={82} isWin={!!isWin} hasDead={!!hasDead} damaged={!!(isDev||isDef)} zIndex={6} anim="tl-canoe-home 6s ease-in-out infinite"/>
+    <SceneLayer zIndex={6} style={{left:'23%',bottom:waterH+2,width:64,height:16,opacity:ci>=2?1:ci===1?.72:.58}}>
+      <WitnessCluster x="28px" bottom={1} count={isWin?4:isStale?2:1} mood={shoreMood} zIndex={7}/>
+    </SceneLayer>
     {/* Water */}
-    <div className="tl-water" style={{position:'absolute',bottom:0,left:0,right:0,height:waterH,zIndex:3}}>
-      <div className="tl-wave-1" style={{position:'absolute',top:3,left:'-50%',right:'-50%',height:2}}/>
-      <div className="tl-wave-2" style={{position:'absolute',top:10,left:'-50%',right:'-50%',height:1}}/>
-    </div>
-    {isWin&&<div style={{position:'absolute',left:'12%',bottom:waterH-1,width:80,height:6,zIndex:5}}>
-      {[0,1,2].map(i=><div key={i} style={{position:'absolute',top:i*1.2,left:-i*5,width:38+i*10,height:1.5,
-        background:`linear-gradient(90deg,rgba(120,170,210,${.2-i*.05}),transparent)`,borderRadius:1,
-        animation:'tl-wake 3.8s ease-out infinite',animationDelay:(i*.4)+'s'}}/>) }
-    </div>}
+    <WaterBody top={landTop+groundH}
+      gradient="linear-gradient(180deg,#123058 0%,#0f2a4a 25%,#0a2242 55%,#081838 100%)"
+      waveCount={6} phosphorCount={isWin?3:0}/>
+    <SurfBand top={landTop+groundH-4} height={10} foam={isWin?'228,216,190':ci===1?'198,202,218':'184,188,204'} undertow={isWin?'126,156,188':ci===1?'108,124,160':'96,108,144'} intensity={isWin?0.84:ci===1?0.62:0.5} zIndex={5}/>
+    {isWin&&<WakeTrail left="12%" bottom={waterH-1} width={80} strength="strong" zIndex={5}/>} 
     {/* ── Atmospheric ceremony warmth / cold ── */}
     {ci>=2&&<FireGlow x="55%" bottom={0} r={120} color="200,140,60" intensity={0.07} zIndex={2}/>}
     <FireGlow x="55%" bottom={gb-4} r={ci>=2?65:35} color={isWin?"200,140,60":"140,100,80"} intensity={ci>=2?0.22:0.1} zIndex={4}/>
     {/* Victory warm overlay */}
-    {isDecisive&&<div className="tl-ceremony-glow" style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
+    {isDecisive&&<SceneLayer zIndex={9} className="tl-ceremony-glow" style={{inset:0,
       background:'radial-gradient(ellipse at 55% 65%,rgba(200,140,40,.04),transparent 50%)'}}/>}
     {/* Grief / cold overlay (defeat) */}
-    {isDev&&<div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
+    {isDev&&<SceneLayer zIndex={9} style={{inset:0,
       background:'linear-gradient(180deg,rgba(10,4,18,.15),transparent 40%,transparent 60%,rgba(10,4,18,.2))'}}/>}
-    {isDef&&<div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
+    {isDef&&<SceneLayer zIndex={9} style={{inset:0,
       background:'linear-gradient(180deg,rgba(8,4,14,.08),transparent 30%,transparent 70%,rgba(8,4,14,.1))'}}/>}
+    <SceneLayer zIndex={9} style={{inset:0,
+      background:ci>=2?'linear-gradient(180deg,rgba(200,140,60,.03),transparent 24%,transparent 76%,rgba(200,140,60,.03))'
+        :ci===1?'linear-gradient(180deg,rgba(120,120,150,.03),transparent 28%,transparent 72%,rgba(120,120,150,.04))'
+        :'linear-gradient(180deg,rgba(12,10,24,.05),transparent 30%,transparent 68%,rgba(12,10,24,.08))'}}/>
     <Vignette color={isWin?"8,6,16":"6,4,10"} intensity={isWin?0.18:isDev?0.35:0.25} focus="55% 55%"/>
   </div>;
 }
@@ -1812,9 +2047,9 @@ function TravelScene({sceneH}){
     for(let i=0;i<8;i++){
       const isP=i%2===0;
       seats.push({
-        x:52+i*18,                 // generous 18px spacing along hull
+        x:42+i*22,
         side:isP?'p':'s',
-        delay:isP?0:CYCLE*0.5,     // port group together, starboard half-cycle offset
+        delay:i*0.05,
       });
     }
     return seats;
@@ -1823,14 +2058,10 @@ function TravelScene({sceneH}){
   /* ── Paddler silhouette — exaggerated port/starboard lateral offset ── */
   const Paddler=({x,side,delay})=>{
     const isP=side==='p';
-    /* Port paddlers: bottom-10 (near viewer, well below gunwale)
-       Starboard:     bottom+14 (far side, well above gunwale)
-       This 24px vertical gap creates unmistakable zigzag at any scale */
-    const yOff=isP?-10:14;
+     const yOff=isP?4:17;
     const bodyAnim=isP?'tl-row-port':'tl-row-star';
     const oarAnim=isP?'tl-oar-port':'tl-oar-star';
-    /* Port paddlers render in front (zIndex 5), starboard behind hull (zIndex 1) */
-    const z=isP?5:1;
+    const z=isP?10:7;
     /* Port = brighter for near-side clarity, starboard = dimmer for depth */
     const hat1=isP?'#5a4420':'#342410';
     const hat2=isP?'#4a3418':'#281c0c';
@@ -1840,7 +2071,7 @@ function TravelScene({sceneH}){
     const shaft2=isP?'#5a3818':'#2e2008';
     const blade=isP?'#5a3818':'#2e2008';
     /* Paddle is on the OUTSIDE of the canoe — port=left, starboard=right */
-    const padX=isP?-8:16;
+    const padX=isP?-6:10;
     return(
       <div className="tl-paddler" style={{
         position:'absolute',bottom:yOff,left:x,width:14,height:28,
@@ -1885,343 +2116,39 @@ function TravelScene({sceneH}){
     );
   };
 
-  /* ── Stars ── */
-  const stars=useMemo(()=>[
-    [6,5,1.8,0],[14,12,1.2,1.5],[23,3,2,0.8],[34,9,1,2.2],[42,4,1.5,0.4],
-    [55,7,1.3,1.8],[63,2,1.8,0.6],[71,11,1,1.2],[78,5,1.5,2.8],[87,8,1.2,0.3],
-    [93,3,1.6,1.9],[18,18,1,2.6],[48,16,1.3,0.9],[82,14,1,1.4],[30,14,0.8,2.0],
-    [60,13,0.9,0.1],[75,18,1.1,1.7],[10,20,0.7,2.3],[50,1,1.4,0.5],[90,16,0.8,1.1],
-  ],[]);
-
-  /* ── Phosphorescence dots ── */
-  const phosphor=useMemo(()=>Array.from({length:18},(_,i)=>({
-    x:5+Math.random()*90,y:Math.random()*100,d:Math.random()*6,sz:1+Math.random()*1.5,
-  })),[]);
-
-  /* ── Mountain silhouettes (far shore, 200% wide for scrolling) ── */
-  const mtPoints='0,100 3,72 8,55 14,48 19,58 22,50 28,35 33,40 38,30 42,38 46,28 50,20 54,32 58,25 62,35 66,42 70,30 74,45 78,38 82,50 86,55 90,48 94,60 97,52 100,100';
-  const mtPoints2='0,100 4,65 10,50 15,42 20,55 25,38 30,30 35,45 40,25 45,35 50,28 55,40 60,32 65,22 70,38 75,48 80,35 85,52 90,42 95,58 100,100';
-
   return(
-    <div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.travel}}>
+    <div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.travel}}>
+      <StarField count={20} region={22}/>
+      <SceneMoon right="14%" top="6%" size={22}/>
 
-      {/* ━━ SKY LAYER ━━ */}
-      {stars.map(([x,y,sz,d],i)=>(
-        <div key={i} className="tl-star" style={{position:'absolute',left:x+'%',top:y+'%',width:sz,height:sz,borderRadius:'50%',background:'#c0c0e8',animationDelay:d+'s',zIndex:1}}/>
-      ))}
-
-      {/* Moon */}
-      <div style={{position:'absolute',top:'6%',right:'14%',width:22,height:22,zIndex:2,
-        borderRadius:'50%',
-        background:'radial-gradient(circle at 40% 40%,#e8e0c8 0%,#c8c0a8 50%,#a8a088 100%)',
-        boxShadow:'0 0 20px rgba(200,190,160,.25), 0 0 60px rgba(200,190,160,.08)',
-      }}>
-        {/* crater hints */}
-        <div style={{position:'absolute',top:6,left:8,width:4,height:3,borderRadius:'50%',background:'rgba(0,0,0,.08)'}}/>
-        <div style={{position:'absolute',top:12,left:5,width:3,height:2,borderRadius:'50%',background:'rgba(0,0,0,.06)'}}/>
-      </div>
-
-      {/* Moon reflection on water */}
-      <div style={{position:'absolute',top:waterTop+8,right:'13%',width:28,height:waterH-20,zIndex:5,
-        background:'linear-gradient(180deg,rgba(200,190,160,.1) 0%,rgba(200,190,160,.03) 40%,transparent 100%)',
-        filter:'blur(2px)',
-      }}/>
-
-      {/* Wispy cloud */}
-      <div className="tl-cloud" style={{position:'absolute',top:'12%',left:'-20%',width:'18%',height:6,
+      <SceneLayer zIndex={2} className="tl-cloud" style={{top:'12%',left:'-20%',width:'18%',height:6,
         background:'linear-gradient(90deg,transparent,rgba(140,150,170,.06),rgba(140,150,170,.1),rgba(140,150,170,.06),transparent)',
-        borderRadius:3,zIndex:2,animationDelay:'0s',
-      }}/>
-      <div className="tl-cloud" style={{position:'absolute',top:'18%',left:'-10%',width:'12%',height:4,
+        borderRadius:3,animationDelay:'0s'}}/>
+      <SceneLayer zIndex={2} className="tl-cloud" style={{top:'18%',left:'-10%',width:'12%',height:4,
         background:'linear-gradient(90deg,transparent,rgba(120,130,160,.05),rgba(120,130,160,.08),rgba(120,130,160,.05),transparent)',
-        borderRadius:3,zIndex:2,animationDelay:'30s',
-      }}/>
+        borderRadius:3,animationDelay:'30s'}}/>
 
-      {/* ━━ DISTANT MOUNTAINS (parallax layer — slow scroll) ━━ */}
-      <div style={{position:'absolute',top:skyH-8,left:0,width:'200%',height:mtH+16,zIndex:3,overflow:'hidden'}} className="tl-shore-far">
-        <svg viewBox="0 0 200 100" preserveAspectRatio="none" style={{width:'100%',height:'100%'}}>
-          <polygon points={mtPoints.split(' ').map(p=>{const[x,y]=p.split(',');return(parseFloat(x)*2)+','+y;}).join(' ')} fill="#142430" opacity=".55"/>
-          <polygon points={mtPoints2.split(' ').map(p=>{const[x,y]=p.split(',');return(parseFloat(x)*2+15)+','+y;}).join(' ')} fill="#182838" opacity=".4"/>
-        </svg>
-      </div>
+      <MountainRange yTop={skyH-8} height={mtH+16} fill1="#142430" fill2="#182838" zIndex={3}/>
+      <SceneLayer zIndex={3} className="tl-shore-far" style={{top:skyH-2,left:0,width:'200%',height:6}}>
+        {[{x:50,w:6},{x:65,w:4},{x:40,w:5},{x:150,w:5},{x:165,w:4}].map((p,i)=><div key={i} style={{position:'absolute',left:p.x+'%',top:0,width:p.w,height:2,background:'rgba(200,210,230,.15)',borderRadius:1}}/>)}
+      </SceneLayer>
+      <ForestLine yTop={skyH+mtH-12} height={shoreH+20} color="#122c1c" altColor="#0e2418" density={80} zIndex={4}/>
 
-      {/* Snow caps hint on tallest peaks */}
-      <div style={{position:'absolute',top:skyH-2,left:0,width:'200%',height:6,zIndex:3,pointerEvents:'none'}} className="tl-shore-far">
-        {[{x:50,w:6},{x:65,w:4},{x:40,w:5},{x:150,w:5},{x:165,w:4}].map((p,i)=>(
-          <div key={i} style={{position:'absolute',left:p.x+'%',top:0,width:p.w,height:2,
-            background:'rgba(200,210,230,.15)',borderRadius:1}}/>
-        ))}
-      </div>
+      <FogBand top={skyH+mtH-4} height={18} opacity={0.1} color="140,160,180" zIndex={5}/>
+      <FogBand top={skyH+mtH+shoreH-6} height={14} opacity={0.09} color="120,140,170" delay={5} speed={18} zIndex={5}/>
+      <WaterBody top={waterTop} gradient="linear-gradient(180deg,#14385e 0%,#103050 20%,#0c2848 45%,#082040 70%,#061838 100%)" waveCount={9} phosphorCount={18} zIndex={5}/>
+      <FogBand top={waterTop+waterH*0.3} height={10} opacity={0.07} color="100,120,150" delay={10} speed={22} zIndex={7}/>
 
-      {/* ━━ MID-GROUND FOREST SILHOUETTE (medium scroll) ━━ */}
-      <div style={{position:'absolute',top:skyH+mtH-12,left:0,width:'200%',height:shoreH+20,zIndex:4}} className="tl-shore-mid">
-        {/* Dense treeline — CSS triangles for individual trees */}
-        <div style={{position:'absolute',bottom:0,left:0,width:'100%',height:'100%'}}>
-          {Array.from({length:80},(_,i)=>{
-            const tx=i*2.5+Math.sin(i*0.7)*0.8;
-            const th=12+Math.sin(i*1.3)*6+Math.cos(i*0.5)*4;
-            const tw=3+Math.sin(i*0.9)*1.5;
-            return <div key={i} style={{
-              position:'absolute',bottom:0,left:tx+'%',
-              width:0,height:0,
-              borderLeft:`${tw}px solid transparent`,borderRight:`${tw}px solid transparent`,
-              borderBottom:`${th}px solid ${i%5===0?'#0e2418':'#122c1c'}`,
-            }}/>;
-          })}
-          {/* Solid base */}
-          <div style={{position:'absolute',bottom:0,left:0,right:0,height:8,background:'#0e2418'}}/>
-        </div>
-      </div>
+      <SceneLayer zIndex={6} style={{top:waterTop+8,right:'13%',width:28,height:waterH-20,
+        background:'linear-gradient(180deg,rgba(200,190,160,.1) 0%,rgba(200,190,160,.03) 40%,transparent 100%)',filter:'blur(2px)'}}/>
+      <SceneLayer zIndex={7} style={{left:'14%',top:waterTop+18,width:'58%',height:40,
+        background:'radial-gradient(ellipse,rgba(110,160,210,.06) 0%,transparent 72%)'}}/>
 
-      {/* ━━ FOG LAYERS ━━ */}
-      <div className="tl-fog" style={{position:'absolute',top:skyH+mtH-4,left:0,right:0,height:18,zIndex:5,
-        background:'linear-gradient(90deg,transparent 0%,rgba(140,160,180,.06) 20%,rgba(140,160,180,.1) 50%,rgba(140,160,180,.06) 80%,transparent 100%)',
-      }}/>
-      <div className="tl-fog" style={{position:'absolute',top:skyH+mtH+shoreH-6,left:0,right:0,height:14,zIndex:5,
-        background:'linear-gradient(90deg,transparent 0%,rgba(120,140,170,.05) 25%,rgba(120,140,170,.09) 50%,rgba(120,140,170,.05) 75%,transparent 100%)',
-        animationDelay:'5s',animationDuration:'18s',
-      }}/>
-      <div className="tl-fog" style={{position:'absolute',top:waterTop+waterH*0.3,left:0,right:0,height:10,zIndex:7,
-        background:'linear-gradient(90deg,transparent 0%,rgba(100,120,150,.04) 30%,rgba(100,120,150,.07) 50%,rgba(100,120,150,.04) 70%,transparent 100%)',
-        animationDelay:'10s',animationDuration:'22s',
-      }}/>
+      <TravelHeroCanoe left="18%" bottom={waterH*0.32} width={260} crew={crew} Paddler={Paddler} CYCLE={CYCLE} zIndex={8}/>
 
-      {/* ━━ WATER ━━ */}
-      <div style={{position:'absolute',top:waterTop,left:0,right:0,bottom:0,zIndex:5,
-        background:'linear-gradient(180deg,#14385e 0%,#103050 20%,#0c2848 45%,#082040 70%,#061838 100%)',
-      }}>
-        {/* Horizontal wave lines — multiple layers */}
-        {[4,12,22,34,48,62,78,96,112].map((y,i)=>(
-          <div key={i} className="tl-wave-1" style={{
-            position:'absolute',top:y,left:'-100%',right:'-100%',
-            height:i<3?2:1,
-            background:`repeating-linear-gradient(90deg,transparent 0px,transparent ${14+i*2}px,rgba(${30+i*5},${60+i*8},${120+i*6},${.12+i*.015}) ${14+i*2}px,rgba(${30+i*5},${60+i*8},${120+i*6},${.12+i*.015}) ${16+i*2}px,transparent ${16+i*2}px,transparent ${30+i*3}px)`,
-            animationDuration:(4+i*0.8)+'s',
-            animationDelay:(i*0.4)+'s',
-          }}/>
-        ))}
-
-        {/* Water surface shimmer */}
-        <div style={{position:'absolute',top:0,left:0,right:0,height:3,
-          background:'linear-gradient(90deg,transparent 5%,rgba(100,140,200,.08) 20%,rgba(120,160,220,.12) 35%,transparent 50%,rgba(100,140,200,.06) 65%,rgba(120,160,220,.1) 80%,transparent 95%)',
-          animation:'tl-water-shimmer 4s ease-in-out infinite',
-        }}/>
-
-        {/* Phosphorescence */}
-        {phosphor.map((p,i)=>(
-          <div key={i} style={{
-            position:'absolute',left:p.x+'%',top:p.y+'%',
-            width:p.sz,height:p.sz,borderRadius:'50%',
-            background:'rgba(100,200,220,.5)',
-            animation:`tl-phosphor ${3+p.d*0.5}s ease-in-out infinite`,
-            animationDelay:p.d+'s',
-          }}/>
-        ))}
-      </div>
-
-      {/* ━━ THE WAR CANOE ━━ */}
-      <div className="tl-canoe-rock" style={{
-        position:'absolute',bottom:waterH*0.32,left:'18%',width:260,height:72,zIndex:8,
-      }}>
-        {/* ── Hull ── */}
-        <div style={{position:'absolute',bottom:8,left:28,width:204,height:20,zIndex:2}}>
-          {/* Main hull body */}
-          <div style={{position:'absolute',bottom:0,left:0,width:204,height:16,
-            background:'linear-gradient(180deg,#6a2800 0%,#5a2000 25%,#3a1400 60%,#2a0e00 100%)',
-            borderRadius:'2px 2px 10px 10px',
-            border:'1px solid #7a3000',borderTop:'none',
-            boxShadow:'0 3px 10px rgba(0,0,0,.5),inset 0 2px 4px rgba(120,60,10,.15)',
-          }}/>
-          {/* Gunwale */}
-          <div style={{position:'absolute',bottom:14,left:-2,width:208,height:4,
-            background:'linear-gradient(90deg,#4a1a00 0%,#7a3200 15%,#8a3800 50%,#7a3200 85%,#4a1a00 100%)',
-            borderRadius:'2px 2px 0 0',
-            boxShadow:'0 -1px 2px rgba(0,0,0,.2)',
-          }}/>
-          {/* Hull midline gold band */}
-          <div style={{position:'absolute',bottom:7,left:6,width:192,height:1.5,
-            background:`linear-gradient(90deg,transparent 2%,${P.gold}12 10%,${P.gold}28 30%,${P.gold}35 50%,${P.gold}28 70%,${P.gold}12 90%,transparent 98%)`,
-          }}/>
-          {/* Waterline highlight */}
-          <div style={{position:'absolute',bottom:0,left:8,width:188,height:2,
-            background:'linear-gradient(90deg,transparent,rgba(60,100,140,.08),rgba(60,100,140,.12),rgba(60,100,140,.08),transparent)',
-            borderRadius:'0 0 8px 8px',
-          }}/>
-        </div>
-
-        {/* ── Bow (prow) — high sweep with carved crest ── */}
-        <div style={{position:'absolute',bottom:10,left:0,width:38,height:46,zIndex:3}}>
-          {/* Prow upswept body */}
-          <div style={{position:'absolute',bottom:0,left:10,width:26,height:42,
-            background:'linear-gradient(180deg,#4a1a00 0%,#5a2200 40%,#4a1a00 100%)',
-            clipPath:'polygon(35% 0%,65% 0%,100% 75%,100% 100%,0% 100%,0% 60%)',
-            boxShadow:'2px 0 4px rgba(0,0,0,.3)',
-          }}/>
-          {/* Prow spine highlight */}
-          <div style={{position:'absolute',bottom:14,left:21,width:2,height:28,
-            background:'linear-gradient(180deg,rgba(140,80,20,.35),rgba(140,80,20,.08))',borderRadius:1,
-          }}/>
-          {/* Carved crest — thunderbird */}
-          <div style={{position:'absolute',top:0,left:9,width:20,height:16,zIndex:4}}>
-            <div style={{position:'absolute',bottom:0,left:2,width:16,height:14,
-              background:`radial-gradient(ellipse at 50% 35%,${P.gold}55,#4a1a00 80%)`,
-              borderRadius:'45% 45% 25% 25%',
-              boxShadow:`0 0 6px ${P.gold}30`,
-            }}/>
-            {/* Eye */}
-            <div style={{position:'absolute',top:4,left:5,width:4,height:2.5,borderRadius:'50%',
-              background:P.gold,boxShadow:`0 0 4px ${P.gold}80`}}/>
-            {/* Beak */}
-            <div style={{position:'absolute',top:8,left:4,width:6,height:3,
-              background:'#3a1400',clipPath:'polygon(0% 0%,100% 0%,80% 100%,20% 100%)',borderRadius:1}}/>
-          </div>
-        </div>
-
-        {/* ── Stern — moderate rise ── */}
-        <div style={{position:'absolute',bottom:12,right:0,width:30,height:30,zIndex:3}}>
-          <div style={{position:'absolute',bottom:0,right:2,width:24,height:26,
-            background:'linear-gradient(180deg,#3a1400 0%,#4a1a00 50%,#3a1400 100%)',
-            clipPath:'polygon(0% 60%,55% 0%,100% 0%,100% 100%,0% 100%)',
-            boxShadow:'-2px 0 4px rgba(0,0,0,.25)',
-          }}/>
-          <div style={{position:'absolute',bottom:10,right:10,width:2,height:18,
-            background:'linear-gradient(180deg,rgba(140,80,20,.25),rgba(140,80,20,.05))',borderRadius:1,
-          }}/>
-        </div>
-
-        {/* ── Crew: 8 paddlers, strongly alternating port/starboard ── */}
-        {crew.map((s,i)=>(
-          <Paddler key={i} x={s.x} side={s.side} delay={s.delay}/>
-        ))}
-
-        {/* ── Paddle-entry water disturbances (both sides) ── */}
-        {crew.map((s,i)=>{
-          const isP=s.side==='p';
-          return<div key={'wd'+i} style={{position:'absolute',
-            bottom:isP?-8:16,left:s.x+(isP?-4:12),width:10,height:4,zIndex:isP?1:0,
-            background:`radial-gradient(ellipse,rgba(80,140,180,${isP?.14:.06}),transparent)`,borderRadius:'50%',
-            animation:`tl-paddle-splash ${CYCLE}s ease-in-out ${s.delay}s infinite`,
-          }}/>;
-        })}
-
-        {/* ── Ceremonial bow figure (blessing/spiritual presence) ── */}
-        <div style={{position:'absolute',bottom:12,left:30,width:18,height:42,zIndex:6,
-          animation:'tl-bless-sway 5s ease-in-out infinite',transformOrigin:'50% 100%',
-        }}>
-          {/* Tall ceremonial hat — taller and wider than paddler hats */}
-          <div style={{position:'absolute',top:0,left:1,width:16,height:10,
-            background:'linear-gradient(180deg,#4a3818 0%,#3a2a10 100%)',
-            clipPath:'polygon(50% 0%,95% 100%,5% 100%)',
-          }}/>
-          {/* Gold hat band */}
-          <div style={{position:'absolute',top:8,left:3,width:12,height:2,
-            background:`linear-gradient(90deg,transparent,${P.gold}40,${P.gold}55,${P.gold}40,transparent)`,borderRadius:1}}/>
-          {/* Head */}
-          <div style={{position:'absolute',top:9,left:4,width:10,height:6,
-            background:'#241a0e',borderRadius:'40%'}}/>
-          {/* Torso — upright ceremonial posture */}
-          <div style={{position:'absolute',top:14,left:3,width:12,height:11,
-            background:'linear-gradient(180deg,#201410,#1a0e08)',
-            borderRadius:'2px 2px 1px 1px'}}/>
-          {/* Cedar bough / staff — raised in left hand */}
-          <div style={{position:'absolute',top:4,left:-4,width:2.5,height:24,
-            background:'linear-gradient(180deg,#3a2a10,#2a1c08)',borderRadius:1,
-            transform:'rotate(-12deg)',transformOrigin:'bottom center'}}/>
-          {/* Cedar frond at top of staff */}
-          <div style={{position:'absolute',top:0,left:-8,width:8,height:6,
-            background:'radial-gradient(ellipse at 70% 80%,#1a3a18 0%,#0c2a10 60%,transparent 100%)',
-            borderRadius:'40%',opacity:0.8,
-          }}/>
-          {/* Right arm — blessing gesture, raised */}
-          <div style={{position:'absolute',top:12,right:-3,width:3,height:8,
-            background:'#1e140a',borderRadius:1,
-            transform:'rotate(25deg)',transformOrigin:'top center'}}/>
-          {/* Open hand at end of raised arm */}
-          <div style={{position:'absolute',top:8,right:-5,width:4,height:3,
-            background:'#241a0e',borderRadius:'50% 50% 30% 30%'}}/>
-          {/* Legs — standing */}
-          <div style={{position:'absolute',top:24,left:4,width:4,height:10,background:'#140a04'}}/>
-          <div style={{position:'absolute',top:24,right:4,width:4,height:10,background:'#140a04'}}/>
-          {/* Subtle spiritual glow around figure */}
-          <div style={{position:'absolute',top:-2,left:-4,width:26,height:36,
-            background:`radial-gradient(ellipse at 50% 30%,${P.gold}06,transparent 70%)`,
-            pointerEvents:'none',
-          }}/>
-        </div>
-
-        {/* ── Chief / Steersman at stern (standing, commanding) ── */}
-        <div style={{position:'absolute',bottom:8,left:218,width:20,height:36,zIndex:5}}>
-          {/* Wide ceremonial hat */}
-          <div style={{position:'absolute',top:0,left:-1,width:22,height:8,
-            background:'linear-gradient(180deg,#4a3010 0%,#3a2008 100%)',
-            clipPath:'polygon(50% 0%,100% 100%,0% 100%)',
-          }}/>
-          {/* Gold band on hat */}
-          <div style={{position:'absolute',top:6,left:5,width:10,height:1.5,
-            background:`${P.gold}45`,borderRadius:1}}/>
-          {/* Head */}
-          <div style={{position:'absolute',top:6,left:5,width:10,height:7,
-            background:'#1c1004',borderRadius:'40%'}}/>
-          {/* Broader torso — standing posture */}
-          <div style={{position:'absolute',top:12,left:2,width:16,height:12,
-            background:'linear-gradient(180deg,#1a0e04,#140a02)',
-            borderRadius:'3px 3px 1px 1px'}}/>
-          {/* Legs */}
-          <div style={{position:'absolute',top:23,left:4,width:5,height:9,background:'#100802'}}/>
-          <div style={{position:'absolute',top:23,right:4,width:5,height:9,background:'#100802'}}/>
-          {/* Steering paddle — longer, more vertical */}
-          <div style={{position:'absolute',top:11,right:-5,width:2.5,height:26,
-            background:'linear-gradient(180deg,#4a3010,#3a2808)',borderRadius:1,
-            transform:'rotate(8deg)',transformOrigin:'top center'}}/>
-          <div style={{position:'absolute',top:35,right:-7,width:6,height:8,
-            background:'linear-gradient(180deg,#3a2808,#2a1a06)',
-            borderRadius:'1px 1px 4px 4px',transform:'rotate(8deg)'}}/>
-          {/* Authority shoulder marker */}
-          <div style={{position:'absolute',top:13,left:0,width:16,height:2,
-            background:`linear-gradient(90deg,transparent,${P.gold}20,${P.gold}30,${P.gold}20,transparent)`}}/>
-        </div>
-
-        {/* ── Stern wake — V-trail ── */}
-        <div style={{position:'absolute',bottom:2,right:-55,width:85,height:12,zIndex:1}}>
-          {[0,1,2,3].map(i=>(
-            <div key={i} style={{
-              position:'absolute',top:i*2.8,left:0,width:50+i*12,height:2-i*0.3,
-              background:`linear-gradient(90deg,rgba(100,150,190,${.3-i*.06}),transparent)`,
-              borderRadius:1,
-              animation:'tl-wake 3.2s ease-out infinite',
-              animationDelay:(i*0.5)+'s',
-            }}/>
-          ))}
-        </div>
-
-        {/* ── Bow wave ── */}
-        <div style={{position:'absolute',bottom:3,left:-8,width:16,height:12,zIndex:1}}>
-          <div style={{position:'absolute',bottom:2,left:0,width:12,height:6,
-            background:'radial-gradient(ellipse,rgba(120,180,220,.2) 0%,transparent 70%)',
-          }}/>
-          <div style={{position:'absolute',bottom:0,left:3,width:7,height:3,
-            background:'radial-gradient(ellipse,rgba(200,220,240,.1) 0%,transparent 70%)',
-            animation:'tl-water-shimmer 2s ease-in-out infinite',
-          }}/>
-        </div>
-
-        {/* ── Hull reflection on water ── */}
-        <div style={{position:'absolute',bottom:-6,left:30,width:200,height:8,
-          background:'linear-gradient(180deg,rgba(80,40,0,.16) 0%,rgba(60,30,0,.06) 50%,transparent 100%)',
-          filter:'blur(1.5px)',borderRadius:'0 0 6px 6px',
-        }}/>
-      </div>
-
-      {/* ━━ FOREGROUND WATER DARKENING ━━ */}
-      <div style={{position:'absolute',bottom:0,left:0,right:0,height:waterH*0.3,zIndex:9,
-        background:'linear-gradient(180deg,transparent 0%,rgba(4,8,18,.15) 100%)',
-        pointerEvents:'none',
-      }}/>
-
-      {/* ━━ OVERALL ATMOSPHERIC VIGNETTE ━━ */}
-      <div style={{position:'absolute',inset:0,zIndex:10,pointerEvents:'none',
-        background:'radial-gradient(ellipse at 50% 45%,transparent 40%,rgba(4,8,18,.18) 100%)',
-      }}/>
+      <SceneLayer zIndex={9} style={{left:0,right:0,bottom:0,height:waterH*0.3,
+        background:'linear-gradient(180deg,transparent 0%,rgba(4,8,18,.15) 100%)'}}/>
+      <Vignette color="4,8,18" intensity={0.18} focus="50% 45%"/>
     </div>
   );
 }
@@ -2651,16 +2578,16 @@ function ImpactFrame({frame,onDismiss}){
     if(frame.phase===5) sub=frame.isWin?'Witnesses gather before the canoe fully touches shore.':'The shoreline recognizes loss before anyone speaks.';
   }
   return(
-    <div className="tl-impact-scrim" onClick={onDismiss} style={{
+    <div className="tl-impact-scrim" style={{
       position:'fixed',top:0,left:0,right:0,bottom:0,zIndex:1000,
       display:'flex',alignItems:'center',justifyContent:'center',
-      background:P.scrim,cursor:'pointer',
+      background:P.scrim,cursor:'default',
     }}>
-      <div className="tl-impact" onClick={e=>e.stopPropagation()} style={{
+      <div className="tl-impact" onClick={onDismiss} style={{
         maxWidth:480,width:'90%',padding:frame.type==='phase_enter'?'20px 24px':'28px 24px',
         textAlign:'center',position:'relative',overflow:'hidden',
         background:P.panel,border:`2px solid ${accentColor}`,borderRadius:8,
-        boxShadow:`0 0 50px ${accentColor}25, inset 0 0 40px ${accentColor}06`,
+        boxShadow:`0 0 50px ${accentColor}25, inset 0 0 40px ${accentColor}06`,cursor:'pointer',
       }}>
         {/* Decorative carved border lines (ceremony events) */}
         {isCeremony&&<>
@@ -3021,7 +2948,9 @@ function TidelinesApp(){
           </div>
           {isFirstRaid&&<FirstRunBriefing phase={phase} playContext={playContext}/>} 
 
-          <Scene type={G.scene} tall={true} G={G} phase={phase} sceneH={playMode?sceneH:220}/>
+          <div style={{flex:'0 0 auto',minHeight:playMode?sceneH:220}}>
+            <Scene type={G.scene} tall={true} G={G} phase={phase} sceneH={playMode?sceneH:220}/>
+          </div>
 
           {showBattle&&<div className="tl-scroll" style={playMode?{maxHeight:180,overflowY:'auto'}:{}}><BattleBoard G={G}/></div>}
           {showAftermath&&<div className="tl-scroll" style={playMode?{maxHeight:260,overflowY:'auto'}:{}}><AftermathSummary G={G} feedbackHref={feedbackHref} onFeedback={openFeedback} playContext={playContext}/></div>}

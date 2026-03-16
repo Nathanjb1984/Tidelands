@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 40" fill="none">
+  <defs>
+    <linearGradient id="hatHome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#745226"/>
+      <stop offset="100%" stop-color="#422814"/>
+    </linearGradient>
+  </defs>
+  <path d="M4 10c2-4 5-7 8-8 3 1 6 4 8 8H4Z" fill="url(#hatHome)"/>
+  <ellipse cx="12" cy="14" rx="4.6" ry="4.1" fill="#23150C"/>
+  <path d="M8 18c1-1 2-2 4-2s3 1 4 2l2 12c-1 2-4 3-6 3s-5-1-6-3l2-12Z" fill="#17100A"/>
+  <path d="M9 21c2 1 4 1 6 0" stroke="#4A3018" stroke-opacity="0.35" stroke-width="1" stroke-linecap="round"/>
+  <path d="M9 31c0 3-1 5-2 8" stroke="#120A06" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M15 31c0 3 1 5 2 8" stroke="#120A06" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M7 23c1 2 2 4 3 5" stroke="#17100A" stroke-width="2" stroke-linecap="round"/>
+  <path d="M17 23c-1 2-2 4-3 5" stroke="#17100A" stroke-width="2" stroke-linecap="round"/>
+</svg>

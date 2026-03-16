@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 44" fill="none">
+  <defs>
+    <linearGradient id="hatWar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#745226"/>
+      <stop offset="100%" stop-color="#422814"/>
+    </linearGradient>
+    <linearGradient id="spearWar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6A4420"/>
+      <stop offset="100%" stop-color="#33200C"/>
+    </linearGradient>
+  </defs>
+  <path d="M22 4c1 9 1 21 0 37" stroke="url(#spearWar)" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M21 4 24 1l2 4" fill="#BCB4A4"/>
+  <path d="M5 10c2-4 5-7 8-8 3 1 6 4 8 8H5Z" fill="url(#hatWar)"/>
+  <ellipse cx="13" cy="14" rx="4.7" ry="4.2" fill="#21140C"/>
+  <path d="M8 18c2-2 4-3 5-3 2 0 4 1 5 3l2 13c-3 2-5 3-7 3s-4-1-7-3l2-13Z" fill="#171008"/>
+  <path d="M9 21c3 1 5 1 8 0" stroke="#4E3218" stroke-opacity="0.35" stroke-width="1" stroke-linecap="round"/>
+  <path d="M9 31c0 4-1 7-2 10" stroke="#120A06" stroke-width="3" stroke-linecap="round"/>
+  <path d="M16 31c0 4 1 7 2 10" stroke="#120A06" stroke-width="3" stroke-linecap="round"/>
+  <path d="M7 23c1 1 2 3 3 5" stroke="#171008" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M18 23c-1 1-2 3-3 5" stroke="#171008" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

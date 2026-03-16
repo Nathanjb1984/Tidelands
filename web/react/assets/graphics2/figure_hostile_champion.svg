@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 48" fill="none">
+  <defs>
+    <linearGradient id="champHat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4C2420"/>
+      <stop offset="100%" stop-color="#261010"/>
+    </linearGradient>
+    <linearGradient id="champSpear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#643020"/>
+      <stop offset="100%" stop-color="#2A120E"/>
+    </linearGradient>
+  </defs>
+  <path d="M23 3c1 10 1 22 0 40" stroke="url(#champSpear)" stroke-width="2.7" stroke-linecap="round"/>
+  <path d="M22 3 25 0l3 4" fill="#B8AEA0"/>
+  <path d="M6 10c2-4 5-7 9-8 4 1 7 4 9 8H6Z" fill="url(#champHat)"/>
+  <ellipse cx="15" cy="14.5" rx="5.2" ry="4.5" fill="#1C0E0C"/>
+  <path d="M9 19c2-2 4-3 6-3s4 1 6 3l2 15c-2 3-5 4-8 4s-5-1-8-4l2-15Z" fill="#140808"/>
+  <path d="M10 23h10" stroke="#D03020" stroke-opacity="0.22" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M10 35c0 4-1 7-2 12" stroke="#0E0606" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M20 35c0 4 1 7 2 12" stroke="#0E0606" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M8 24c2 2 3 4 4 8" stroke="#140808" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M22 24c-1 3-2 5-4 8" stroke="#140808" stroke-width="2.3" stroke-linecap="round"/>
+</svg>

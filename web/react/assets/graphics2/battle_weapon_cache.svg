@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 40" fill="none">
+  <defs>
+    <linearGradient id="cacheWood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3A2810"/>
+      <stop offset="100%" stop-color="#1A1004"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="26" width="52" height="8" rx="3" fill="#140A08"/>
+  <rect x="14" y="18" width="4" height="16" rx="2" fill="url(#cacheWood)"/>
+  <rect x="54" y="18" width="4" height="16" rx="2" fill="url(#cacheWood)"/>
+  <rect x="16" y="18" width="40" height="3" rx="1.5" fill="#2A1A08"/>
+  <rect x="18" y="8" width="2.5" height="22" rx="1.25" fill="#4A3010" transform="rotate(-18 18 8)"/>
+  <rect x="28" y="6" width="2.5" height="24" rx="1.25" fill="#4A3010" transform="rotate(-8 28 6)"/>
+  <rect x="40" y="7" width="2.5" height="23" rx="1.25" fill="#4A3010" transform="rotate(6 40 7)"/>
+  <rect x="50" y="9" width="2.5" height="22" rx="1.25" fill="#4A3010" transform="rotate(16 50 9)"/>
+  <path d="M16 24h42" stroke="#D4B020" stroke-opacity="0.14" stroke-width="1.5" stroke-linecap="round"/>
+  <ellipse cx="24" cy="30" rx="5" ry="2" fill="#2A1010"/>
+  <ellipse cx="48" cy="30" rx="5" ry="2" fill="#2A1010"/>
+</svg>

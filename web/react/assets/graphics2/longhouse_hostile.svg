@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 92" fill="none">
+  <defs>
+    <linearGradient id="hostileRoof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2A1412"/>
+      <stop offset="100%" stop-color="#120808"/>
+    </linearGradient>
+    <linearGradient id="hostileWalls" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3E2016"/>
+      <stop offset="100%" stop-color="#1A0C08"/>
+    </linearGradient>
+  </defs>
+  <path d="M8 42 64 8l56 34H8Z" fill="url(#hostileRoof)" stroke="#3A1812" stroke-width="2"/>
+  <path d="M16 40h96v43H16z" fill="url(#hostileWalls)" stroke="#4A2418" stroke-opacity="0.45"/>
+  <path d="M50 54h28v29H50z" fill="#0C0606"/>
+  <path d="M20 38c14-5 29-7 44-7 18 0 35 3 46 7" stroke="#5A281C" stroke-opacity="0.38" stroke-width="1.4"/>
+  <path d="M24 44v34M32 43v36M40 42v37M48 42v37M56 42v37M64 42v37M72 42v37M80 42v37M88 42v37M96 43v36M104 44v34" stroke="#55281C" stroke-opacity="0.26" stroke-width="1"/>
+  <path d="M26 49h18M84 49h18" stroke="#D03020" stroke-opacity="0.12" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

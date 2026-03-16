@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 50" fill="none">
+  <defs>
+    <linearGradient id="steerHat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6A4C26"/>
+      <stop offset="100%" stop-color="#382210"/>
+    </linearGradient>
+    <linearGradient id="steerPaddle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5A3A1C"/>
+      <stop offset="100%" stop-color="#2C1A0C"/>
+    </linearGradient>
+  </defs>
+  <path d="M4 9c2-4 5-7 10-8 4 1 7 4 10 8H4Z" fill="url(#steerHat)"/>
+  <ellipse cx="14" cy="13.5" rx="5" ry="4.3" fill="#22160C"/>
+  <path d="M9 19c2-2 3-3 5-3 3 0 4 1 6 3l2 15c-3 3-5 4-8 4-2 0-5-1-7-4l2-15Z" fill="#17100A"/>
+  <path d="M22 17c1 9 1 20 0 30" stroke="url(#steerPaddle)" stroke-width="2.6" stroke-linecap="round" transform="rotate(8 22 17)"/>
+  <path d="M20 42h7v8h-7z" fill="#35200E" transform="rotate(8 20 42)"/>
+  <path d="M10 36c0 4-1 7-2 12" stroke="#120A06" stroke-width="3.1" stroke-linecap="round"/>
+  <path d="M18 36c0 4 1 7 2 12" stroke="#120A06" stroke-width="3.1" stroke-linecap="round"/>
+</svg>

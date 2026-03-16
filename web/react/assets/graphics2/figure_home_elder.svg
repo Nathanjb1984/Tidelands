@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 46" fill="none">
+  <defs>
+    <linearGradient id="elderHat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6E542E"/>
+      <stop offset="100%" stop-color="#3A2614"/>
+    </linearGradient>
+    <linearGradient id="elderStaff" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#624018"/>
+      <stop offset="100%" stop-color="#2C1C0C"/>
+    </linearGradient>
+  </defs>
+  <path d="M6 10c2-4 5-7 8-8 4 1 6 4 8 8H6Z" fill="url(#elderHat)"/>
+  <ellipse cx="14" cy="14" rx="5" ry="4.3" fill="#261A12"/>
+  <path d="M9 19c2-2 3-3 5-3 3 0 4 1 5 3l2 13c-2 3-4 4-7 4s-5-1-7-4l2-13Z" fill="#18120C"/>
+  <path d="M6 19c1 8 1 16 0 24" stroke="url(#elderStaff)" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M10 34c0 3-1 6-2 10" stroke="#120A06" stroke-width="3" stroke-linecap="round"/>
+  <path d="M18 34c0 3 1 6 2 10" stroke="#120A06" stroke-width="3" stroke-linecap="round"/>
+  <path d="M8 24c2 2 3 4 4 7" stroke="#18120C" stroke-width="2.1" stroke-linecap="round"/>
+  <path d="M20 24c-1 2-2 4-4 7" stroke="#18120C" stroke-width="2.1" stroke-linecap="round"/>
+</svg>

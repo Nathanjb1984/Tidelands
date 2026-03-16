@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 88" fill="none">
+  <defs>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2A180C"/>
+      <stop offset="100%" stop-color="#140A06"/>
+    </linearGradient>
+    <linearGradient id="walls" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A2C18"/>
+      <stop offset="100%" stop-color="#24140A"/>
+    </linearGradient>
+    <linearGradient id="roofShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#120804" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#120804" stop-opacity="0.45"/>
+    </linearGradient>
+  </defs>
+  <path d="M8 40 64 6l56 34H8Z" fill="url(#roof)" stroke="#3A2412" stroke-width="2"/>
+  <path d="M16 38h96v45H16z" fill="url(#walls)" stroke="#4A3018" stroke-opacity="0.42"/>
+  <path d="M48 54h32v29H48z" fill="#0E0806"/>
+  <path d="M18 39c11-5 29-8 46-8 23 0 39 3 46 8" stroke="#6A4424" stroke-opacity="0.38" stroke-width="1.4"/>
+  <path d="M24 43v35M32 42v37M40 41v38M48 40v39M56 40v39M64 40v39M72 40v39M80 40v39M88 41v38M96 42v37M104 43v35" stroke="#5A381E" stroke-opacity="0.28" stroke-width="1"/>
+  <path d="M10 40c5 8 15 13 28 16 12 2 26 3 40 2 18 0 34-4 44-10-3 12-10 23-18 33H24C14 72 11 59 10 40Z" fill="url(#roofShade)"/>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 56" fill="none">
+  <defs>
+    <linearGradient id="hullBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#794020"/>
+      <stop offset="42%" stop-color="#5A2C16"/>
+      <stop offset="100%" stop-color="#261006"/>
+    </linearGradient>
+    <linearGradient id="gunwale" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3A180C"/>
+      <stop offset="35%" stop-color="#6A3018"/>
+      <stop offset="65%" stop-color="#7A4020"/>
+      <stop offset="100%" stop-color="#34140A"/>
+    </linearGradient>
+    <linearGradient id="innerShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#140804" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#140804" stop-opacity="0.42"/>
+    </linearGradient>
+    <linearGradient id="reflection" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#704020" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#704020" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M18 32c2-6 8-11 18-16 14-7 31-10 49-10 26 0 44 5 55 14 8 6 13 12 14 18-16 6-40 10-74 10-27 0-45-3-58-8-4-2-6-4-7-8Z" fill="url(#hullBody)" stroke="#6C3418" stroke-width="1.2"/>
+  <path d="M11 27c6-8 14-14 24-18 13-6 29-9 49-9 25 0 46 5 59 15 6 4 12 10 16 17h-9c-5-6-11-10-18-13-11-5-28-8-48-8-18 0-36 3-49 9-7 3-13 6-18 11l-6-4Z" fill="url(#gunwale)"/>
+  <path d="M17 31c8-5 15-13 20-25 2-4 5-6 10-6 8 0 14 3 15 7 2 6-7 21-18 28-10 0-18-1-27-4Z" fill="#4A2010"/>
+  <path d="M127 30c7-4 13-11 24-24 2-2 5-3 9-3v35c-8 0-17-2-25-5Z" fill="#3A180E"/>
+  <path d="M37 35c13 2 27 3 43 3 22 0 39-2 58-5" stroke="#D4B020" stroke-opacity="0.22" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M29 38c8 6 26 10 52 11 27 2 50-2 69-10-6 8-20 13-34 15-11 2-24 2-40 1-13 0-25-2-37-5-6-2-10-5-15-12h5Z" fill="url(#innerShade)"/>
+  <path d="M44 52c17 3 47 3 70 0" stroke="url(#reflection)" stroke-width="5" stroke-linecap="round"/>
+</svg>

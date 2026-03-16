@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 30" fill="none">
+  <defs>
+    <linearGradient id="hatSolemn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#504252"/>
+      <stop offset="100%" stop-color="#2C2430"/>
+    </linearGradient>
+  </defs>
+  <path d="M2 7c2-4 4-6 6-7 3 1 5 3 6 7H2Z" fill="url(#hatSolemn)"/>
+  <ellipse cx="8" cy="9.5" rx="3.8" ry="3.4" fill="#1A1418"/>
+  <path d="M4 13c1-1 2-2 4-2s3 1 4 2l1 9c-2 2-3 3-5 3s-4-1-5-3l1-9Z" fill="#120E14"/>
+  <path d="M5 23c0 2-1 4-1 6" stroke="#09070C" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M11 23c0 2 1 4 1 6" stroke="#09070C" stroke-width="2.2" stroke-linecap="round"/>
+  <ellipse cx="8" cy="28.5" rx="5.5" ry="1.1" fill="#080608" fill-opacity="0.3"/>
+</svg>
