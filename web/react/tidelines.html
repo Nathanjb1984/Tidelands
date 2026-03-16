@@ -17,13 +17,13 @@ body{background:#060612;overflow-y:scroll;overflow-x:hidden}
 <div id="root"></div>
 <script type="text/babel">
 /* ═══════════════════════════════════════════════════════════════════════
-   TIDELINES : Cedar, Sea & Legacy — React Vertical-Slice  v1.1
-   ═══════════════════════════════════════════════════════════════════════
-   Ceremony, village, prestige & memory — ceremonial poles, witness
-   crowds, outcome-aware aftermath, goods display, memorial posts.
-   Same single file, same 6-phase loop, same formulas / persistence /
-   state / traits / named crew / impact frames / route strip / sidebar.
-   ═══════════════════════════════════════════════════════════════════════ */
+  TIDELINES : Cedar, Sea & Legacy — React Vertical-Slice  v1.3a
+  ═══════════════════════════════════════════════════════════════════════
+  Private alpha readiness, feedback path, first-session clarity.
+  Same single file, same 6-phase loop, same formulas / persistence /
+  state / traits / named crew / impact frames / route strip / sidebar /
+  fullscreen / audio / mobile play mode — presentation expanded only.
+  ═══════════════════════════════════════════════════════════════════════ */
 
 /* ─── §1  React ───────────────────────────────────────────────────────── */
 const {useState,useRef,useEffect,useCallback,useMemo}=React;
@@ -46,12 +46,12 @@ const PHASE_BG=['#0a0a18','#060818','#0c0614','#120608','#0e0a06','#0a0812'];
 
 /* ─── §3  Constants & Data ────────────────────────────────────────────── */
 const PHASES=[
-  {key:'vil',label:'Village',icon:'🏘',tagline:'Preparations — Choose wisely before you depart'},
-  {key:'trv',label:'Travel',icon:'🌊',tagline:'The Crossing — Open water, no turning back'},
-  {key:'enc',label:'Encounter',icon:'⚔',tagline:'First Contact — Your presence is known'},
-  {key:'res',label:'Resolution',icon:'🔥',tagline:'The Fight — Blood on the tide'},
-  {key:'wth',label:'Withdrawal',icon:'🛶',tagline:'Pull Back — Every moment counts'},
-  {key:'aft',label:'Aftermath',icon:'📜',tagline:'What Remains — History remembers'},
+  {key:'vil',label:'Village',icon:'🏘',tagline:'Home Waters — Prepare while witness fires still burn'},
+  {key:'trv',label:'Travel',icon:'🌊',tagline:'Grey Channel — Distance, weather, and silence now matter'},
+  {key:'enc',label:'Encounter',icon:'⚔',tagline:'Cedar Creek Reach — Another shoreline answers you'},
+  {key:'res',label:'Resolution',icon:'🔥',tagline:'Feud Shore — Blood and prestige meet at the waterline'},
+  {key:'wth',label:'Withdrawal',icon:'🛶',tagline:'Homeward Water — Spoils and grief must survive the return'},
+  {key:'aft',label:'Aftermath',icon:'📜',tagline:'Witness Fires — The coast remembers what came back'},
 ];
 const TACTIC_MODS={
   overwhelming_assault:{atk:1.30,loss:1.50,label:'Overwhelming Assault'},
@@ -112,15 +112,48 @@ const SCENE_SKY={
   aftermath_l:'linear-gradient(180deg,#0a0818 0%,#0e0c20 20%,#121028 40%,#0e0c20 60%,#0a0818 80%,#080610 100%)',
 };
 const STAR_POS=[[8,10,2,0],[22,6,1.5,1.2],[38,16,1,.5],[52,5,2,1.8],[68,12,1.5,.3],[82,8,1,2.1],[15,20,1,1.5],[72,3,1.5,.8],[45,14,1,2.5],[90,18,1.5,.7]];
+const BUILD={label:'PRIVATE ALPHA',version:'v1.3a',build:'PA-2026-03-15',feedbackEmail:'alpha-feedback@example.com'};
+const ALPHA_LOG_KEY='tidelines_alpha_log_v1';
+
+const WORLD={
+  home:{
+    key:'home',name:'Stoneshell Inlet',title:'Home Waters',badge:'Raven House',
+    subtitle:'Sheltered tidewater where witness fires and carved poles watch departures.',
+    atmosphere:'Protected beach beneath cedar smoke and familiar voices.',
+    tone:'home',x:12,y:70,
+  },
+  target:{
+    key:'target',name:'Cedar Creek',title:'North Reach Village',badge:'Feud Shore',
+    subtitle:'A gravel landing under dark cedar where your name is not welcome.',
+    atmosphere:'Another settlement, another lineage, another memory waiting to harden.',
+    tone:'hostile',x:82,y:22,
+  },
+  route:[
+    {key:'home',label:'Stoneshell Inlet',sub:'House beaches',water:'sheltered',danger:0,landmark:'Witness poles',x:12,y:70},
+    {key:'narrows',label:'Seal Narrows',sub:'Tide race',water:'channel',danger:1,landmark:'Running current',x:28,y:57},
+    {key:'channel',label:'Grey Channel',sub:'Open crossing',water:'open',danger:2,landmark:'Fog banks',x:48,y:42},
+    {key:'cedar',label:'Cedar Creek',sub:'Hostile gravel',water:'hostile',danger:3,landmark:'North-bank longhouse',x:82,y:22},
+    {key:'headland',label:'South Headland',sub:'Turn homeward',water:'return',danger:1,landmark:'Bearing stone',x:58,y:56},
+    {key:'homecoming',label:'Stoneshell Inlet',sub:'Witness fires',water:'homecoming',danger:0,landmark:'Welcoming beach',x:18,y:76},
+  ],
+  landmarks:[
+    {label:'Kelp Sound',x:37,y:24,type:'water'},
+    {label:'Cedar Shadow',x:74,y:10,type:'land'},
+    {label:'Outer Reefs',x:56,y:20,type:'hazard'},
+    {label:'Smoke Point',x:20,y:84,type:'home'},
+  ],
+};
+const PHASE_ROUTE_INDEX={0:0,1:2,2:3,3:3,4:4,5:5};
+const PHASE_LOCATION_KEY={0:'home',1:'channel',2:'cedar',3:'cedar',4:'headland',5:'homecoming'};
 
 /* ─ Onboarding hints (first raid only) ─ */
 const HINTS={
-  vil_intel:'Intelligence shapes your approach. Better information means better decisions — but it costs time or certainty.',
-  vil_prep:'Your last act before the crossing. Each choice strengthens a different part of the raid.',
-  trv_arrival:'Timing determines surprise. Surprise amplifies your opening strike and can break enemy morale before battle.',
-  trv_form:'Your approach sets the tone. Stealth preserves surprise; intimidation can end the fight before it starts.',
-  enc_tactic:'The decisive order. Aggressive tactics hit harder but risk heavier losses if the line breaks.',
-  wth_choose:'The battle is won but danger remains. Speed is safe; greed is tempting; legacy lasts longest.',
+  vil_intel:'This choice tells you what kind of shore you are sailing toward. Better intel makes the rest of the run easier to read.',
+  vil_prep:'This is your last village decision before departure. Pick the advantage you want to feel most during the crossing and battle.',
+  trv_arrival:'Arrival timing shapes surprise. More surprise usually means a stronger opening and a clearer early advantage.',
+  trv_form:'This decides whether your crew feels hidden or terrifying when Cedar Creek first sees you.',
+  enc_tactic:'This is your main battle order. It changes how hard you hit and how much risk your crew carries.',
+  wth_choose:'The raid is not over until you get home. Withdrawal decides how much you save, risk, or memorialize.',
 };
 
 /* ─── §4  Pure Helpers  (UNCHANGED) ───────────────────────────────────── */
@@ -132,6 +165,112 @@ const L=(t,c='',s='')=>({t,c,s});
 const signStr=n=>(n>=0?'+':'')+n;
 const feudName=e=>e<=0?'Resolved':e<=3?'Smouldering':e<=5?'Grievance':e<=12?'Active Feud':'Blood Feud';
 const phaseIdx=step=>PHASES.findIndex(p=>step.startsWith(p.key));
+const routeIdxForPhase=phase=>PHASE_ROUTE_INDEX[phase]??0;
+const phaseLocationKey=phase=>PHASE_LOCATION_KEY[phase]||'home';
+const routeNodeForPhase=phase=>WORLD.route[routeIdxForPhase(phase)]||WORLD.route[0];
+
+function getLocationIdentity(phase){
+  const key=phaseLocationKey(phase);
+  if(key==='home'||key==='homecoming') return WORLD.home;
+  if(key==='cedar') return WORLD.target;
+  const node=WORLD.route.find(r=>r.key===key)||WORLD.route[0];
+  return{
+    key:node.key,
+    name:node.label,
+    title:node.sub,
+    badge:node.water==='channel'?'Channel Water':node.water==='open'?'Outer Reach':node.water==='return'?'Homeward Arc':'Coastal Route',
+    subtitle:node.landmark,
+    atmosphere:node.water==='open'
+      ?'The canoe is exposed between settlements; distance feels real here.'
+      :node.water==='channel'
+      ?'Currents gather and separate villages. Water chooses the pace.'
+      :'The shoreline bends; the route itself becomes part of the story.',
+    tone:node.water,
+  };
+}
+function campaignSeason(s){
+  if(s.feudEscalation>12) return 'Season of Blood Water';
+  if(s.totalRaids>=5&&s.prestige>=260) return 'Season of Witnessed Prestige';
+  if(s.totalRaids>=3) return 'Season of Hard Crossings';
+  if(s.totalRaids>=1) return 'Season of Retaliation';
+  return 'First Season of Answering';
+}
+function coastMemoryLine(s){
+  if(!s.lastRun) return 'The wider coast is still listening for the shape of your first crossing.';
+  if(s.lastRun.named_dead?.length) return `The coast still holds the names of ${s.lastRun.named_dead.join(', ')}.`;
+  if(s.lastRun.outcome==='DECISIVE_VICTORY') return 'Cedar Creek remembers the day your canoe owned its beach.';
+  if(s.lastRun.outcome==='VICTORY') return 'Other shorelines have begun to weigh your name more carefully.';
+  if(s.lastRun.outcome==='STALEMATE') return 'Both villages remember a crossing that proved nothing and changed everything.';
+  if(s.lastRun.outcome==='DEFEAT'||s.lastRun.outcome==='DEVASTATING_DEFEAT') return 'The route home still feels longer after the last retreat.';
+  return 'The channels are learning your rhythm.';
+}
+function routeStatusText(phase,s){
+  if(phase===0) return 'War canoe beached in home water';
+  if(phase===1) return 'Two waters from home · exposed crossing';
+  if(phase===2||phase===3) return `At ${WORLD.target.name} · ${feudName(s.feudEscalation)}`;
+  if(phase===4) return s.outcome.includes('VICTORY')?'Homeward with spoils and wounded':'Homeward carrying grief and silence';
+  return 'Back inside Stoneshell Inlet · witnesses on the beach';
+}
+function phaseTransitionCopy(phase,s){
+  if(phase===0) return {title:'STONESHELL INLET',subtitle:'Home is one village within a wider coast of channels, allies, and danger.',place:WORLD.home.title};
+  if(phase===1) return {title:'LEAVING HOME WATERS',subtitle:'Past Seal Narrows and into Grey Channel. Distance now has a cost.',place:'Grey Channel Crossing'};
+  if(phase===2) return {title:'CEDAR CREEK REACH',subtitle:'Another shoreline rises ahead — longhouses, gravel, and hostile memory.',place:WORLD.target.title};
+  if(phase===3) return {title:'FEUD SHORE',subtitle:'What happens here will travel back across the water with you.',place:'Contested Beach'};
+  if(phase===4) return {title:'TURN HOMEWARD',subtitle:s.outcome.includes('VICTORY')?'The canoe rides lower. Every paddle stroke protects what was taken.':'The return arc is longer when the canoe comes back light.',place:'South Headland'};
+  return {title:'SIGHTING HOME AGAIN',subtitle:'Witness fires, gathered families, and memory waiting on the beach.',place:WORLD.home.name};
+}
+function playContextLabel({playMode,isMobile,isPortrait}){
+  if(playMode&&isMobile&&isPortrait) return 'Play Mode · Mobile Portrait';
+  if(playMode&&isMobile) return 'Play Mode · Mobile Landscape';
+  if(playMode) return 'Play Mode · Desktop';
+  if(isMobile&&isPortrait) return 'Windowed · Mobile Portrait';
+  if(isMobile) return 'Windowed · Mobile Landscape';
+  return 'Windowed · Desktop';
+}
+function phaseProgressLabel(phase){return `Phase ${phase+1} of ${PHASES.length}`;}
+function firstRunObjective(phase){
+  return phase===0?'Your goal: prepare a war canoe, cross north, confront Cedar Creek, and bring a story home.'
+    :phase===1?'You are on the outward journey. Distance and timing now shape the rest of the raid.'
+    :phase===2?'You have reached Cedar Creek. Your choices now decide fear, bloodshed, and leverage.'
+    :phase===3?'The battle is the consequence of everything chosen before this moment.'
+    :phase===4?'You are not done yet. The return journey decides what actually reaches home.'
+    :'Now read what the coast and village made of your decisions.';
+}
+function strongestMomentLabel(G){
+  if(G.turningPoint?.text) return G.turningPoint.text;
+  if(G.outcome==='DECISIVE_VICTORY') return 'Taking Cedar Creek’s beach decisively.';
+  if(G.crewKilled>0) return 'The loss carried home to Stoneshell Inlet.';
+  if(G.spoils.length>0) return 'Bringing visible spoils back across the water.';
+  return 'The return to the village after the crossing.';
+}
+function buildFeedbackHref(ctx){
+  const subject=`TIDELINES ${BUILD.label} ${BUILD.version} feedback`;
+  const body=[
+    `Build: ${BUILD.version} (${BUILD.build})`,
+    `Play context: ${ctx.playContext}`,
+    `Current phase: ${ctx.phaseLabel}`,
+    `Raid: ${ctx.raidNumber}`,
+    `Outcome: ${ctx.outcome||'In progress'}`,
+    `Strongest moment: ${ctx.strongestMoment||''}`,
+    '',
+    'What felt strongest?',
+    '',
+    'What felt confusing or unclear?',
+    '',
+    'Anything you expected that was missing?',
+    '',
+    `Legacy context: ${ctx.memoryLine||''}`,
+  ].join('\n');
+  return `mailto:${BUILD.feedbackEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+function logAlphaEvent(type,payload={}){
+  try{
+    const raw=localStorage.getItem(ALPHA_LOG_KEY);
+    const prev=raw?JSON.parse(raw):[];
+    const next=[...prev.slice(-19),{type,ts:new Date().toISOString(),...payload}];
+    localStorage.setItem(ALPHA_LOG_KEY,JSON.stringify(next));
+  }catch(e){}
+}
 
 /* ─ Cause/effect explanation builder ─ */
 function buildIntimExplain(s){
@@ -450,10 +589,10 @@ function pickPrep(prev,id){
 function enterTravel(prev){
   const s=dup(prev);s.step='trv_arrival';s.scene='travel';s.statDeltas={};
   s.log.push(L(''));
-  s.log.push(L("The morning fog clings to the water as you push off. Cedar Creek lies half a day's paddle to the north."));
+  s.log.push(L("The canoe leaves Stoneshell Inlet under the eyes of the witness poles. Cedar Creek lies beyond Seal Narrows and the long grey crossing north."));
   s.log.push(L(''));
-  s.log.push(L('Every stroke takes you closer to the moment where words end and actions begin.'));
-  s.impactFrame={type:'phase_enter',phase:1,title:'THE CROSSING',subtitle:'Half a day north. No turning back.'};
+  s.log.push(L('Home smoke thins behind you. Every stroke widens the distance between your village and the shore where this feud must be answered.'));
+  s.impactFrame={type:'phase_enter',phase:1,...phaseTransitionCopy(1,s)};
   return s;
 }
 function pickArrival(prev,id){
@@ -461,12 +600,12 @@ function pickArrival(prev,id){
   const oldSurp=s.surpriseBonus,oldStealth=s.stealthBonus,oldCanoe=s.canoeCondition;
   switch(id){
     case'dawn':s.approachTime='dawn';s.surpriseBonus+=15;
-      s.log.push(L('You paddle through the night. As the first grey light touches the sky, Cedar Creek appears — smoke rising, a dog barking. No one is on the beach.'));break;
+      s.log.push(L('You paddle through the night. As grey light spills across the north reach, Cedar Creek appears — longhouse smoke, barking dogs, and an empty gravel beach.'));break;
     case'night':s.approachTime='night';s.surpriseBonus+=25;
       if(Math.random()<0.20){s.canoeCondition-=10;s.log.push(L('A rock scrapes the hull — hearts stop — but the canoe holds.','red'));}
-      s.log.push(L('The darkness is total except for phosphorescence. You reach the shallows in absolute silence.'));break;
+      s.log.push(L("The darkness is total except for phosphorescence and the hiss of current against the hull. You reach Cedar Creek's shallows in absolute silence."));break;
     case'fog':s.approachTime='fog';s.surpriseBonus+=20;s.stealthBonus+=5;
-      s.log.push(L('The fog is a gift. Your canoe slides through it like a spirit. You hear Cedar Creek before you see it.'));break;
+      s.log.push(L('The fog is a gift. Your canoe slides through it like a spirit between shorelines. You hear Cedar Creek before you see it.'));break;
   }
   s.statDeltas={surprise:s.surpriseBonus-oldSurp,stealth:s.stealthBonus-oldStealth,canoe:s.canoeCondition-oldCanoe};
   s.log.push(L(''));s.step='trv_form';return s;
@@ -486,6 +625,8 @@ function pickFormation(prev,id){
 }
 function enterEncounter(prev){
   const s=dup(prev);s.scene='encounter';s.statDeltas={};
+  s.log.push(L(''));
+  s.log.push(L("Cedar Creek's beach is no longer an idea on the horizon. Your canoe has crossed into another settlement's reach."));
   s.log.push(L(''));
   const oldMorale=s.morale;
   doIntimidation(s);
@@ -508,6 +649,7 @@ function enterEncounter(prev){
     s.log.push(L('Warriors spill from the longhouse. Not many — but they are armed, and they are moving to the beach.'));
     s.log.push(L(''));
     s.log.push(L('The bow of your war canoe grinds into the gravel. Your warriors leap into the shallow water.'));
+    s.impactFrame={type:'phase_enter',phase:2,...phaseTransitionCopy(2,s)};
     s.step='enc_tactic';
   }
   return s;
@@ -536,7 +678,7 @@ function enterResolution(prev){
     s.step='res_done';return s;
   }
   // Battle enter impact
-  s.impactFrame={type:'phase_enter',phase:3,title:'BATTLE',subtitle:(TACTIC_MODS[s.attackerTactic]||{}).label||'Engaged'};
+  s.impactFrame={type:'phase_enter',phase:3,title:'FEUD SHORE',subtitle:`${(TACTIC_MODS[s.attackerTactic]||{}).label||'Engaged'} — what happens here will travel the whole coast.`,place:'Cedar Creek Beach'};
   doEngagement(s);
   s.log.push(L(pick(ROUND_NARR.opening)));s.log.push(L(''));
   s.log.push(L(pick(ROUND_NARR.sustained)));s.log.push(L(''));
@@ -563,15 +705,16 @@ function enterWithdrawal(prev){
   s.log.push(L(''));
   const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
   if(!isWin){
-    s.log.push(L('Your crew falls back to the canoe. There are no spoils — only the bitter taste of retreat.'));
+    s.log.push(L("Your crew falls back to the canoe and shoves off from Cedar Creek's gravel. There are no spoils — only the bitter taste of retreat over open water."));
     if(s.crewKilled>0){const dn=s.namedCrew.filter(c=>!c.alive).map(c=>c.name);
       if(dn.length)s.log.push(L(`${dn.join(' and ')} will not make the journey home.`,'red'));}
     s.step='wth_retreat';
   }else{
-    s.log.push(L("The fighting is over. Cedar Creek's warriors watch from the tree line."));
-    s.log.push(L('Your crew must work fast — load the spoils, tend the wounded, and get back to sea.'));
+    s.log.push(L("The fighting is over. Cedar Creek's warriors watch from the tree line as your canoe turns from hostile shore to homeward water."));
+    s.log.push(L('Your crew must work fast — load the spoils, tend the wounded, and get back across Grey Channel before the coast closes behind you.'));
     s.step='wth_choose';
   }
+  s.impactFrame={type:'phase_enter',phase:4,...phaseTransitionCopy(4,s)};
   return s;
 }
 function pickWithdrawal(prev,id){
@@ -595,9 +738,11 @@ function enterAftermath(prev){
   const s=dup(prev);s.scene='village';s.statDeltas={};
   s.log.push(L(''));
   const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
-  if(isWin)s.log.push(L('Your canoe rounds the headland and your village comes into view. People are already gathering on the beach — they have seen the loaded canoe, and they are cheering.'));
-  else if(s.outcome==='STALEMATE')s.log.push(L('Your canoe rounds the headland. The village watches in silence. The canoe sits too high in the water — everyone can see it came back light.'));
-  else s.log.push(L('Your canoe limps around the headland. The village sees the empty seats, the blood on the hull. No one cheers. The women begin to wail before you reach the shallows.'));
+  if(isWin)s.log.push(L('Your canoe rounds the south headland and Stoneshell Inlet opens before you. People are already gathering on the beach — they have seen the loaded canoe, and they are cheering.'));
+  else if(s.outcome==='STALEMATE')s.log.push(L('Your canoe rounds the headland into home water. The village watches in silence. The canoe sits too high in the water — everyone can see it came back light.'));
+  else s.log.push(L('Your canoe limps around the headland into Stoneshell Inlet. The village sees the empty seats, the blood on the hull. No one cheers. The women begin to wail before you reach the shallows.'));
+  s.log.push(L(''));
+  s.log.push(L(coastMemoryLine(s),'dim'));
   s.log.push(L(''));
   s.traitsEarned=[];
   if(s.crewKilled>0&&!s.warTraits.includes('grief_hardened'))s.traitsEarned.push('grief_hardened');
@@ -666,6 +811,8 @@ const INJCSS=`
 @keyframes tl-delta-in{0%{opacity:0;transform:translateY(4px)}30%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-4px)}}
 @keyframes tl-phase-sweep{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
 @keyframes tl-hint-in{from{opacity:0;max-height:0}to{opacity:1;max-height:60px}}
+@keyframes tl-chart-pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.9}50%{transform:translate(-50%,-50%) scale(1.08);opacity:1}}
+@keyframes tl-route-flow{0%{background-position:0 0}100%{background-position:24px 0}}
 
 /* Ceremony / village animations */
 @keyframes tl-ceremony-glow{0%,100%{opacity:.6}50%{opacity:1}}
@@ -724,6 +871,15 @@ const INJCSS=`
 .tl-action:hover{background:${P.cedarHi}!important;box-shadow:0 0 14px rgba(140,38,0,.5)}
 .tl-action:active{transform:scale(.96)}
 .tl-action:focus-visible{outline:2px solid ${P.gold};outline-offset:2px}
+.tl-feedback-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:4px 8px;border-radius:4px;border:1px solid ${P.gold}35;background:linear-gradient(180deg,${P.panelHi},${P.panel});color:${P.goldDim};font-family:${font};font-size:6px;letter-spacing:.5px;text-decoration:none;cursor:pointer;transition:all .2s ease}
+.tl-feedback-btn:hover{color:${P.gold};border-color:${P.gold}70;transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.tl-feedback-btn:active{transform:translateY(0) scale(.98)}
+.tl-alpha-chip{padding:2px 5px;border-radius:999px;border:1px solid ${P.gold}35;background:${P.gold}10;color:${P.gold};font-size:5px;letter-spacing:.7px}
+.tl-context-chip{padding:2px 5px;border-radius:999px;border:1px solid ${P.borderHi}60;background:${P.panelHi};color:${P.dimHi};font-size:5px;letter-spacing:.4px}
+.tl-briefing{padding:7px 8px;background:linear-gradient(180deg,${P.panelHi},${P.panel});border-bottom:1px solid ${P.border};display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.tl-briefing-main{font-size:6px;color:${P.text};line-height:1.6}
+.tl-briefing-side{min-width:120px;text-align:right;font-size:5px;color:${P.dim}}
+.tl-tester-summary{padding:8px 10px;margin-top:8px;background:linear-gradient(180deg,${P.panelHi},${P.panel});border:1px solid ${P.border};border-left:3px solid ${P.goldDim};border-radius:4px}
 
 /* Micro-feedback animations */
 @keyframes tl-cmd-flash{0%{background:${P.gold}20}100%{background:transparent}}
@@ -792,6 +948,9 @@ const INJCSS=`
   .tl-action{min-height:44px}
   .tl-play-btn,.tl-mute-btn,.tl-sidebar-toggle{min-width:28px;min-height:28px;display:inline-flex!important;align-items:center;justify-content:center}
   .tl-cmd-grid{grid-template-columns:1fr!important}
+  .tl-feedback-btn{min-height:32px;padding:5px 9px}
+  .tl-briefing{flex-direction:column}
+  .tl-briefing-side{text-align:left;min-width:0}
 }
 
 /* Safe-area insets (notch, home indicator) */
@@ -852,6 +1011,31 @@ const INJCSS=`
 
 /* Bottom-sheet drag handle */
 .tl-sheet-handle{width:32px;height:4px;border-radius:2px;background:${P.dim}40;margin:0 auto 4px}
+
+.tl-worldbar{display:grid;grid-template-columns:1.15fr 1fr 1.1fr;gap:6px;padding:6px 8px;background:linear-gradient(180deg,${P.panelHi},${P.panel});border-bottom:1px solid ${P.border}}
+.tl-worldpanel{min-height:72px;padding:6px 7px;background:linear-gradient(180deg,rgba(20,20,52,.92),rgba(12,12,34,.96));border:1px solid ${P.border};border-radius:4px;overflow:hidden;position:relative}
+.tl-worldpanel::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.02),transparent 45%);pointer-events:none}
+.tl-route-seg{position:relative;flex:1 1 0;height:8px;border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+.tl-route-seg::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);background-size:24px 100%;animation:tl-route-flow 2.4s linear infinite;mix-blend-mode:screen;opacity:.45}
+.tl-seg-sheltered{background:linear-gradient(90deg,#163a48,#1e4c5a)}
+.tl-seg-channel{background:linear-gradient(90deg,#14385e,#1c4e72)}
+.tl-seg-open{background:linear-gradient(90deg,#102c58,#173c72)}
+.tl-seg-hostile{background:linear-gradient(90deg,#3a1218,#621820)}
+.tl-seg-return{background:linear-gradient(90deg,#244060,#325478)}
+.tl-seg-homecoming{background:linear-gradient(90deg,#294458,#30586a)}
+.tl-chart-node{position:absolute;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid rgba(6,6,18,.9);box-shadow:0 0 0 1px rgba(255,255,255,.05)}
+.tl-chart-marker{animation:tl-chart-pulse 2.1s ease-in-out infinite}
+
+@media(max-width:739px){
+  .tl-worldbar{grid-template-columns:1fr 1fr;grid-template-areas:'campaign chart' 'location location'}
+  .tl-worldbar .tl-worldpanel:nth-child(1){grid-area:campaign}
+  .tl-worldbar .tl-worldpanel:nth-child(2){grid-area:location}
+  .tl-worldbar .tl-worldpanel:nth-child(3){grid-area:chart}
+}
+
+@media(max-width:520px){
+  .tl-worldbar{grid-template-columns:1fr;grid-template-areas:'campaign' 'location' 'chart'}
+}
 `;
 
 /* ─── §11  Sub-components ─────────────────────────────────────────────── */
@@ -1937,34 +2121,103 @@ function Scene({type,tall,G,phase,sceneH}){
 }
 
 /* ═══ ROUTE STRIP ═══ */
-const ROUTE_NODES=[
-  {key:'vil',label:'Home',icon:'🏘',phases:[0]},
-  {key:'sea1',label:'Crossing',icon:'〰',phases:[1]},
-  {key:'enc',label:'Cedar Creek',icon:'⚔',phases:[2,3]},
-  {key:'sea2',label:'Return',icon:'〰',phases:[4]},
-  {key:'aft',label:'Home',icon:'📜',phases:[5]},
-];
-function RouteStrip({phase}){
-  const tension=phase>=2&&phase<=3;
+function CampaignBanner({G,phase}){
+  const season=campaignSeason(G);
+  const memory=coastMemoryLine(G);
   return(
-    <div style={{display:'flex',alignItems:'center',gap:0,padding:'4px 10px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
-      {ROUTE_NODES.map((n,i)=>{
-        const active=n.phases.includes(phase);
-        const done=n.phases.every(p=>p<phase);
-        const col=active?P.gold:done?P.greenDim:P.dim+'50';
-        return(<React.Fragment key={n.key}>
-          {i>0&&<div style={{flex:'1 1 0',height:2,background:done||active?P.greenDim:P.border,margin:'0 2px',minWidth:8,maxWidth:40,borderRadius:1,transition:'background .4s'}}/>}
-          <div className={active?'tl-route-active':''} style={{
-            display:'flex',flexDirection:'column',alignItems:'center',gap:2,padding:'3px 6px',
-            borderRadius:4,background:active?P.panelHi:'transparent',border:`1px solid ${active?P.gold+'40':'transparent'}`,
-            transition:'all .4s ease',minWidth:44,
-          }}>
-            <span style={{fontSize:active?12:10,transition:'font-size .3s'}}>{n.icon}</span>
-            <span style={{fontSize:5,color:col,letterSpacing:.3,whiteSpace:'nowrap',transition:'color .3s'}}>{n.label}</span>
-          </div>
-        </React.Fragment>);
-      })}
-      {tension&&<div style={{marginLeft:8,fontSize:6,color:P.red,letterSpacing:.3,animation:'tl-pulse 2s infinite'}}>⚡ HOSTILE</div>}
+    <div className="tl-worldpanel">
+      <div style={{fontSize:6,color:P.goldDim,letterSpacing:.6,marginBottom:4}}>SEASON OF CONFLICT</div>
+      <div style={{fontSize:8,color:P.gold,letterSpacing:.7,marginBottom:3}}>{season}</div>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',fontSize:6,color:P.dim,marginBottom:5}}>
+        <span>⚓ {WORLD.home.name}</span>
+        <span>⚔ {WORLD.target.name}</span>
+        <span>📜 Raid {G.totalRaids+1}</span>
+      </div>
+      <div style={{fontSize:6,color:P.dimHi,lineHeight:1.55}}>{memory}</div>
+      <div style={{fontSize:5,color:phase>=2&&phase<=4?P.red:P.dim,marginTop:5,letterSpacing:.4}}>{routeStatusText(phase,G)}</div>
+    </div>
+  );
+}
+
+function LocationCard({phase}){
+  const loc=getLocationIdentity(phase);
+  const accent=loc.tone==='hostile'?P.red:loc.tone==='home'||loc.tone==='homecoming'?P.gold:P.blue;
+  return(
+    <div className="tl-worldpanel">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+        <div>
+          <div style={{fontSize:6,color:accent,letterSpacing:.7}}>{loc.badge.toUpperCase()}</div>
+          <div style={{fontSize:9,color:P.text,letterSpacing:.5}}>{loc.name}</div>
+        </div>
+        <div style={{fontSize:5,color:P.dim,padding:'2px 4px',border:`1px solid ${accent}30`,borderRadius:3,background:accent+'12'}}>{phase===4?'RETURN ARC':phase>=2&&phase<=3?'AWAY WATER':phase===0||phase===5?'HOME SHORE':'CROSSING'}</div>
+      </div>
+      <div style={{fontSize:6,color:accent,marginBottom:3}}>{loc.title}</div>
+      <div style={{fontSize:6,color:P.dimHi,lineHeight:1.5,marginBottom:4}}>{loc.subtitle}</div>
+      <div style={{fontSize:5,color:P.dim,lineHeight:1.5}}>{loc.atmosphere}</div>
+    </div>
+  );
+}
+
+function CoastalChart({phase}){
+  const currentIndex=routeIdxForPhase(phase);
+  const previousIndex=Math.max(0,currentIndex-1);
+  return(
+    <div className="tl-worldpanel">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+        <span style={{fontSize:6,color:P.goldDim,letterSpacing:.6}}>COASTAL CHART</span>
+        <span style={{fontSize:5,color:P.dim}}>{routeNodeForPhase(phase).landmark}</span>
+      </div>
+      <div style={{position:'relative',height:56,border:`1px solid ${P.border}60`,borderRadius:4,overflow:'hidden',background:'linear-gradient(180deg,#0c1834,#0a1430)'}}>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+          <path d="M0 100 L0 68 L8 60 L14 63 L20 55 L26 57 L32 45 L41 46 L53 31 L62 28 L73 12 L100 0 L100 100 Z" fill="#16243a" opacity=".92"/>
+          <path d="M0 100 L0 82 L18 78 L27 70 L32 73 L43 60 L50 62 L59 52 L70 42 L85 32 L100 28" stroke="#35506c" strokeWidth="1.2" fill="none" opacity=".35"/>
+          <polyline points={WORLD.route.map(n=>`${n.x},${n.y}`).join(' ')} fill="none" stroke="#d4b020" strokeWidth="1.4" strokeDasharray="2.5 2" opacity=".9"/>
+          <polyline points={WORLD.route.slice(0,currentIndex+1).map(n=>`${n.x},${n.y}`).join(' ')} fill="none" stroke="#60e050" strokeWidth="1.7" opacity=".9"/>
+        </svg>
+        {WORLD.landmarks.map((m,i)=><div key={i} style={{position:'absolute',left:m.x+'%',top:m.y+'%',transform:'translate(-50%,-50%)',fontSize:4,color:m.type==='hazard'?P.red:m.type==='home'?P.goldDim:P.dim,letterSpacing:.3}}>{m.label}</div>)}
+        {WORLD.route.map((n,i)=>{
+          const active=i===currentIndex;
+          const done=i<currentIndex;
+          const col=active?P.gold:done?P.green:P.dim;
+          return <div key={n.key} className={active?'tl-chart-node tl-chart-marker':'tl-chart-node'} style={{left:n.x+'%',top:n.y+'%',background:col}}/>;
+        })}
+        <div style={{position:'absolute',left:WORLD.route[currentIndex].x+'%',top:WORLD.route[currentIndex].y+'%',transform:'translate(8px,-16px)',fontSize:5,color:P.text,padding:'2px 4px',background:P.scrim,border:`1px solid ${P.gold}35`,borderRadius:3,whiteSpace:'nowrap'}}>
+          {WORLD.route[currentIndex].label}
+        </div>
+        {phase===4&&<div style={{position:'absolute',left:WORLD.route[previousIndex].x+'%',top:WORLD.route[previousIndex].y+'%',transform:'translate(6px,8px)',fontSize:4,color:P.dim}}>astern</div>}
+      </div>
+    </div>
+  );
+}
+
+function RouteStrip({phase}){
+  const currentIndex=routeIdxForPhase(phase);
+  const tension=phase>=2&&phase<=4;
+  return(
+    <div style={{padding:'5px 10px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
+        <div style={{fontSize:6,color:P.goldDim,letterSpacing:.7}}>ROUTE OF THIS EXPEDITION</div>
+        <div style={{fontSize:5,color:tension?P.red:P.dim,letterSpacing:.4}}>{phase>=4?'TURNING SOUTH TOWARD HOME':phase>=2?'IN HOSTILE REACH':'OUTBOUND FROM HOME WATER'}</div>
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:3}}>
+        {WORLD.route.map((n,i)=>{
+          const active=i===currentIndex;
+          const done=i<currentIndex;
+          const upcoming=i>currentIndex;
+          const nodeColor=active?P.gold:done?P.greenDim:upcoming&&n.danger>=2?P.redDim:P.dim;
+          return(<React.Fragment key={n.key}>
+            {i>0&&<div className={`tl-route-seg tl-seg-${WORLD.route[i].water}`} style={{opacity:i<=currentIndex?1:.55}}/>}
+            <div className={active?'tl-route-active':''} style={{minWidth:54,maxWidth:74,padding:'4px 5px',borderRadius:4,background:active?P.panelHi:'transparent',border:`1px solid ${active?P.gold+'50':'transparent'}`}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:4}}>
+                <span style={{fontSize:active?10:8,color:nodeColor}}>{i===0||i===5?'⚓':i===3?'🏴':n.danger>=2?'≈':'◦'}</span>
+                {n.danger>0&&<span style={{fontSize:5,color:n.danger>=3?P.red:P.goldDim}}>{'▲'.repeat(Math.min(n.danger,3))}</span>}
+              </div>
+              <div style={{fontSize:5.5,color:nodeColor,letterSpacing:.2,marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{n.label}</div>
+              <div style={{fontSize:4.5,color:P.dim,letterSpacing:.2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{n.sub}</div>
+            </div>
+          </React.Fragment>);
+        })}
+      </div>
     </div>
   );
 }
@@ -2076,7 +2329,7 @@ function BattleBoard({G}){
 }
 
 /* ═══ AFTERMATH SUMMARY — ceremonial presentation of legacy ═══ */
-function AftermathSummary({G}){
+function AftermathSummary({G,feedbackHref,onFeedback,playContext}){
   if(phaseIdx(G.step)!==5)return null;
   const isWin=G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY';
   const isDecisive=G.outcome==='DECISIVE_VICTORY';
@@ -2158,6 +2411,57 @@ function AftermathSummary({G}){
         <div style={{color:P.gold,fontSize:7,marginBottom:5,letterSpacing:.5}}>🏅  TRAITS WITNESSED — The Village Remembers</div>
         {G.traitsEarned.map(t=><div key={t} style={{color:P.gold,fontSize:6,marginBottom:2,lineHeight:1.5}}>{TRAIT_DESC[t]||t}</div>)}
       </div>}
+
+      <TesterRunSummary G={G} feedbackHref={feedbackHref} onFeedback={onFeedback} playContext={playContext}/>
+    </div>
+  );
+}
+
+function FeedbackButton({href,onOpen,label='Send Feedback'}){
+  return <a className="tl-feedback-btn" href={href} onClick={onOpen} target="_blank" rel="noreferrer">✉ {label}</a>;
+}
+
+function FirstRunBriefing({phase,playContext}){
+  return(
+    <div className="tl-briefing">
+      <div className="tl-briefing-main">
+        <div style={{color:P.gold,fontSize:6,letterSpacing:.6,marginBottom:3}}>FIRST SESSION GUIDE</div>
+        <div>{firstRunObjective(phase)}</div>
+      </div>
+      <div className="tl-briefing-side">
+        <div style={{color:P.goldDim,marginBottom:2}}>{phaseProgressLabel(phase)}</div>
+        <div>{playContext}</div>
+        <div style={{marginTop:3}}>Prepare → Cross → Confront → Return → Be Remembered</div>
+      </div>
+    </div>
+  );
+}
+
+function TesterRunSummary({G,feedbackHref,onFeedback,playContext}){
+  const outcome=OUTCOME_LABEL[G.outcome]?.text||G.outcome;
+  return(
+    <div className="tl-tester-summary">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,marginBottom:5,flexWrap:'wrap'}}>
+        <div style={{fontSize:7,color:P.gold,letterSpacing:.6}}>PRIVATE ALPHA RUN SUMMARY</div>
+        <div style={{display:'flex',gap:5,alignItems:'center',flexWrap:'wrap'}}>
+          <span className="tl-alpha-chip">{BUILD.version}</span>
+          <span className="tl-context-chip">{playContext}</span>
+        </div>
+      </div>
+      <div style={{fontSize:6,color:P.dimHi,lineHeight:1.6,marginBottom:6}}>
+        Outcome: <span style={{color:P.text}}>{outcome}</span> · Strongest moment: <span style={{color:P.text}}>{strongestMomentLabel(G)}</span>
+      </div>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',fontSize:6,color:P.dim,marginBottom:6}}>
+        <span>⭐ {signStr(G.prestigeChange)} prestige</span>
+        <span>🔥 {feudName(G.feudEscalation)}</span>
+        <span>☠ {G.crewKilled} killed</span>
+        <span>⚔ {G.crewWounded} wounded</span>
+        <span>🏅 {G.traitsEarned.length||0} new traits</span>
+      </div>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+        <div style={{fontSize:5,color:P.dim}}>When reporting bugs, include {BUILD.label}, {BUILD.version}, {BUILD.build}, and your play context.</div>
+        <FeedbackButton href={feedbackHref} onOpen={onFeedback} label="Send feedback on this run"/>
+      </div>
     </div>
   );
 }
@@ -2220,6 +2524,7 @@ function ImpactFrame({frame,onDismiss}){
     icon=PHASES[frame.phase]?.icon||'';
     title=frame.title||'';accentColor=PHASE_ACCENT[frame.phase]||P.gold;
     body=frame.subtitle||'';sub='';
+    witness=frame.place?`Route focus: ${frame.place}`:'';
   }
   return(
     <div className="tl-impact-scrim" onClick={onDismiss} style={{
@@ -2245,7 +2550,7 @@ function ImpactFrame({frame,onDismiss}){
         {body&&<div style={{fontSize:8,color:P.text,lineHeight:1.8,fontFamily:font,marginBottom:sub?8:14}}>{body}</div>}
         {sub&&<div style={{fontSize:7,color:P.dim,lineHeight:1.6,fontFamily:font,marginBottom:witness?6:14,fontStyle:'italic'}}>{sub}</div>}
         {witness&&<div style={{fontSize:6,color:accentColor+'90',letterSpacing:.3,marginBottom:12,fontFamily:font}}>{witness}</div>}
-        <div style={{fontSize:6,color:P.dim+'80',letterSpacing:.5}}>— CLICK TO CONTINUE —</div>
+        <div style={{fontSize:6,color:P.dim+'80',letterSpacing:.5}}>— CLICK / TAP TO CONTINUE —</div>
       </div>
     </div>
   );
@@ -2340,6 +2645,7 @@ function NarrEntry({line,isLast}){
 function TidelinesApp(){
   const[G,setG]=useState(()=>{const sv=loadPersist();return initState(sv?{...sv,_fromSave:true}:{});});
   const logRef=useRef(null);
+  const lastLoggedPhaseRef=useRef(null);
   useEffect(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight;},[G.log.length]);
   const act=useCallback((fn,...a)=>setG(p=>fn(p,...a)),[]);
   const onContinue=useCallback(()=>{TL_Audio.sfxContinue();setG(p=>{const fn=CONT[p.step];return fn?fn(p):p;});},[]);
@@ -2511,6 +2817,24 @@ function TidelinesApp(){
   const showAftermath=phase===5;
   const isFirstRaid=G.totalRaids===0;
   const hint=isFirstRaid?HINTS[G.step]:null;
+  const playContext=playContextLabel({playMode,isMobile,isPortrait});
+  const feedbackHref=buildFeedbackHref({
+    playContext,
+    phaseLabel:phaseProgressLabel(phase),
+    raidNumber:G.totalRaids+1,
+    outcome:OUTCOME_LABEL[G.outcome]?.text||'',
+    strongestMoment:strongestMomentLabel(G),
+    memoryLine:coastMemoryLine(G),
+  });
+  const openFeedback=useCallback(()=>{
+    logAlphaEvent('feedback_opened',{phase:G.step,outcome:G.outcome||'',context:playContext,build:BUILD.version});
+  },[G.step,G.outcome,playContext]);
+
+  useEffect(()=>{
+    if(lastLoggedPhaseRef.current===G.step)return;
+    lastLoggedPhaseRef.current=G.step;
+    logAlphaEvent('step_viewed',{step:G.step,phase:phaseInfo.label,raid:G.totalRaids+1});
+  },[G.step,phaseInfo.label,G.totalRaids]);
 
   return(
     <div ref={appRef} className={playMode?'tl-playmode':''} style={{fontFamily:font,fontSize:10,lineHeight:1.6,color:P.text,background:P.bg,minHeight:'100vh'}}>
@@ -2529,10 +2853,14 @@ function TidelinesApp(){
           <div style={{display:'flex',alignItems:'center',gap:8}}>
             <span style={{fontSize:12,color:P.gold,letterSpacing:2}}>⛵ TIDELINES</span>
             <span style={{fontSize:6,color:P.dim,letterSpacing:.5}}>Cedar, Sea & Legacy</span>
+            <span className="tl-alpha-chip">{BUILD.label}</span>
+            <span className="tl-context-chip">{BUILD.version}</span>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <span className="tl-context-chip" title="Current play context">{playContext}</span>
             {G.totalRaids>0&&<span style={{fontSize:6,color:P.dim}}>Raid #{G.totalRaids+1}</span>}
             {G.warTraits.length>0&&<span style={{fontSize:6,color:P.goldDim}}>{G.warTraits.length} trait{G.warTraits.length>1?'s':''}</span>}
+            <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Feedback"/>
             <span onClick={toggleLegacy} style={{fontSize:7,color:P.goldDim,cursor:'pointer',userSelect:'none'}} title="Legacy Log">📜</span>
             <span onClick={toggleDebug} style={{fontSize:6,color:P.dim+'80',cursor:'pointer',userSelect:'none'}} title="Debug">⚙</span>
             <span className="tl-mute-btn" onClick={toggleMute} style={{color:audioMuted?P.dim:P.dimHi}} title={audioMuted?'Unmute (M)':'Mute (M)'}>{audioMuted?'🔇':'🔊'}</span>
@@ -2556,16 +2884,23 @@ function TidelinesApp(){
             <div>
               <div style={{fontSize:10,color:accent,letterSpacing:1.5}}>{phaseInfo.label.toUpperCase()}</div>
               <div style={{fontSize:6,color:P.dim,letterSpacing:.3}}>{phaseInfo.tagline}</div>
+              <div style={{fontSize:5,color:P.goldDim,letterSpacing:.5,marginTop:1}}>{phaseProgressLabel(phase)} · {BUILD.label}</div>
             </div>
           </div>
 
           <RouteStrip phase={phase}/>
           <HudBar G={G} phase={phase} isFirstRaid={isFirstRaid}/>
+          <div className="tl-worldbar">
+            <CampaignBanner G={G} phase={phase}/>
+            <LocationCard phase={phase}/>
+            <CoastalChart phase={phase}/>
+          </div>
+          {isFirstRaid&&<FirstRunBriefing phase={phase} playContext={playContext}/>} 
 
           <Scene type={G.scene} tall={true} G={G} phase={phase} sceneH={playMode?sceneH:220}/>
 
           {showBattle&&<div className="tl-scroll" style={playMode?{maxHeight:180,overflowY:'auto'}:{}}><BattleBoard G={G}/></div>}
-          {showAftermath&&<div className="tl-scroll" style={playMode?{maxHeight:200,overflowY:'auto'}:{}}><AftermathSummary G={G}/></div>}
+          {showAftermath&&<div className="tl-scroll" style={playMode?{maxHeight:260,overflowY:'auto'}:{}}><AftermathSummary G={G} feedbackHref={feedbackHref} onFeedback={openFeedback} playContext={playContext}/></div>}
 
           {/* Narrative log */}
           <div className="tl-scroll" ref={logRef} style={{
@@ -2615,6 +2950,20 @@ function TidelinesApp(){
               {G.lastRun.named_dead?.length>0&&<div style={{fontSize:6,color:P.red,marginTop:2}}>Fallen: {G.lastRun.named_dead.join(', ')}</div>}
             </div>
           )}
+
+          <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
+            <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>COASTAL CONTEXT</div>
+            <div style={{fontSize:7,color:P.gold,marginBottom:2}}>{campaignSeason(G)}</div>
+            <div style={{fontSize:6,color:P.dim,marginBottom:4}}>{routeStatusText(phase,G)}</div>
+            <div style={{fontSize:6,color:P.dimHi,lineHeight:1.55}}>{coastMemoryLine(G)}</div>
+          </div>
+
+          <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
+            <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>ALPHA BUILD</div>
+            <div style={{fontSize:7,color:P.gold,marginBottom:2}}>{BUILD.label} · {BUILD.version}</div>
+            <div style={{fontSize:6,color:P.dim,marginBottom:4}}>{BUILD.build} · {playContext}</div>
+            <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Send feedback"/>
+          </div>
 
           {/* Crew roster */}
           <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
@@ -2685,7 +3034,7 @@ function TidelinesApp(){
 
           {!G.showDebug&&!G.showLegacy&&<div style={{flex:'1 1 0'}}/>}
 
-          <div style={{padding:'6px 10px',textAlign:'center',borderTop:`1px solid ${P.border}`,fontSize:5,color:P.dim+'50'}}>TIDELINES v1.1</div>
+          <div style={{padding:'6px 10px',textAlign:'center',borderTop:`1px solid ${P.border}`,fontSize:5,color:P.dim+'50'}}>TIDELINES {BUILD.version} · {BUILD.label} · {BUILD.build}</div>
         </div>
 
         {/* ═══ COMMAND AREA ═══ */}
@@ -2697,7 +3046,7 @@ function TidelinesApp(){
           {/* ─ Village: Intel ─ */}
           {G.step==='vil_intel'&&<>
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
-              {isFirstRaid?'Your first decision as war chief. How will you learn about Cedar Creek?':'How will you gather intelligence?'}
+              {isFirstRaid?'First choice: learn what waits at Cedar Creek before you commit the crossing.':'How will you gather intelligence before departure?'}
             </div>
             <Hint text={hint}/>
             <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
@@ -2723,7 +3072,7 @@ function TidelinesApp(){
           {/* ─ Village: Prep ─ */}
           {G.step==='vil_prep'&&<>
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
-              {isFirstRaid?'One final preparation before you push off. Each choice shapes a different advantage.':'Final preparations before departure:'}
+              {isFirstRaid?'Final village preparation: choose the advantage you want to carry onto the water.':'Final preparations before departure:'}
             </div>
             <Hint text={hint}/>
             <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
@@ -2748,7 +3097,7 @@ function TidelinesApp(){
           {/* ─ Travel: Arrival ─ */}
           {G.step==='trv_arrival'&&<>
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
-              {isFirstRaid?'Cedar Creek lies ahead. When you arrive determines how much surprise you carry.':'When will you arrive at Cedar Creek?'}
+              {isFirstRaid?'The crossing is underway. Choose when your canoe reaches Cedar Creek’s shore.':'When will you arrive at Cedar Creek?'}
             </div>
             <Hint text={hint}/>
             <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
@@ -2774,7 +3123,7 @@ function TidelinesApp(){
           {/* ─ Travel: Formation ─ */}
           {G.step==='trv_form'&&<>
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
-              {isFirstRaid?'How you approach sets the tone. Stealth preserves surprise; intimidation breaks will.':'How does your force approach?'}
+              {isFirstRaid?'Choose the feeling of your approach: remain hidden, or be seen and feared.':'How does your force approach?'}
             </div>
             <Hint text={hint}/>
             <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
@@ -2794,7 +3143,7 @@ function TidelinesApp(){
           {/* ─ Encounter: Tactic ─ */}
           {G.step==='enc_tactic'&&<>
             <div style={{fontSize:7,color:P.red,marginBottom:5,letterSpacing:.3}}>
-              {isFirstRaid?'⚔ The moment of truth. Your tactic determines the shape of the battle.':'⚔ Issue your battle order:'}
+              {isFirstRaid?'⚔ Battle order: this choice most directly shapes damage, risk, and the story you bring home.':'⚔ Issue your battle order:'}
             </div>
             <Hint text={hint}/>
             <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
@@ -2825,7 +3174,7 @@ function TidelinesApp(){
           {/* ─ Withdrawal ─ */}
           {G.step==='wth_choose'&&<>
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
-              {isFirstRaid?'Victory — but the withdrawal matters. Greed invites counterattack.':'How will you withdraw?'}
+              {isFirstRaid?'The raid is not finished. Decide what kind of return journey your crew must survive.':'How will you withdraw?'}
             </div>
             <Hint text={hint}/>
             <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
@@ -2852,6 +3201,7 @@ function TidelinesApp(){
           {G.step==='aft_show'&&(
             <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center',alignItems:'center'}}>
               <ContinueBtn label="🔄  Launch Next Raid" onClick={onReset}/>
+              <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Send feedback"/>
               <button className="tl-action" style={{
                 display:'inline-block',background:P.panelHi,color:P.dim,border:`1px solid ${P.border}`,
                 borderRadius:4,padding:'10px 18px',fontFamily:font,fontSize:8,cursor:'pointer',
