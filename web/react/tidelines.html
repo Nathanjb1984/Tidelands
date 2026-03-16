@@ -1456,6 +1456,30 @@ const INJCSS=`
 @keyframes tl-water-shimmer{0%,100%{opacity:.08}50%{opacity:.22}}
 @keyframes tl-canoe-rock{0%,100%{transform:translateY(0) rotate(0deg)}20%{transform:translateY(-1.5px) rotate(-.4deg)}45%{transform:translateY(.8px) rotate(.2deg)}70%{transform:translateY(-.8px) rotate(-.15deg)}90%{transform:translateY(.3px) rotate(.05deg)}}
 
+/* ── Featured SVG scene animations ── */
+@keyframes tl-copper-gleam{0%,100%{filter:drop-shadow(0 2px 6px rgba(0,0,0,.35)) brightness(1)}30%{filter:drop-shadow(0 2px 14px rgba(212,176,32,.45)) brightness(1.15)}60%{filter:drop-shadow(0 2px 8px rgba(212,176,32,.2)) brightness(1.05)}}
+@keyframes tl-fire-dance{0%,100%{transform:scaleY(1) scaleX(1);filter:brightness(1)}15%{transform:scaleY(1.06) scaleX(.97);filter:brightness(1.12)}35%{transform:scaleY(.94) scaleX(1.03);filter:brightness(.92)}55%{transform:scaleY(1.08) scaleX(.96);filter:brightness(1.18)}75%{transform:scaleY(.97) scaleX(1.02);filter:brightness(1.05)}}
+@keyframes tl-staff-sway{0%,100%{transform:rotate(0deg) translateY(0)}25%{transform:rotate(1.5deg) translateY(-1px)}50%{transform:rotate(-1deg) translateY(0)}75%{transform:rotate(.5deg) translateY(-0.5px)}}
+@keyframes tl-goods-shimmer{0%,100%{filter:drop-shadow(0 2px 5px rgba(0,0,0,.3)) brightness(1)}50%{filter:drop-shadow(0 2px 12px rgba(180,140,60,.3)) brightness(1.08)}}
+@keyframes tl-rack-sway{0%,100%{transform:rotate(0deg)}30%{transform:rotate(.8deg)}70%{transform:rotate(-.6deg)}}
+@keyframes tl-canoe-drift{0%,100%{transform:translateX(0) translateY(0) rotate(0deg)}25%{transform:translateX(4px) translateY(-2px) rotate(-.3deg)}50%{transform:translateX(2px) translateY(1px) rotate(.2deg)}75%{transform:translateX(-2px) translateY(-1px) rotate(-.15deg)}}
+@keyframes tl-pole-grow-pulse{0%,100%{filter:drop-shadow(0 2px 7px rgba(0,0,0,.38)) brightness(1)}50%{filter:drop-shadow(0 0 14px rgba(212,176,32,.25)) brightness(1.06)}}
+@keyframes tl-settlement-approach{0%{opacity:.3;transform:scale(.92) translateY(4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes tl-longhouse-warmth{0%,100%{filter:drop-shadow(0 3px 8px rgba(0,0,0,.38)) brightness(1)}50%{filter:drop-shadow(0 3px 18px rgba(220,150,80,.3)) brightness(1.06)}}
+@keyframes tl-scene-float-in{0%{opacity:0;transform:translateY(12px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes tl-firelight-wash{0%,100%{opacity:.08}30%{opacity:.18}60%{opacity:.1}85%{opacity:.2}}
+.tl-copper-gleam{animation:tl-copper-gleam 3.2s ease-in-out infinite}
+.tl-fire-dance{animation:tl-fire-dance 2.4s ease-in-out infinite;transform-origin:50% 100%}
+.tl-staff-sway{animation:tl-staff-sway 4.8s ease-in-out infinite;transform-origin:50% 100%}
+.tl-goods-shimmer{animation:tl-goods-shimmer 4s ease-in-out infinite}
+.tl-rack-sway{animation:tl-rack-sway 5.2s ease-in-out infinite;transform-origin:50% 0%}
+.tl-canoe-drift{animation:tl-canoe-drift 6s ease-in-out infinite}
+.tl-pole-grow-pulse{animation:tl-pole-grow-pulse 3.8s ease-in-out infinite}
+.tl-settlement-approach{animation:tl-settlement-approach .8s ease-out forwards}
+.tl-longhouse-warmth{animation:tl-longhouse-warmth 3.6s ease-in-out infinite}
+.tl-scene-float-in{animation:tl-scene-float-in .6s ease-out forwards}
+.tl-firelight-wash{animation:tl-firelight-wash 2.8s ease-in-out infinite}
+
 .tl-paddler{transform-origin:50% 85%}
 .tl-canoe-rock{animation:tl-canoe-rock 3.8s ease-in-out infinite}
 .tl-shore-far{animation:tl-shore-scroll 90s linear infinite}
@@ -3509,11 +3533,332 @@ function TravelScene({sceneH,G}){
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   FEATURED SVG SCENES — dedicated compositions where new art assets
+   are large, centered, and fully animated instead of tiny background props.
+   Each scene tells a visual story: Potlatch, Diplomacy, Trade, Provision.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ POTLATCH SCENE — ceremony of generosity and prestige ═══
+   Triggered: aft_show with any victory outcome (raid, trade, diplomacy).
+   Stars: feast longhouse (huge, warm), copper shields (gleaming), council fire
+   (blazing), trade goods (shimmering display), growing memorial pole. */
+function PotlatchScene({G,sceneH}){
+  const H=sceneH||220;
+  const skyH=H*0.22;
+  const groundTop=Math.floor(H*0.50);
+  const groundH=H-groundTop;
+  const isDecisive=G&&G.outcome==='DECISIVE_VICTORY';
+  const isTrade=G&&G.outcome==='TRADE_SUCCESS';
+  const isDiplo=G&&G.outcome==='DIPLOMACY_SUCCESS';
+  const pp=G?G.poleProgress||0:0;
+  return(
+    <div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',
+      background:'linear-gradient(180deg,#1c1258 0%,#28206e 22%,#342880 44%,#3c2e88 62%,#302470 82%,#281c58 100%)'}}>
+      <StarField count={28} region={22}/>
+      <SceneMoon right="8%" top="3%" size={20}/>
+      {/* Warm ambient firelight wash across the whole scene */}
+      <SceneLayer zIndex={1} className="tl-firelight-wash" style={{inset:0,
+        background:'radial-gradient(ellipse at 50% 70%,rgba(230,160,60,.12),transparent 65%)'}}/>
+      {/* Ground — ceremonial earth */}
+      <div style={{position:'absolute',top:groundTop,left:0,right:0,height:groundH,zIndex:4,
+        background:'linear-gradient(180deg,#1c3018 0%,#1e3014 40%,#243018 100%)'}}>
+        {[6,14,24,36,48,60,72,84,94].map((x,i)=><div key={i} style={{position:'absolute',top:-2-(i%3),left:x+'%',
+          width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
+          borderBottom:`${4+(i%2)*3}px solid #1c3018`}}/>)}
+      </div>
+      {/* ═══ FEAST LONGHOUSE — Large, centered, warm glow ═══ */}
+      <div className="tl-scene-float-in tl-longhouse-warmth" style={{position:'absolute',left:'22%',bottom:groundH-4,width:200,height:130,zIndex:6}}>
+        <img src={GFX2.longhouseFeast} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Doorway fire glow — large animated warmth spilling out */}
+      <div className="tl-ember-pulse" style={{position:'absolute',left:'34%',bottom:groundH+8,width:80,height:50,zIndex:5,
+        background:'radial-gradient(ellipse at 50% 80%,rgba(240,170,60,.18),transparent 70%)',pointerEvents:'none'}}/>
+      {/* ═══ COUNCIL FIRE — Large, blazing center stage ═══ */}
+      <div className="tl-scene-float-in tl-fire-dance" style={{position:'absolute',left:'42%',bottom:groundH+2,width:72,height:58,zIndex:8,animationDelay:'.2s'}}>
+        <img src={GFX2.councilFire} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Fire radial glow on ground */}
+      <div className="tl-ember-pulse" style={{position:'absolute',left:'38%',bottom:groundH-6,width:100,height:40,zIndex:5,
+        background:'radial-gradient(ellipse,rgba(240,170,60,.15),transparent 65%)',pointerEvents:'none'}}/>
+      {/* ═══ COPPER SHIELDS — Gleaming prestige display (2 flanking) ═══ */}
+      <div className="tl-scene-float-in tl-copper-gleam" style={{position:'absolute',left:'14%',bottom:groundH+6,width:28,height:42,zIndex:7,animationDelay:'.3s'}}>
+        <img src={GFX2.copperShield} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      <div className="tl-scene-float-in tl-copper-gleam" style={{position:'absolute',right:'14%',bottom:groundH+6,width:28,height:42,zIndex:7,animationDelay:'.5s'}}>
+        <img src={GFX2.copperShield} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {isDecisive&&<div className="tl-scene-float-in tl-copper-gleam" style={{position:'absolute',left:'50%',bottom:groundH+50,width:34,height:50,zIndex:9,transform:'translateX(-50%)',animationDelay:'.6s'}}>
+        <img src={GFX2.copperShield} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>}
+      {/* ═══ TRADE GOODS — Shimmering feast bounty ═══ */}
+      <div className="tl-scene-float-in tl-goods-shimmer" style={{position:'absolute',left:'60%',bottom:groundH+2,width:90,height:38,zIndex:7,animationDelay:'.4s'}}>
+        <img src={GFX2.tradeGoodsPile} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {isTrade&&<div className="tl-scene-float-in tl-goods-shimmer" style={{position:'absolute',left:'8%',bottom:groundH+1,width:70,height:30,zIndex:6,animationDelay:'.5s'}}>
+        <img src={GFX2.tradeGoodsPile} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>}
+      {/* ═══ SPEAKING STAFF — Diplomacy trophy display ═══ */}
+      {isDiplo&&<div className="tl-scene-float-in tl-staff-sway" style={{position:'absolute',left:'76%',bottom:groundH+4,width:14,height:56,zIndex:8,animationDelay:'.3s'}}>
+        <img src={GFX2.speakingStaff} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>}
+      {/* ═══ GROWING MEMORIAL POLE — Prominent, pulsing with earned prestige ═══ */}
+      {pp>0&&<div className="tl-scene-float-in tl-pole-grow-pulse" style={{position:'absolute',right:'6%',bottom:groundH,width:20,height:72,zIndex:8,animationDelay:'.4s'}}>
+        <img src={GFX2.poleMemorialGrowing} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+        <div style={{position:'absolute',top:-4,left:-8,width:'180%',height:'110%',
+          background:`radial-gradient(ellipse at 50% 20%,${P.gold}${pp>50?'18':'0a'},transparent 55%)`,pointerEvents:'none'}}/>
+      </div>}
+      {/* Ceremonial poles flanking the longhouse */}
+      <CeremonialPole x="20%" h={52} bottom={groundH} gold={true} zIndex={7}/>
+      <CeremonialPole x="72%" h={48} bottom={groundH} gold={true} zIndex={7}/>
+      {/* Witness crowds — animated gathering */}
+      <WitnessCluster x="35%" bottom={groundH+2} count={6} mood="warm" zIndex={6}/>
+      <WitnessCluster x="56%" bottom={groundH+2} count={5} mood="warm" zIndex={6}/>
+      <WitnessCluster x="80%" bottom={groundH+1} count={3} mood="warm" zIndex={6}/>
+      {/* Smoke rising from the feast */}
+      <div className="tl-smoke" style={{position:'absolute',top:groundTop-40,left:'36%',zIndex:10}}/>
+      <div className="tl-smoke" style={{position:'absolute',top:groundTop-48,left:'42%',zIndex:10,animationDelay:'1.5s'}}/>
+      <div className="tl-smoke" style={{position:'absolute',top:groundTop-36,left:'48%',zIndex:10,animationDelay:'2.8s'}}/>
+      {/* Fire warmth on water */}
+      <FireGlow x="50%" bottom={0} r={140} color="220,160,60" intensity={0.10} zIndex={2}/>
+      <FireGlow x="48%" bottom={groundH-6} r={80} color="240,170,60" intensity={0.22} zIndex={4}/>
+      <Vignette color="8,6,16" intensity={0.08} focus="50% 60%"/>
+    </div>
+  );
+}
+
+/* ═══ DIPLOMACY COUNCIL SCENE — peace negotiation around the fire ═══
+   Triggered: trv_diplo_council step.
+   Stars: council fire (huge, central, blazing), speaking staff (prominent,
+   swaying), trade port settlement (approaching in background),
+   figures in council positions. */
+function DiplomacyCouncilScene({G,sceneH}){
+  const H=sceneH||220;
+  const skyH=H*0.20;
+  const shoreTop=Math.floor(H*0.38);
+  const groundTop=Math.floor(H*0.48);
+  const groundH=H-groundTop;
+  const waterH=H-groundTop;
+  return(
+    <div style={{height:H,position:'relative',overflow:'hidden',
+      background:'linear-gradient(180deg,#1c1a40 0%,#242050 18%,#2c2860 36%,#302c68 52%,#282458 72%,#222048 100%)'}}>
+      <StarField count={18} brightness="#d0d0f0" region={20}/>
+      {/* Warm council-fire sky glow */}
+      <SceneLayer zIndex={1} className="tl-firelight-wash" style={{left:'30%',top:skyH,width:'40%',height:H*0.4,
+        background:'radial-gradient(ellipse at 50% 80%,rgba(240,170,60,.06),transparent 60%)'}}/>
+      {/* ═══ TRADE PORT SETTLEMENT — Large, approaching in background ═══ */}
+      <div className="tl-settlement-approach" style={{position:'absolute',left:'10%',top:shoreTop-18,width:'80%',height:Math.round(H*0.28),zIndex:3}}>
+        <img src={GFX2.tradePortSettlement} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none',opacity:.85}}/>
+      </div>
+      {/* Treeline behind settlement */}
+      <ForestLine yTop={shoreTop-10} height={30} color="#1c3e2c" altColor="#183828" density={80} zIndex={2}/>
+      {/* Ground — council clearing */}
+      <div style={{position:'absolute',top:groundTop,left:0,right:0,height:groundH,zIndex:4,
+        background:'linear-gradient(180deg,#1e2c1a 0%,#1c2a18 40%,#1a2816 100%)'}}>
+        {/* Stone circle for council */}
+        {[28,35,42,50,58,65,72].map((x,i)=><div key={i} style={{position:'absolute',top:4+Math.sin(i)*3,left:x+'%',
+          width:6,height:4,borderRadius:'50%',background:'#3a3830',opacity:.6}}/>)}
+      </div>
+      {/* ═══ COUNCIL FIRE — Huge, blazing, center of scene ═══ */}
+      <div className="tl-scene-float-in tl-fire-dance" style={{position:'absolute',left:'38%',bottom:groundH-2,width:96,height:78,zIndex:8}}>
+        <img src={GFX2.councilFire} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Large fire glow on the ground */}
+      <div className="tl-ember-pulse" style={{position:'absolute',left:'32%',bottom:groundH-10,width:140,height:50,zIndex:5,
+        background:'radial-gradient(ellipse,rgba(240,170,60,.16),transparent 60%)',pointerEvents:'none'}}/>
+      {/* Fire glow reflected upward on faces/structures */}
+      <SceneLayer zIndex={2} className="tl-firelight-wash" style={{left:'35%',bottom:groundH,width:120,height:60,
+        background:'radial-gradient(ellipse at 50% 90%,rgba(240,170,60,.10),transparent 55%)'}}/>
+      {/* ═══ SPEAKING STAFF — Tall, prominent, swaying with authority ═══ */}
+      <div className="tl-scene-float-in tl-staff-sway" style={{position:'absolute',left:'50%',bottom:groundH+4,width:18,height:72,zIndex:9,transform:'translateX(-50%)',animationDelay:'.2s'}}>
+        <img src={GFX2.speakingStaff} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Staff glow — authority aura */}
+      <div style={{position:'absolute',left:'48%',bottom:groundH+20,width:30,height:60,zIndex:8,
+        background:`radial-gradient(ellipse at 50% 30%,${P.gold}0a,transparent 55%)`,pointerEvents:'none'}}/>
+      {/* ═══ COPPER SHIELD — Gift offering on display ═══ */}
+      <div className="tl-scene-float-in tl-copper-gleam" style={{position:'absolute',left:'22%',bottom:groundH+4,width:24,height:36,zIndex:7,animationDelay:'.3s'}}>
+        <img src={GFX2.copperShield} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* ═══ TRADE GOODS — Diplomatic gifts ═══ */}
+      <div className="tl-scene-float-in tl-goods-shimmer" style={{position:'absolute',left:'62%',bottom:groundH+2,width:76,height:32,zIndex:7,animationDelay:'.4s'}}>
+        <img src={GFX2.tradeGoodsPile} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Council participants — your side and theirs */}
+      <WitnessCluster x="28%" bottom={groundH+2} count={4} mood="neutral" zIndex={6}/>
+      <WitnessCluster x="66%" bottom={groundH+2} count={4} mood="neutral" zIndex={6}/>
+      {/* Ceremonial leader presiding */}
+      <RoleFigure role="ceremonialLeader" x="46%" bottom={groundH+6} zIndex={9} glow={`radial-gradient(ellipse at 50% 35%,${P.gold}08,transparent 72%)`}/>
+      {/* Smoke wisps from council fire */}
+      <div className="tl-smoke" style={{position:'absolute',top:groundTop-32,left:'48%',zIndex:10}}/>
+      <div className="tl-smoke" style={{position:'absolute',top:groundTop-40,left:'52%',zIndex:10,animationDelay:'2s'}}/>
+      <FireGlow x="50%" bottom={0} r={120} color="230,165,55" intensity={0.08} zIndex={2}/>
+      <FireGlow x="50%" bottom={groundH-4} r={70} color="240,170,60" intensity={0.24} zIndex={4}/>
+      <Vignette color="6,6,14" intensity={0.10} focus="50% 58%"/>
+    </div>
+  );
+}
+
+/* ═══ TRADE NEGOTIATION SCENE — the bargaining ground ═══
+   Triggered: trv_trade_negotiate step.
+   Stars: trade port settlement (huge background), trade goods pile (large,
+   front and center), copper shield (gleaming), trade canoe (foreground). */
+function TradeNegotiationScene({G,sceneH}){
+  const H=sceneH||220;
+  const skyH=H*0.18;
+  const shoreTop=Math.floor(H*0.32);
+  const groundTop=Math.floor(H*0.52);
+  const groundH=H-groundTop;
+  const waterTop=groundTop;
+  const waterH=groundH;
+  return(
+    <div style={{height:H,position:'relative',overflow:'hidden',
+      background:'linear-gradient(180deg,#0e1c38 0%,#183060 20%,#203c70 42%,#284478 58%,#304e82 72%,#38588a 100%)'}}>
+      <StarField count={12} region={16}/>
+      <SceneMoon right="10%" top="4%" size={16}/>
+      {/* ═══ TRADE PORT SETTLEMENT — Huge, filling the horizon ═══ */}
+      <div className="tl-settlement-approach" style={{position:'absolute',left:'5%',top:shoreTop-24,width:'90%',height:Math.round(H*0.35),zIndex:3}}>
+        <img src={GFX2.tradePortSettlement} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Settlement glow — inhabited, warm */}
+      <SceneLayer zIndex={2} className="tl-firelight-wash" style={{left:'25%',top:shoreTop-10,width:'50%',height:40,
+        background:'radial-gradient(ellipse at 50% 80%,rgba(220,150,60,.06),transparent 65%)'}}/>
+      {/* Beach / landing strip */}
+      <div style={{position:'absolute',top:groundTop-8,left:0,right:0,height:16,zIndex:4,
+        background:'linear-gradient(180deg,#2e2820 0%,#262018 60%,#201c14 100%)'}}>
+        {Array.from({length:20},(_, i)=><div key={i} style={{position:'absolute',top:3+Math.random()*6,left:(i*5+Math.random()*3)+'%',width:2+Math.random()*2,height:1,background:'#3e3828',borderRadius:1,opacity:.4+Math.random()*.3}}/>)}
+      </div>
+      {/* Water */}
+      <WaterBody top={groundTop+6}
+        gradient="linear-gradient(180deg,#204c72 0%,#1a4468 25%,#163c60 55%,#123458 100%)"
+        waveCount={6} phosphorCount={4}/>
+      <SurfBand top={groundTop+2} height={10} foam="226,214,188" undertow="120,150,180" intensity={0.72} zIndex={6}/>
+      {/* ═══ TRADE GOODS — LARGE, center-stage bargaining display ═══ */}
+      <div className="tl-scene-float-in tl-goods-shimmer" style={{position:'absolute',left:'30%',bottom:waterH+6,width:120,height:50,zIndex:8}}>
+        <img src={GFX2.tradeGoodsPile} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Goods glow — value display */}
+      <div className="tl-ember-pulse" style={{position:'absolute',left:'34%',bottom:waterH,width:110,height:30,zIndex:6,
+        background:'radial-gradient(ellipse,rgba(200,160,60,.10),transparent 65%)',pointerEvents:'none'}}/>
+      {/* ═══ COPPER SHIELDS — The prestige currency on the table ═══ */}
+      <div className="tl-scene-float-in tl-copper-gleam" style={{position:'absolute',left:'18%',bottom:waterH+10,width:22,height:33,zIndex:8,animationDelay:'.2s'}}>
+        <img src={GFX2.copperShield} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      <div className="tl-scene-float-in tl-copper-gleam" style={{position:'absolute',right:'22%',bottom:waterH+8,width:20,height:30,zIndex:8,animationDelay:'.4s'}}>
+        <img src={GFX2.copperShield} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* ═══ TRADE CANOE — Your vessel, large in foreground, drifting ═══ */}
+      <div className="tl-scene-float-in tl-canoe-drift" style={{position:'absolute',left:'8%',bottom:waterH*0.15,width:140,height:48,zIndex:9,animationDelay:'.3s'}}>
+        <img src={GFX2.canoeTradeHull} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Canoe wake */}
+      <WakeTrail left="6%" bottom={waterH*0.12} width={130} strength="medium" zIndex={8}/>
+      {/* Negotiators on the beach */}
+      <WitnessCluster x="45%" bottom={waterH+2} count={5} mood="neutral" zIndex={7}/>
+      <RoleFigure role="elder" x="38%" bottom={waterH+4} zIndex={8}/>
+      <FogBand top={shoreTop-4} height={20} opacity={0.06} color="140,160,180" zIndex={5}/>
+      <FireGlow x="45%" bottom={waterH-2} r={50} color="200,160,80" intensity={0.10} zIndex={4}/>
+      <Vignette color="4,8,18" intensity={0.08} focus="50% 50%"/>
+    </div>
+  );
+}
+
+/* ═══ VILLAGE PROVISION SCENE — Home Waters daily life, large SVGs ═══
+   Triggered: vil_dawn (Home Waters opening).
+   Stars: drying racks (large, swaying with fish), trade goods (stored
+   provisions), feast longhouse (community center), growing memorial pole,
+   trade canoe being loaded. */
+function VillageProvisionScene({G,sceneH}){
+  const H=sceneH||220;
+  const skyH=H*0.24;
+  const mtH=H*0.10;
+  const shoreH=H*0.06;
+  const landTop=skyH+mtH+shoreH;
+  const groundH=H*0.28;
+  const waterH=H-landTop-groundH;
+  const gb=waterH+groundH;
+  const pp=G?G.poleProgress||0:0;
+  return(
+    <div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',
+      background:'linear-gradient(180deg,#1c1258 0%,#28206e 22%,#342880 44%,#3c2e88 58%,#302470 78%,#281c58 100%)'}}>
+      <StarField count={24} region={24}/>
+      <SceneMoon right="12%" top="4%" size={18}/>
+      <MountainRange yTop={skyH-8} height={mtH+14} fill1="#1c2040" fill2="#202848"/>
+      <ForestLine yTop={skyH+mtH-10} height={shoreH+18} color="#1c3020" altColor="#182818"/>
+      <FogBand top={skyH+mtH-2} opacity={0.05} speed={18}/>
+      {/* Ground */}
+      <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,
+        background:'linear-gradient(180deg,#1c3018 0%,#1e3014 40%,#243018 100%)'}}>
+        {[6,14,26,38,52,66,78,90].map((x,i)=><div key={i} style={{position:'absolute',top:-2-(i%3),left:x+'%',
+          width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
+          borderBottom:`${4+(i%2)*3}px solid #1c3018`}}/>)}
+      </div>
+      {/* ═══ FEAST LONGHOUSE — Community center, warm and welcoming ═══ */}
+      <div className="tl-scene-float-in tl-longhouse-warmth" style={{position:'absolute',left:'32%',bottom:gb-2,width:160,height:104,zIndex:5}}>
+        <img src={GFX2.longhouseFeast} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      <div className="tl-smoke" style={{position:'absolute',top:landTop-18,left:'48%',zIndex:10}}/>
+      <div className="tl-smoke" style={{position:'absolute',top:landTop-24,left:'52%',zIndex:10,animationDelay:'2s'}}/>
+      {/* Longhouse warmth glow */}
+      <div className="tl-ember-pulse" style={{position:'absolute',left:'38%',bottom:gb+4,width:90,height:40,zIndex:4,
+        background:'radial-gradient(ellipse,rgba(230,160,60,.10),transparent 65%)',pointerEvents:'none'}}/>
+      {/* ═══ DRYING RACK — Large, prominent, fish swaying ═══ */}
+      <div className="tl-scene-float-in tl-rack-sway" style={{position:'absolute',left:'4%',bottom:gb,width:68,height:78,zIndex:7,animationDelay:'.2s'}}>
+        <img src={GFX2.dryingRack} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Second drying rack — slightly smaller, behind */}
+      <div className="tl-scene-float-in tl-rack-sway" style={{position:'absolute',left:'18%',bottom:gb-2,width:52,height:60,zIndex:6,animationDelay:'.5s',opacity:.8}}>
+        <img src={GFX2.dryingRack} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* ═══ TRADE GOODS — Stored provisions for the season ═══ */}
+      <div className="tl-scene-float-in tl-goods-shimmer" style={{position:'absolute',left:'72%',bottom:gb+2,width:80,height:34,zIndex:7,animationDelay:'.3s'}}>
+        <img src={GFX2.tradeGoodsPile} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* ═══ GROWING MEMORIAL POLE — Village legacy, pulsing ═══ */}
+      {pp>0&&<div className="tl-scene-float-in tl-pole-grow-pulse" style={{position:'absolute',right:'4%',bottom:gb,width:22,height:76,zIndex:8,animationDelay:'.4s'}}>
+        <img src={GFX2.poleMemorialGrowing} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+        <div style={{position:'absolute',top:-4,left:-8,width:'180%',height:'110%',
+          background:`radial-gradient(ellipse at 50% 20%,${P.gold}${pp>50?'18':'0a'},transparent 55%)`,pointerEvents:'none'}}/>
+      </div>}
+      {/* Ceremonial poles */}
+      <CeremonialPole x="30%" h={46} bottom={gb} gold={pp>30} zIndex={7}/>
+      {/* ═══ TRADE CANOE — Beached, being loaded ═══ */}
+      <div className="tl-scene-float-in tl-canoe-drift" style={{position:'absolute',left:'2%',bottom:waterH-4,width:120,height:40,zIndex:6,animationDelay:'.2s'}}>
+        <img src={GFX2.canoeTradeHull} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',userSelect:'none',pointerEvents:'none'}}/>
+      </div>
+      {/* Village workers */}
+      <VillageWorkers bottom={gb} zIndex={6}/>
+      <WitnessCluster x="56%" bottom={gb+2} count={4} mood="warm" zIndex={6}/>
+      {/* Workshop warmth fires */}
+      <CeremonialFire x="16%" bottom={gb+2} size="small" zIndex={7} mood="warm"/>
+      <DawnSmoke x="12%" bottom={gb+22} zIndex={3}/>
+      <DawnSmoke x="50%" bottom={gb+26} zIndex={3}/>
+      {/* Water */}
+      <WaterBody top={landTop+groundH}
+        gradient="linear-gradient(180deg,#1e4470 0%,#183c62 28%,#143658 58%,#102c50 100%)"
+        waveCount={5} phosphorCount={3}/>
+      <SurfBand top={landTop+groundH-4} height={11} foam="226,214,188" undertow="120,150,180" intensity={0.72} zIndex={6}/>
+      <FireGlow x="50%" bottom={0} r={130} color="200,140,60" intensity={0.07} zIndex={2}/>
+      <FireGlow x="44%" bottom={gb-4} r={50} intensity={0.16} zIndex={4}/>
+      <Vignette color="8,6,16" intensity={0.08} focus="48% 55%"/>
+    </div>
+  );
+}
+
 /* ═══ SCENE DISPATCHER ═══ */
 /* Routes to the appropriate phase scene using shared building blocks.
    Each scene is 320px tall, using the same visual language.
    Pass G and phase so scenes can react to game state (outcome, etc). */
 function Scene({type,tall,G,phase,sceneH}){
+  /* ── Step-specific featured SVG scenes ── */
+  if(G&&G.step==='trv_trade_negotiate') return <TradeNegotiationScene G={G} sceneH={sceneH}/>;
+  if(G&&G.step==='trv_diplo_council') return <DiplomacyCouncilScene G={G} sceneH={sceneH}/>;
+  if(G&&G.step==='aft_show'){
+    const isWin=G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY'||G.outcome==='TRADE_SUCCESS'||G.outcome==='DIPLOMACY_SUCCESS';
+    if(isWin) return <PotlatchScene G={G} sceneH={sceneH}/>;
+  }
+  if(G&&G.step==='vil_dawn') return <VillageProvisionScene G={G} sceneH={sceneH}/>;
+  /* ── Standard phase-based scenes ── */
   if(phase===1) return <TravelScene sceneH={sceneH} G={G}/>;
   if(phase===4) return <WithdrawalScene G={G} sceneH={sceneH}/>;
   if(phase===5) return <AftermathScene G={G} sceneH={sceneH}/>;
