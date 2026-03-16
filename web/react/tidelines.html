@@ -899,10 +899,10 @@ const INJCSS=`
 .tl-battle-surge-right{animation:tl-battle-surge-right 2.2s ease-in-out infinite}
 .tl-banner-breathe{animation:tl-banner-breathe 2.8s ease-in-out infinite}
 
-@keyframes tl-row-port{0%,100%{transform:translateX(2px) translateY(0) rotate(0deg)}12%{transform:translateX(3px) translateY(-2px) rotate(-5deg)}40%{transform:translateX(1px) translateY(1.5px) rotate(4deg)}58%{transform:translateX(2px) translateY(.5px) rotate(1deg)}80%{transform:translateX(2px) translateY(-.3px) rotate(-.5deg)}}
+@keyframes tl-row-port{0%,100%{transform:translateX(-2px) translateY(0) rotate(0deg)}12%{transform:translateX(-3px) translateY(-2px) rotate(-5deg)}40%{transform:translateX(1px) translateY(1.5px) rotate(4deg)}58%{transform:translateX(0px) translateY(.5px) rotate(1deg)}80%{transform:translateX(-1px) translateY(-.3px) rotate(-.5deg)}}
 @keyframes tl-row-star{0%,100%{transform:translateX(-2px) translateY(0) rotate(0deg)}12%{transform:translateX(-3px) translateY(-2px) rotate(5deg)}40%{transform:translateX(-1px) translateY(1.5px) rotate(-4deg)}58%{transform:translateX(-2px) translateY(.5px) rotate(-1deg)}80%{transform:translateX(-2px) translateY(-.3px) rotate(.5deg)}}
-@keyframes tl-oar-port{0%,100%{transform:rotate(28deg)}12%{transform:rotate(6deg)}40%{transform:rotate(-28deg)}58%{transform:rotate(-8deg)}80%{transform:rotate(18deg)}}
-@keyframes tl-oar-star{0%,100%{transform:rotate(-28deg) scaleX(-1)}12%{transform:rotate(-6deg) scaleX(-1)}40%{transform:rotate(28deg) scaleX(-1)}58%{transform:rotate(8deg) scaleX(-1)}80%{transform:rotate(-18deg) scaleX(-1)}}
+@keyframes tl-oar-port{0%,100%{transform:rotate(-30deg)}12%{transform:rotate(-10deg)}40%{transform:rotate(24deg)}58%{transform:rotate(8deg)}80%{transform:rotate(-20deg)}}
+@keyframes tl-oar-star{0%,100%{transform:rotate(-34deg)}12%{transform:rotate(-12deg)}40%{transform:rotate(24deg)}58%{transform:rotate(10deg)}80%{transform:rotate(-24deg)}}
 @keyframes tl-paddle-splash{0%,10%{opacity:0;transform:scale(.4)}13%{opacity:.5;transform:scale(1.1)}22%{opacity:.15;transform:scale(1.5) translateY(2px)}32%,100%{opacity:0;transform:scale(.5) translateY(3px)}}
 @keyframes tl-bless-sway{0%,100%{transform:rotate(0deg)}30%{transform:rotate(1.5deg)}70%{transform:rotate(-1deg)}}
 @keyframes tl-wake{0%{opacity:.35;transform:scaleX(1) translateX(0)}100%{opacity:0;transform:scaleX(2.5) translateX(30px)}}
@@ -1615,17 +1615,25 @@ function ReturnCanoe({left='28%',bottom=0,w=110,isWin=false,hasDead=false,damage
   );
 }
 
-function TravelHeroCanoe({left='18%',bottom=32,width=260,crew,Paddler,CYCLE,zIndex=8}){
+function TravelHeroCanoe({left='18%',bottom=32,width=176,crew,Paddler,CYCLE,zIndex=8}){
+  const trimLeft=Math.round(width*0.16);
+  const trimWidth=Math.round(width*0.68);
+  const shadowLeft=Math.round(width*0.15);
+  const shadowWidth=Math.round(width*0.7);
+  const crowdMaskLeft=Math.round(width*0.2);
+  const crowdMaskWidth=Math.round(width*0.56);
+  const leaderX=Math.round(width*0.12);
+  const steersmanX=Math.round(width*0.79);
   return(
-    <SceneLayer zIndex={zIndex} className="tl-canoe-rock" style={{left,bottom,width,height:78}}>
-      <div style={{position:'absolute',left:0,right:0,bottom:2,height:62,zIndex:8,overflow:'visible'}}>
-        <img src={GFX2.canoeWarHull} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'auto',transform:'scaleY(.62)',transformOrigin:'50% 100%',filter:'drop-shadow(0 4px 12px rgba(0,0,0,.42))',userSelect:'none',pointerEvents:'none'}}/>
+    <SceneLayer zIndex={zIndex} className="tl-canoe-rock" style={{left,bottom,width,height:72}}>
+      <div style={{position:'absolute',left:0,right:0,bottom:2,height:56,zIndex:8,overflow:'visible'}}>
+        <img src={GFX2.canoeWarHull} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'auto',transform:'scaleY(.54)',transformOrigin:'50% 100%',filter:'drop-shadow(0 4px 12px rgba(0,0,0,.42))',userSelect:'none',pointerEvents:'none'}}/>
       </div>
-      <div style={{position:'absolute',bottom:16,left:26,width:208,height:2,zIndex:9,
+      <div style={{position:'absolute',bottom:16,left:trimLeft,width:trimWidth,height:2,zIndex:9,
         background:`linear-gradient(90deg,transparent 2%,${P.gold}10 12%,${P.gold}24 30%,${P.gold}34 50%,${P.gold}24 70%,${P.gold}10 88%,transparent 98%)`}}/>
-      <div style={{position:'absolute',bottom:4,left:30,width:198,height:8,zIndex:3,
+      <div style={{position:'absolute',bottom:5,left:shadowLeft,width:shadowWidth,height:8,zIndex:3,
         background:'linear-gradient(180deg,rgba(80,40,0,.16) 0%,rgba(60,30,0,.06) 50%,transparent 100%)',filter:'blur(1.5px)',borderRadius:'0 0 6px 6px'}}/>
-      <div style={{position:'absolute',bottom:17,left:24,width:212,height:12,zIndex:9,
+      <div style={{position:'absolute',bottom:17,left:crowdMaskLeft,width:crowdMaskWidth,height:7,zIndex:7,
         background:'radial-gradient(ellipse at 50% 100%,rgba(18,10,4,.16),transparent 72%)',pointerEvents:'none'}}/>
 
       {crew.map((s,i)=><Paddler key={i} x={s.x} side={s.side} delay={s.delay}/>) }
@@ -1636,12 +1644,12 @@ function TravelHeroCanoe({left='18%',bottom=32,width=260,crew,Paddler,CYCLE,zInd
         animation:`tl-paddle-splash ${CYCLE}s ease-in-out ${s.delay}s infinite`,
       }}/>;})}
 
-      <RoleFigure role="ceremonialLeader" x={34} bottom={15} zIndex={zIndex+3} animation="tl-bless-sway 5s ease-in-out infinite" glow={`radial-gradient(ellipse at 50% 30%,${P.gold}08,transparent 70%)`} />
-      <RoleFigure role="canoeSteersman" x={208} bottom={13} zIndex={zIndex+3}/>
+      <RoleFigure role="ceremonialLeader" x={leaderX} bottom={14} zIndex={zIndex+3} animation="tl-bless-sway 5s ease-in-out infinite" glow={`radial-gradient(ellipse at 50% 30%,${P.gold}08,transparent 70%)`} />
+      <RoleFigure role="canoeSteersman" x={steersmanX} bottom={12} zIndex={zIndex+3}/>
 
-      <div style={{position:'absolute',bottom:8,right:-55,width:85,height:12,zIndex:1}}>
+      <div style={{position:'absolute',bottom:8,right:-30,width:54,height:12,zIndex:1}}>
         {[0,1,2,3].map(i=>(<div key={i} className="tl-wake-shimmer" style={{
-          position:'absolute',top:i*2.8,left:0,width:50+i*12,height:2-i*0.3,
+          position:'absolute',top:i*2.8,left:0,width:30+i*8,height:2-i*0.3,
           background:`linear-gradient(90deg,rgba(100,150,190,${.3-i*.06}),transparent)`,borderRadius:1,
           animation:'tl-wake 3.2s ease-out infinite',animationDelay:(i*0.5)+'s',
         }}/>))}
@@ -2039,44 +2047,51 @@ function TravelScene({sceneH}){
   /* ── Stroke cycle: 2.4s per full catch→pull→exit→recovery ── */
   const CYCLE=2.4;
 
-  /* ── Crew seats: 8 paddlers, strongly alternating port(p)/starboard(s) ── */
-  /* Port paddlers sit near-side (visually lower), starboard far-side (higher).
-     Wide lateral offsets make the alternation unmistakable at any size. */
+  /* ── Crew seats: 8 paddlers packed into the canoe's working middle ── */
   const crew=useMemo(()=>{
-    const seats=[];
-    for(let i=0;i<8;i++){
-      const isP=i%2===0;
-      seats.push({
-        x:42+i*22,
-        side:isP?'p':'s',
-        delay:i*0.05,
-      });
-    }
-    return seats;
+    return[
+      {x:38,side:'p',delay:0},
+      {x:49,side:'s',delay:0.06},
+      {x:60,side:'p',delay:0.12},
+      {x:71,side:'s',delay:0.18},
+      {x:82,side:'p',delay:0.24},
+      {x:93,side:'s',delay:0.3},
+      {x:104,side:'p',delay:0.36},
+      {x:115,side:'s',delay:0.42},
+    ];
   },[]);
 
   /* ── Paddler silhouette — exaggerated port/starboard lateral offset ── */
   const Paddler=({x,side,delay})=>{
     const isP=side==='p';
-     const yOff=isP?4:17;
+    const xOff=isP?-1:7;
+    const yOff=isP?5:19;
     const bodyAnim=isP?'tl-row-port':'tl-row-star';
     const oarAnim=isP?'tl-oar-port':'tl-oar-star';
-    const z=isP?10:7;
-    /* Port = brighter for near-side clarity, starboard = dimmer for depth */
-    const hat1=isP?'#5a4420':'#342410';
-    const hat2=isP?'#4a3418':'#281c0c';
-    const skin=isP?'#2e2014':'#1a1208';
-    const torso=isP?'#281c14':'#16100a';
-    const shaft1=isP?'#6a4820':'#3e2c10';
-    const shaft2=isP?'#5a3818':'#2e2008';
-    const blade=isP?'#5a3818':'#2e2008';
+    const z=isP?10:11;
+    /* Port = brighter for near-side clarity, starboard = lifted just enough to read over the hull */
+    const hat1=isP?'#5a4420':'#594226';
+    const hat2=isP?'#4a3418':'#45301b';
+    const skin=isP?'#2e2014':'#302116';
+    const torso=isP?'#281c14':'#2d2118';
+    const shaft1=isP?'#6a4820':'#694924';
+    const shaft2=isP?'#5a3818':'#55371b';
+    const blade=isP?'#5a3818':'#4c3019';
+    const silhouetteFilter=isP
+      ?'drop-shadow(0 0 1px rgba(0,0,0,.12))'
+      :'brightness(1.08) saturate(.9) contrast(1.03) drop-shadow(0 0 2px rgba(8,12,20,.34))';
+    const rowerOpacity=isP?1:.96;
     /* Paddle is on the OUTSIDE of the canoe — port=left, starboard=right */
-    const padX=isP?-6:10;
+    const padX=isP?-6:15;
+    const paddleVisibleH=isP?28:16;
+    const paddleTop=isP?6:4;
     return(
       <div className="tl-paddler" style={{
-        position:'absolute',bottom:yOff,left:x,width:14,height:28,
+        position:'absolute',bottom:yOff,left:x+xOff,width:14,height:28,
         animation:`${bodyAnim} ${CYCLE}s ease-in-out ${delay}s infinite`,
         zIndex:z,
+        filter:silhouetteFilter,
+        opacity:rowerOpacity,
       }}>
         {/* woven hat — conical, wider for readability */}
         <div style={{position:'absolute',top:0,left:0,width:14,height:6,
@@ -2094,17 +2109,20 @@ function TravelScene({sceneH}){
           background:torso,borderRadius:1,transform:`rotate(${isP?-18:18}deg)`}}/>
         {/* paddle assembly — shaft+blade on the CORRECT side */}
         <div style={{
-          position:'absolute',top:6,left:padX,width:12,height:28,
-          transformOrigin:isP?'8px 3px':'4px 3px',
+          position:'absolute',top:paddleTop,left:padX,width:12,height:paddleVisibleH,
+          transformOrigin:isP?'8px 3px':'2px 2px',
           animation:`${oarAnim} ${CYCLE}s ease-in-out ${delay}s infinite`,
         }}>
           {/* shaft — thicker for readability */}
-          <div style={{position:'absolute',top:0,left:5,width:3,height:20,
+          <div style={{position:'absolute',top:0,left:isP?5:2,width:isP?3:2,height:isP?20:13,
             background:`linear-gradient(180deg,${shaft1},${shaft2})`,borderRadius:1}}/>
-          {/* blade */}
-          <div style={{position:'absolute',top:18,left:3,width:6,height:7,
-            background:`linear-gradient(180deg,${shaft2},${blade})`,
-            borderRadius:'1px 1px 4px 4px'}}/>
+          {isP
+            ?<div style={{position:'absolute',top:18,left:3,width:6,height:7,
+              background:`linear-gradient(180deg,${shaft2},${blade})`,
+              borderRadius:'1px 1px 4px 4px'}}/>
+            :<div style={{position:'absolute',top:-1,left:0,width:6,height:3,
+              background:`linear-gradient(180deg,${shaft1},${shaft2})`,borderRadius:'2px 2px 1px 1px'}}/>
+          }
         </div>
         {/* paddle catch splash — on correct side */}
         <div style={{position:'absolute',top:33,left:padX+2,width:8,height:3,
@@ -2144,7 +2162,7 @@ function TravelScene({sceneH}){
       <SceneLayer zIndex={7} style={{left:'14%',top:waterTop+18,width:'58%',height:40,
         background:'radial-gradient(ellipse,rgba(110,160,210,.06) 0%,transparent 72%)'}}/>
 
-      <TravelHeroCanoe left="18%" bottom={waterH*0.32} width={260} crew={crew} Paddler={Paddler} CYCLE={CYCLE} zIndex={8}/>
+      <TravelHeroCanoe left="26%" bottom={waterH*0.32} width={176} crew={crew} Paddler={Paddler} CYCLE={CYCLE} zIndex={8}/>
 
       <SceneLayer zIndex={9} style={{left:0,right:0,bottom:0,height:waterH*0.3,
         background:'linear-gradient(180deg,transparent 0%,rgba(4,8,18,.15) 100%)'}}/>
@@ -2723,6 +2741,8 @@ function TidelinesApp(){
   const[playMode,setPlayMode]=useState(false);
   const[sidebarOpen,setSidebarOpen]=useState(false);
   const[logExpanded,setLogExpanded]=useState(false);
+  const[battleSummaryOpen,setBattleSummaryOpen]=useState(true);
+  const[aftermathSummaryOpen,setAftermathSummaryOpen]=useState(true);
   const appRef=useRef(null);
   const[sceneH,setSceneH]=useState(220);
 
@@ -2882,6 +2902,12 @@ function TidelinesApp(){
   },[G.step,G.outcome,playContext]);
 
   useEffect(()=>{
+    if(phase===3) setBattleSummaryOpen(true);
+    else if(phase===4) setBattleSummaryOpen(false);
+    if(phase===5) setAftermathSummaryOpen(false);
+  },[phase,G.step]);
+
+  useEffect(()=>{
     if(lastLoggedPhaseRef.current===G.step)return;
     lastLoggedPhaseRef.current=G.step;
     logAlphaEvent('step_viewed',{step:G.step,phase:phaseInfo.label,raid:G.totalRaids+1});
@@ -2952,8 +2978,20 @@ function TidelinesApp(){
             <Scene type={G.scene} tall={true} G={G} phase={phase} sceneH={playMode?sceneH:220}/>
           </div>
 
-          {showBattle&&<div className="tl-scroll" style={playMode?{maxHeight:180,overflowY:'auto'}:{}}><BattleBoard G={G}/></div>}
-          {showAftermath&&<div className="tl-scroll" style={playMode?{maxHeight:260,overflowY:'auto'}:{}}><AftermathSummary G={G} feedbackHref={feedbackHref} onFeedback={openFeedback} playContext={playContext}/></div>}
+          {showBattle&&<div style={{background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+            <div onClick={()=>{setBattleSummaryOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 12px',cursor:'pointer',userSelect:'none'}}>
+              <div style={{fontSize:7,color:P.dim,letterSpacing:.5}}>⚔ BATTLE SUMMARY {phase>=4?'— compact so the scene stays visible':''}</div>
+              <div style={{fontSize:6,color:battleSummaryOpen?P.gold:P.dim}}>{battleSummaryOpen?'▾ OPEN':'▸ EXPAND'}</div>
+            </div>
+            {battleSummaryOpen&&<div className="tl-scroll" style={playMode?{maxHeight:180,overflowY:'auto'}:{}}><BattleBoard G={G}/></div>}
+          </div>}
+          {showAftermath&&<div style={{background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+            <div onClick={()=>{setAftermathSummaryOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 12px',cursor:'pointer',userSelect:'none'}}>
+              <div style={{fontSize:7,color:P.dim,letterSpacing:.5}}>🏔 AFTERMATH SUMMARY — compact by default so the homecoming scene stays readable</div>
+              <div style={{fontSize:6,color:aftermathSummaryOpen?P.gold:P.dim}}>{aftermathSummaryOpen?'▾ OPEN':'▸ EXPAND'}</div>
+            </div>
+            {aftermathSummaryOpen&&<div className="tl-scroll" style={playMode?{maxHeight:260,overflowY:'auto'}:{}}><AftermathSummary G={G} feedbackHref={feedbackHref} onFeedback={openFeedback} playContext={playContext}/></div>}
+          </div>}
 
           {/* Narrative log */}
           <div className="tl-scroll tl-narrlog" ref={logRef} style={{
