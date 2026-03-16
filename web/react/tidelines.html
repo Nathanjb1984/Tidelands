@@ -787,6 +787,7 @@ function enterAftermath(prev){
   if(dead.length>0) s.impactFrame={type:'fallen',names:dead};
   else if(newFeud==='Blood Feud'&&oldFeud!=='Blood Feud') s.impactFrame={type:'bloodfeud'};
   else if(s.traitsEarned.length>0) s.impactFrame={type:'trait',traits:s.traitsEarned};
+  else s.impactFrame={type:'phase_enter',phase:5,title:isWin?'HOMECOMING':'MOURNING SHORE',subtitle:isWin?'The canoe returns under witness firelight. Every eye in the village turns toward the beach.':'The canoe returns in silence. Stoneshell Inlet sees who did not come back.',place:WORLD.home.name,isWin};
   savePersist(persistFromState(s));s.step='aft_show';return s;
 }
 
@@ -813,6 +814,17 @@ const INJCSS=`
 @keyframes tl-hint-in{from{opacity:0;max-height:0}to{opacity:1;max-height:60px}}
 @keyframes tl-chart-pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.9}50%{transform:translate(-50%,-50%) scale(1.08);opacity:1}}
 @keyframes tl-route-flow{0%{background-position:0 0}100%{background-position:24px 0}}
+@keyframes tl-crowd-sway{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+@keyframes tl-solemn-sway{0%,100%{transform:translateY(0)}50%{transform:translateY(.8px)}}
+@keyframes tl-home-glow{0%,100%{opacity:.45}50%{opacity:.9}}
+@keyframes tl-goods-glint{0%,100%{opacity:.15;transform:translateX(-10%)}50%{opacity:.45;transform:translateX(10%)}}
+@keyframes tl-battle-throb{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
+@keyframes tl-battle-surge-left{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@keyframes tl-battle-surge-right{0%,100%{transform:translateX(0)}50%{transform:translateX(-5px)}}
+@keyframes tl-impact-ring{0%{opacity:.45;transform:translate(-50%,-50%) scale(.65)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+@keyframes tl-shore-notice{0%,100%{opacity:.35}50%{opacity:.85}}
+@keyframes tl-canoe-home{0%,100%{transform:translateX(0) translateY(0)}50%{transform:translateX(6px) translateY(-2px)}}
+@keyframes tl-banner-breathe{0%,100%{box-shadow:0 0 10px rgba(0,0,0,.25)}50%{box-shadow:0 0 18px rgba(0,0,0,.45)}}
 
 /* Ceremony / village animations */
 @keyframes tl-ceremony-glow{0%,100%{opacity:.6}50%{opacity:1}}
@@ -821,6 +833,13 @@ const INJCSS=`
 .tl-ceremony-glow{animation:tl-ceremony-glow 4s ease-in-out infinite}
 .tl-crowd-arrive{animation:tl-crowd-arrive .8s ease-out}
 .tl-pole-reveal{animation:tl-pole-reveal .6s ease-out;transform-origin:bottom center}
+.tl-crowd-warm{animation:tl-crowd-arrive .8s ease-out,tl-crowd-sway 4.6s ease-in-out infinite}
+.tl-crowd-solemn{animation:tl-crowd-arrive .8s ease-out,tl-solemn-sway 5.8s ease-in-out infinite}
+.tl-home-glow{animation:tl-home-glow 3.8s ease-in-out infinite}
+.tl-battle-throb{animation:tl-battle-throb 1.8s ease-in-out infinite}
+.tl-battle-surge-left{animation:tl-battle-surge-left 2.2s ease-in-out infinite}
+.tl-battle-surge-right{animation:tl-battle-surge-right 2.2s ease-in-out infinite}
+.tl-banner-breathe{animation:tl-banner-breathe 2.8s ease-in-out infinite}
 
 @keyframes tl-row-port{0%,100%{transform:translateX(2px) translateY(0) rotate(0deg)}12%{transform:translateX(3px) translateY(-2px) rotate(-5deg)}40%{transform:translateX(1px) translateY(1.5px) rotate(4deg)}58%{transform:translateX(2px) translateY(.5px) rotate(1deg)}80%{transform:translateX(2px) translateY(-.3px) rotate(-.5deg)}}
 @keyframes tl-row-star{0%,100%{transform:translateX(-2px) translateY(0) rotate(0deg)}12%{transform:translateX(-3px) translateY(-2px) rotate(5deg)}40%{transform:translateX(-1px) translateY(1.5px) rotate(-4deg)}58%{transform:translateX(-2px) translateY(.5px) rotate(-1deg)}80%{transform:translateX(-2px) translateY(-.3px) rotate(.5deg)}}
@@ -987,14 +1006,15 @@ const INJCSS=`
 @media(max-height:440px) and (orientation:landscape){
   .tl-playmode .tl-topbar{padding-top:2px!important;padding-bottom:2px!important}
   .tl-playmode .tl-screen{grid-template-rows:auto 1fr auto!important}
-  .tl-playmode .tl-cmdarea{max-height:45vh;max-height:45dvh;overflow-y:auto}
+  .tl-playmode .tl-cmdarea{max-height:42vh;max-height:42dvh;overflow-y:auto}
   .tl-sidebar.tl-sidebar-play{max-height:60vh!important;max-height:60dvh!important}
 }
 
-/* Mobile portrait play mode — scrollable commands */
+/* Mobile portrait play mode — larger stage, scrollable commands */
 @media(max-width:480px) and (orientation:portrait){
   .tl-playmode .tl-screen{grid-template-rows:auto 1fr auto!important}
-  .tl-playmode .tl-cmdarea{max-height:50vh;max-height:50dvh;overflow-y:auto}
+  .tl-playmode .tl-cmdarea{max-height:40vh;max-height:40dvh;overflow-y:auto}
+  .tl-playmode .tl-stage{padding-bottom:2px}
 }
 
 /* Orientation hint banner */
@@ -1302,25 +1322,29 @@ function CeremonialPole({x,h=55,bottom=0,gold=true,memorial=false,zIndex=6}){
 }
 
 /* ── Ceremonial Fire (larger, animated, with sparks and warmth) ── */
-function CeremonialFire({x,bottom,size='medium',zIndex=7}){
+function CeremonialFire({x,bottom,size='medium',zIndex=7,mood='warm'}){
   const sz=size==='large'?{w:14,h:20,glow:80,sparks:6}:size==='small'?{w:5,h:8,glow:28,sparks:1}:{w:9,h:14,glow:55,sparks:3};
+  const warm=mood!=='grief';
+  const outer=warm?'rgba(255,160,40,.6)':'rgba(180,120,110,.36)';
+  const inner=warm?'rgba(255,220,100,.5)':'rgba(220,180,160,.22)';
+  const ember=warm?'rgba(200,80,20,.35)':'rgba(110,80,100,.22)';
   return<div style={{position:'absolute',left:x,bottom,width:sz.w*3,height:sz.h*3,zIndex,transform:'translateX(-50%)'}}>
     <div className="tl-fire" style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',
       width:sz.w,height:sz.h,
-      background:'radial-gradient(ellipse at 50% 80%,rgba(255,160,40,.6) 0%,rgba(255,100,20,.3) 40%,transparent 70%)'}}/>
+      background:`radial-gradient(ellipse at 50% 80%,${outer} 0%,rgba(255,100,20,.3) 40%,transparent 70%)`}}/>
     <div className="tl-fire" style={{position:'absolute',bottom:1,left:'50%',transform:'translateX(-50%)',
       width:sz.w*0.5,height:sz.h*0.6,animationDelay:'.3s',
-      background:'radial-gradient(ellipse at 50% 80%,rgba(255,220,100,.5) 0%,rgba(255,160,40,.2) 50%,transparent 70%)'}}/>
+      background:`radial-gradient(ellipse at 50% 80%,${inner} 0%,rgba(255,160,40,.2) 50%,transparent 70%)`}}/>
     {Array.from({length:sz.sparks},(_,i)=><div key={i} className="tl-spark" style={{
       position:'absolute',bottom:sz.h-2,left:`${35+i*7}%`,width:2,height:2,borderRadius:'50%',
-      background:'rgba(255,200,80,.7)',animationDelay:(i*0.6)+'s'}}/>)}
+      background:warm?'rgba(255,200,80,.7)':'rgba(190,170,190,.45)',animationDelay:(i*0.6)+'s'}}/>)}
     <div style={{position:'absolute',bottom:-4,left:'50%',transform:'translateX(-50%)',
       width:sz.glow,height:sz.glow*0.4,
-      background:`radial-gradient(ellipse,rgba(200,120,40,.2) 0%,transparent 70%)`}}/>
+      background:`radial-gradient(ellipse,rgba(${warm?'200,120,40':'120,90,110'},.2) 0%,transparent 70%)`}}/>
     {/* Ember bed */}
     <div style={{position:'absolute',bottom:-1,left:'50%',transform:'translateX(-50%)',
       width:sz.w*1.2,height:3,borderRadius:2,
-      background:'radial-gradient(ellipse,rgba(200,80,20,.35) 0%,rgba(120,40,10,.15) 60%,transparent 100%)'}}/>
+      background:`radial-gradient(ellipse,${ember} 0%,rgba(120,40,10,.15) 60%,transparent 100%)`}}/>
   </div>;
 }
 
@@ -1331,7 +1355,8 @@ function WitnessCluster({x,bottom=0,count=4,mood='neutral',zIndex=6}){
     hat:i%2===0,h:i%3===0?12:17+Math.random()*3,
   })),[count]);
   const tone=mood==='warm'?'#2a1a08':mood==='grief'?'#140808':'#1a1208';
-  return<>{figs.map((f,i)=><div key={i} className="tl-crowd-arrive" style={{
+  const crowdClass=mood==='warm'?'tl-crowd-warm':mood==='grief'||mood==='solemn'?'tl-crowd-solemn':'tl-crowd-arrive';
+  return<>{figs.map((f,i)=><div key={i} className={crowdClass} style={{
     position:'absolute',left:`calc(${x} + ${f.dx}px)`,bottom:bottom+(i%2)*2,
     width:8,height:f.h,zIndex:zIndex+(f.type==='sitting'?0:1),
     opacity:mood==='grief'?.55:mood==='solemn'?.7:1,
@@ -1358,7 +1383,9 @@ function GoodsPile({x,bottom=0,size='medium',zIndex=5}){
     <div style={{position:'absolute',bottom:h*0.6,left:w*0.2,width:w*0.5,height:h*0.3,
       background:'linear-gradient(180deg,#302018,#241608)',borderRadius:2}}/>
     {big&&<div style={{position:'absolute',bottom:h*0.35,left:w*0.15,width:w*0.7,height:1.5,
-      background:`linear-gradient(90deg,transparent,${P.gold}20,${P.gold}30,${P.gold}20,transparent)`}}/>}
+      background:`linear-gradient(90deg,transparent,${P.gold}20,${P.gold}30,${P.gold}20,transparent)`,animation:'tl-goods-glint 3.8s ease-in-out infinite'}}/>}
+    <div style={{position:'absolute',bottom:h*0.18,left:w*0.12,width:w*0.76,height:1,
+      background:`linear-gradient(90deg,transparent,${P.gold}10,${P.gold}18,${P.gold}10,transparent)`,opacity:.4}}/>
   </div>;
 }
 
@@ -1479,46 +1506,54 @@ function EncounterScene({sceneH}){
 }
 
 /* ═══ BATTLE SCENE ═══ */
-function BattleScene({sceneH}){
+function BattleScene({sceneH,G}){
   const H=sceneH||220;const groundTop=Math.floor(H*0.45);const groundH=H-groundTop;
+  const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY');
+  const isLoss=G&&(G.outcome==='DEFEAT'||G.outcome==='DEVASTATING_DEFEAT');
+  const shockColor=isWin?'96,190,96':isLoss?'190,64,64':'220,140,60';
+  const surgeShift=isWin?10:isLoss?-10:0;
   return<div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.battle}}>
-    {/* Smoke-filled sky */}
     <div style={{position:'absolute',top:0,left:0,right:0,height:H*0.25,zIndex:1,
-      background:'linear-gradient(180deg,rgba(40,8,8,.4),transparent)'}}/>
-    {/* Distant burning treeline */}
+      background:'linear-gradient(180deg,rgba(40,8,8,.45),transparent)'}}/>
     <ForestLine yTop={H*0.25} height={40} color="#0e0808" altColor="#120a08" density={60} speed="far"/>
-    {/* Burning structure */}
     <div style={{position:'absolute',top:H*0.28,right:'20%',width:36,height:18,
       background:'#1a0a04',border:'1px solid #2a1408',zIndex:5}}>
       <div className="tl-fire" style={{position:'absolute',top:-10,left:'25%',width:12,height:14,
         background:'radial-gradient(ellipse,rgba(255,120,30,.5) 0%,transparent 70%)',zIndex:6}}/>
     </div>
-    {/* Heavy smoke */}
     <div className="tl-smoke" style={{position:'absolute',top:H*0.14,right:'22%',width:6,height:44,zIndex:7,
       background:'linear-gradient(180deg,transparent,rgba(120,100,80,.2))',animationDuration:'5s'}}/>
     <div className="tl-smoke" style={{position:'absolute',top:H*0.18,left:'45%',width:5,height:38,zIndex:7,
       background:'linear-gradient(180deg,transparent,rgba(120,100,80,.15))',animationDelay:'2s',animationDuration:'6s'}}/>
     <div className="tl-smoke" style={{position:'absolute',top:H*0.22,left:'30%',width:4,height:30,zIndex:7,
       background:'linear-gradient(180deg,transparent,rgba(100,80,60,.12))',animationDelay:'3.5s',animationDuration:'5.5s'}}/>
-    {/* Beach ground */}
     <BeachStrip top={groundTop} height={groundH} zIndex={4}/>
-    {/* Your warriors (left) */}
-    <WarriorLine x={24} count={6} bottom={groundH-8} spread={14} facing="right" zIndex={6}/>
-    {/* Their warriors (right) */}
-    <WarriorLine x={220} count={5} bottom={groundH-6} spread={13} facing="left" zIndex={6}/>
-    {/* Clash zone sparks */}
-    {[[42,46],[46,40],[50,52],[44,36],[48,48],[52,42],[40,50],[54,38],[38,44]].map(([x,y],i)=>
+    <div className="tl-battle-surge-left" style={{position:'absolute',left:0,right:'48%',top:groundTop-10,bottom:0,zIndex:5,transform:`translateX(${Math.max(surgeShift,0)}px)`}}>
+      <WarriorLine x={20} count={6} bottom={groundH-8} spread={14} facing="right" zIndex={6}/>
+      <Figure x="23%" bottom={groundH-5} type="standing" hasWeapon={true} hasHat={true} zIndex={7}/>
+    </div>
+    <div className="tl-battle-surge-right" style={{position:'absolute',left:'49%',right:0,top:groundTop-10,bottom:0,zIndex:5,transform:`translateX(${Math.min(surgeShift,0)}px)`}}>
+      <WarriorLine x={220} count={5} bottom={groundH-6} spread={13} facing="left" zIndex={6}/>
+      <Figure x="70%" bottom={groundH-6} type="standing" hasWeapon={true} hasHat={true} facing="left" zIndex={7}/>
+    </div>
+    <div className="tl-battle-throb" style={{position:'absolute',left:'49%',top:'47%',width:70,height:38,zIndex:7,transform:'translate(-50%,-50%)',
+      background:'radial-gradient(ellipse,rgba(255,110,40,.28) 0%,rgba(255,110,40,.08) 45%,transparent 75%)'}}/>
+    {[0,1,2].map(i=><div key={i} style={{position:'absolute',left:'49%',top:'47%',width:56,height:28,zIndex:7,border:`1px solid rgba(${shockColor},${.3-i*.08})`,borderRadius:'50%',animation:`tl-impact-ring ${1.8+i*.3}s ease-out ${i*.24}s infinite`}}/>)}
+    {[[42,46],[46,40],[50,52],[44,36],[48,48],[52,42],[40,50],[54,38],[38,44],[47,44],[50,45],[45,49]].map(([x,y],i)=>
       <div key={i} className="tl-spark" style={{position:'absolute',left:x+'%',top:y+'%',
-        width:3,height:3,borderRadius:'50%',background:'#ff6020',zIndex:8,animationDelay:(i*0.25)+'s'}}/>
+        width:i>8?4:3,height:i>8?4:3,borderRadius:'50%',background:i>8?'#ffd070':'#ff6020',zIndex:8,animationDelay:(i*0.18)+'s'}}/>
     )}
-    {/* Central fire */}
+    {G?.turningPoint&&<div style={{position:'absolute',left:'49%',top:'41%',width:120,height:42,zIndex:8,transform:'translateX(-50%)',
+      background:'radial-gradient(ellipse,rgba(220,180,80,.09),transparent 65%)',pointerEvents:'none'}}/>}
     <div className="tl-fire" style={{position:'absolute',top:'40%',left:'47%',width:10,height:16,
       background:'radial-gradient(ellipse,rgba(255,100,20,.45) 0%,transparent 70%)',zIndex:6}}/>
     <FireGlow x="48%" bottom={groundH-20} r={80} color="200,60,20" intensity={0.12} zIndex={3}/>
-    {/* Fog of battle */}
     <FogBand top={H*0.35} opacity={0.1} speed={10} color="140,100,80" height={24}/>
     <FogBand top={H*0.55} opacity={0.07} delay={3} speed={14} color="120,90,70" height={18}/>
-    {/* Blood atmosphere pulse */}
+    <div style={{position:'absolute',left:0,top:'34%',bottom:'18%',width:'32%',zIndex:4,pointerEvents:'none',
+      background:isWin?'linear-gradient(90deg,rgba(70,140,70,.1),transparent)':'linear-gradient(90deg,rgba(120,30,20,.08),transparent)'}}/>
+    <div style={{position:'absolute',right:0,top:'32%',bottom:'16%',width:'34%',zIndex:4,pointerEvents:'none',
+      background:isLoss?'linear-gradient(270deg,rgba(160,40,30,.12),transparent)':'linear-gradient(270deg,rgba(120,50,30,.08),transparent)'}}/>
     <div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
       background:'radial-gradient(ellipse at 48% 46%,rgba(180,30,10,.08),transparent 55%)',
       animation:'tl-pulse 3s ease-in-out infinite'}}/>
@@ -1531,6 +1566,8 @@ function WithdrawalScene({G,sceneH}){
   const H=sceneH||220,skyH=H*0.30,mtH=H*0.12,shoreH=H*0.08;
   const waterTop=skyH+mtH+shoreH;const waterH=H-waterTop;
   const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY');
+  const isStale=G&&G.outcome==='STALEMATE';
+  const hasDead=G&&G.crewKilled>0;
   return<div style={{height:H,position:'relative',overflow:'hidden',
     background:SCENE_SKY.withdrawal}}>
     <StarField count={10} brightness="#a0a0c0" region={22}/>
@@ -1542,6 +1579,14 @@ function WithdrawalScene({G,sceneH}){
     </div>
     {isWin&&<div className="tl-smoke" style={{position:'absolute',top:skyH+mtH-10,left:'6%',width:4,height:26,
       zIndex:6,opacity:0.4,animationDelay:'1s'}}/>}
+    <div style={{position:'absolute',top:skyH+mtH-2,right:'6%',zIndex:5,opacity:isWin?1:isStale?.6:.42}}>
+      <Longhouse x={0} w={30} h={12} bottom={0} smoke={isWin} fireGlow={isWin||isStale}/>
+    </div>
+    <TotemPole x="90%" h={24} bottom={waterH+1} zIndex={6}/>
+    {(isWin||isStale)&&<div className="tl-home-glow" style={{position:'absolute',right:'10%',top:waterTop+8,width:40,height:18,zIndex:6,
+      background:`radial-gradient(ellipse,rgba(${isWin?'200,140,60':'130,120,130'},.18) 0%,transparent 70%)`}}/>}
+    {Array.from({length:isWin?4:isStale?2:1},(_,i)=><div key={i} className="tl-home-glow" style={{position:'absolute',right:`${12+i*2.5}%`,top:waterTop-4+(i%2)*3,width:4,height:10,zIndex:6,
+      background:`linear-gradient(180deg,transparent,rgba(${isWin?'220,180,80':'150,130,140'},.6))`,animationDelay:(i*.5)+'s'}}/>)}
     <FogBand top={skyH+mtH-2} opacity={0.08} speed={18}/>
     <FogBand top={waterTop+waterH*0.3} opacity={0.05} delay={5} speed={22}/>
     {/* Water */}
@@ -1549,8 +1594,10 @@ function WithdrawalScene({G,sceneH}){
       gradient="linear-gradient(180deg,#123058 0%,#0e2848 25%,#0a2040 55%,#081838 100%)"
       waveCount={7} phosphorCount={8}/>
     {/* Canoe heading home */}
-    <div className="tl-canoe-rock" style={{position:'absolute',bottom:waterH*0.3,left:'33%',zIndex:8}}>
+    <div className="tl-canoe-rock" style={{position:'absolute',bottom:waterH*0.3,left:'28%',zIndex:8,animation:'tl-canoe-home 5.5s ease-in-out infinite'}}>
       <SimpleCanoe x={0} bottom={0} w={110} damaged={G&&G.canoeCondition<50}/>
+      {isWin&&<><GoodsPile x={34} bottom={10} size="medium" zIndex={9}/><GoodsPile x={58} bottom={9} size="medium" zIndex={9}/></>}
+      {hasDead&&<div style={{position:'absolute',bottom:16,left:52,width:10,height:3,zIndex:9,background:'linear-gradient(90deg,rgba(40,10,10,.4),rgba(10,6,8,.1))',borderRadius:2}}/>}
       {/* Bow figure */}
       <div style={{position:'absolute',bottom:16,left:12,width:8,height:14,zIndex:10}}>
         <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#342410',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
@@ -1580,6 +1627,9 @@ function WithdrawalScene({G,sceneH}){
         animation:'tl-wake 3.5s ease-out infinite',animationDelay:(i*0.5)+'s',
       }}/>)}
     </div>
+    <div style={{position:'absolute',left:'76%',bottom:waterH-2,width:48,height:18,zIndex:7,opacity:isWin?1:isStale?.65:.5}}>
+      <WitnessCluster x="24px" bottom={4} count={isWin?4:isStale?2:1} mood={isWin?'warm':hasDead?'grief':'solemn'} zIndex={8}/>
+    </div>
     {/* Foreground darkening */}
     <div style={{position:'absolute',bottom:0,left:0,right:0,height:waterH*0.25,zIndex:9,pointerEvents:'none',
       background:'linear-gradient(180deg,transparent,rgba(4,8,18,.25))'}}/>
@@ -1601,7 +1651,7 @@ function AftermathScene({G,sceneH}){
   /* Ceremony intensity — drives fire, crowd, warmth */
   const ci=isDecisive?3:isWin?2:isStale?1:isDef?0:-1;
   const fireSize=ci>=3?'large':ci>=1?'medium':'small';
-  const crowdN=ci>=3?6:ci>=2?5:ci>=1?3:2;
+  const crowdN=ci>=3?8:ci>=2?6:ci>=1?4:isDef?2:1;
   const crowdMood=ci>=2?'warm':ci<=0?(hasDead?'grief':'solemn'):'neutral';
   const skyGrad=isWin?SCENE_SKY.aftermath_w:SCENE_SKY.aftermath_l;
   const starBright=isWin?'#c0c0e8':isDev?'#606070':'#808098';
@@ -1612,6 +1662,8 @@ function AftermathScene({G,sceneH}){
     <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#0c1a10" altColor="#081408"/>
     <FogBand top={skyH+mtH-2} opacity={isWin?0.04:0.07} speed={18}/>
     {isDev&&<FogBand top={skyH+mtH+shoreH} opacity={0.08} speed={22} color="100,90,100"/>}
+    {isWin&&<div className="tl-home-glow" style={{position:'absolute',left:'36%',top:skyH+mtH+4,width:120,height:40,zIndex:2,
+      background:'radial-gradient(ellipse,rgba(210,150,70,.08),transparent 70%)'}}/>}
     {/* Shore ground */}
     <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,
       background:'linear-gradient(180deg,#0c1a0c 0%,#0e1a08 40%,#141808 100%)'}}>
@@ -1623,6 +1675,8 @@ function AftermathScene({G,sceneH}){
     <Longhouse x="14%" w={56} h={22} bottom={gb-1} smoke={true} fireGlow={ci>=1} zIndex={5}/>
     <Longhouse x="46%" w={74} h={26} bottom={gb} smoke={true} fireGlow={ci>=1} zIndex={5}/>
     {ci>=2&&<Longhouse x="82%" w={44} h={18} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>}
+    {ci>=2&&<div className="tl-home-glow" style={{position:'absolute',left:'46%',bottom:gb-2,width:100,height:34,zIndex:4,
+      background:'radial-gradient(ellipse,rgba(220,160,80,.12),transparent 72%)'}}/>}
     {/* Carved frontage on main longhouse (victory ceremony) */}
     {isWin&&<div style={{position:'absolute',bottom:gb+8,left:'50%',width:64,height:3,zIndex:6,
       background:`linear-gradient(90deg,transparent,${P.gold}10,${P.gold}22,${P.gold}30,${P.gold}22,${P.gold}10,transparent)`}}/>}
@@ -1638,26 +1692,40 @@ function AftermathScene({G,sceneH}){
     {/* ── Memorial Post (when warriors have fallen) ── */}
     {hasDead&&<CeremonialPole x={isWin?"90%":"32%"} h={32} bottom={gb} gold={false} memorial={true} zIndex={7}/>}
     {/* ── Central Ceremonial Fire (ceremony warmth) ── */}
-    <CeremonialFire x="55%" bottom={gb+2} size={fireSize} zIndex={7}/>
+    <CeremonialFire x="55%" bottom={gb+2} size={fireSize} zIndex={7} mood={hasDead&&!isWin?'grief':'warm'}/>
     {/* Small secondary fire for victory feast */}
-    {isDecisive&&<CeremonialFire x="35%" bottom={gb+1} size="small" zIndex={7}/>}
+    {isDecisive&&<CeremonialFire x="35%" bottom={gb+1} size="small" zIndex={7} mood="warm"/>}
     {/* ── Witness Clusters — village gathering ── */}
     <WitnessCluster x="50%" bottom={gb+2} count={crowdN} mood={crowdMood} zIndex={6}/>
     {ci>=2&&<WitnessCluster x="65%" bottom={gb+2} count={3} mood="warm" zIndex={6}/>}
     {ci>=3&&<WitnessCluster x="36%" bottom={gb+2} count={4} mood="warm" zIndex={6}/>}
+    {ci>=2&&<WitnessCluster x="84%" bottom={gb+1} count={2} mood={isWin?'warm':'neutral'} zIndex={6}/>}
     {/* Solitary mourner near memorial (defeat + dead) */}
     {!isWin&&hasDead&&<Figure x="30%" bottom={gb+2} type="sitting" hasHat={false} hasWeapon={false} zIndex={6}/>}
     {/* ── Goods / Offerings displayed (prestige / generosity) ── */}
     {isDecisive&&<><GoodsPile x="58%" bottom={gb+2} size="large" zIndex={5}/>
       <GoodsPile x="44%" bottom={gb+1} size="medium" zIndex={5}/></>}
     {isWin&&!isDecisive&&<GoodsPile x="61%" bottom={gb+1} size="medium" zIndex={5}/>}
-    {/* ── Beached Canoe ── */}
-    <SimpleCanoe x="4%" bottom={waterH-3} w={75} rocking={false} damaged={isDev} zIndex={5}/>
+    {(isWin&&G.cargo>25)&&<GoodsPile x="71%" bottom={gb+1} size="medium" zIndex={5}/>} 
+    {/* ── Homecoming Canoe at the shallows ── */}
+    <div style={{position:'absolute',left:'4%',bottom:waterH-2,zIndex:6,animation:'tl-canoe-home 6s ease-in-out infinite'}}>
+      <SimpleCanoe x={0} bottom={0} w={82} rocking={true} damaged={isDev||isDef}/>
+      {isWin&&<><GoodsPile x={18} bottom={8} size="medium" zIndex={7}/><GoodsPile x={42} bottom={7} size="medium" zIndex={7}/></>}
+      {hasDead&&<div style={{position:'absolute',left:44,bottom:14,width:14,height:3,borderRadius:2,background:'linear-gradient(90deg,rgba(40,12,12,.45),rgba(10,8,10,.05))',zIndex:7}}/>}
+    </div>
+    <div style={{position:'absolute',left:'23%',bottom:waterH+2,width:64,height:16,zIndex:6}}>
+      <WitnessCluster x="28px" bottom={1} count={isWin?4:isStale?2:1} mood={isWin?'warm':hasDead?'grief':'solemn'} zIndex={7}/>
+    </div>
     {/* Water */}
     <div className="tl-water" style={{position:'absolute',bottom:0,left:0,right:0,height:waterH,zIndex:3}}>
       <div className="tl-wave-1" style={{position:'absolute',top:3,left:'-50%',right:'-50%',height:2}}/>
       <div className="tl-wave-2" style={{position:'absolute',top:10,left:'-50%',right:'-50%',height:1}}/>
     </div>
+    {isWin&&<div style={{position:'absolute',left:'12%',bottom:waterH-1,width:80,height:6,zIndex:5}}>
+      {[0,1,2].map(i=><div key={i} style={{position:'absolute',top:i*1.2,left:-i*5,width:38+i*10,height:1.5,
+        background:`linear-gradient(90deg,rgba(120,170,210,${.2-i*.05}),transparent)`,borderRadius:1,
+        animation:'tl-wake 3.8s ease-out infinite',animationDelay:(i*.4)+'s'}}/>) }
+    </div>}
     {/* ── Atmospheric ceremony warmth / cold ── */}
     {ci>=2&&<FireGlow x="55%" bottom={0} r={120} color="200,140,60" intensity={0.07} zIndex={2}/>}
     <FireGlow x="55%" bottom={gb-4} r={ci>=2?65:35} color={isWin?"200,140,60":"140,100,80"} intensity={ci>=2?0.22:0.1} zIndex={4}/>
@@ -2116,7 +2184,7 @@ function Scene({type,tall,G,phase,sceneH}){
   if(phase===4) return <WithdrawalScene G={G} sceneH={sceneH}/>;
   if(phase===5) return <AftermathScene G={G} sceneH={sceneH}/>;
   if(phase===2) return <EncounterScene sceneH={sceneH}/>;
-  if(phase===3) return <BattleScene sceneH={sceneH}/>;
+  if(phase===3) return <BattleScene G={G} sceneH={sceneH}/>;
   return <VillageScene sceneH={sceneH}/>;
 }
 
@@ -2293,7 +2361,7 @@ function BattleBoard({G}){
   const tacLabel=(TACTIC_MODS[G.attackerTactic]||{}).label||'';
   return(
     <div style={{padding:'10px 12px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
-      <div style={{fontSize:7,color:P.dim,letterSpacing:.5,marginBottom:8,textAlign:'center'}}>⚔  BATTLE — {tacLabel}</div>
+      <div style={{fontSize:7,color:P.dim,letterSpacing:.5,marginBottom:8,textAlign:'center'}}>⚔  CLASH AT CEDAR CREEK — {tacLabel}</div>
       {G.rounds.map((r,i)=>{
         const total=r.atk+r.def;const atkPct=total>0?r.atk/total*100:50;
         const won=r.winner==='atk';const isTP=!!r.event;
@@ -2312,13 +2380,16 @@ function BattleBoard({G}){
           </div>
         </div>);
       })}
-      <div className="tl-glow-pulse tl-outcome-slam" style={{
+      <div className="tl-glow-pulse tl-outcome-slam tl-banner-breathe" style={{
         textAlign:'center',padding:'12px 8px',marginTop:6,background:P.darkBg,
         border:`2px solid ${isWin?P.green+'80':isLoss?P.red+'80':P.dim+'80'}`,borderRadius:6,
         '--gc':isWin?P.green:isLoss?P.red:P.dim,
       }}>
         <div style={{fontSize:13,letterSpacing:3,color:isWin?P.gold:isLoss?P.red:P.dim}}>
           {ocInfo.icon}  {ocInfo.text}  {ocInfo.icon}
+        </div>
+        <div style={{fontSize:6,color:isWin?P.goldDim:isLoss?P.redDim:P.dim,marginTop:3,letterSpacing:.4}}>
+          {isWin?'Your line owns the waterline.':isLoss?'The beach turns against your crew.':'Neither side can take the shore.'}
         </div>
         <div style={{fontSize:7,color:P.dim,marginTop:5}}>
           YOUR FORCE {Math.round(G.atkTotal)} vs THEIR DEFENSE {Math.round(G.defTotal)} · ratio ×{G.outcomeRatio.toFixed(2)}
@@ -2346,7 +2417,7 @@ function AftermathSummary({G,feedbackHref,onFeedback,playContext}){
         <div style={{position:'absolute',top:0,left:'10%',right:'10%',height:1,
           background:`linear-gradient(90deg,transparent,${accent}30,${accent}50,${accent}30,transparent)`}}/>
         <div style={{fontSize:8,color:accent,letterSpacing:2,marginBottom:3}}>
-          {isDecisive?'🏔  CEREMONY OF VICTORY':isDev?'🕯  THE VILLAGE MOURNS':'📜  EXPEDITION RECORD'}
+          {isDecisive?'🏔  HOMECOMING POTLATCH':isWin?'🔥  WITNESS CIRCLE':isDev?'🕯  THE VILLAGE MOURNS':'📜  RETURN TO STONESHELL'}
         </div>
         <div style={{fontSize:6,color:P.dim,letterSpacing:.5,lineHeight:1.5}}>
           {isDecisive?'The village gathers to witness what you have brought home':
@@ -2485,6 +2556,7 @@ function ImpactFrame({frame,onDismiss}){
       else if(ph===2)TL_Audio.cueEncounter();
       else if(ph===3)TL_Audio.cueBattle();
       else if(ph===4)TL_Audio.cueWithdrawal();
+      else if(ph===5)TL_Audio.cueAftermath(!!frame.isWin);
       else TL_Audio.sfxContinue();
     }
   },[frame]);
@@ -2525,6 +2597,7 @@ function ImpactFrame({frame,onDismiss}){
     title=frame.title||'';accentColor=PHASE_ACCENT[frame.phase]||P.gold;
     body=frame.subtitle||'';sub='';
     witness=frame.place?`Route focus: ${frame.place}`:'';
+    if(frame.phase===5) sub=frame.isWin?'Witnesses gather before the canoe fully touches shore.':'The shoreline recognizes loss before anyone speaks.';
   }
   return(
     <div className="tl-impact-scrim" onClick={onDismiss} style={{
@@ -2571,12 +2644,12 @@ function Hint({text}){
 }
 
 /* ═══ COMMAND CARD ═══ */
-/* ═══ ORIENTATION HINT (portrait play mode) ═══ */
-function OrientationHint({onDismiss}){
+/* ═══ ORIENTATION HINT (mobile play mode) ═══ */
+function OrientationHint({isPortrait,onDismiss}){
   return(
     <div className="tl-orient-hint" onClick={onDismiss}>
       <span style={{fontSize:14,lineHeight:1}}>📱</span>
-      <span>Rotate for best experience</span>
+      <span>{isPortrait?'Portrait is supported — use whichever view feels clearer':'Landscape fits more HUD — portrait may show larger scene art on some phones'}</span>
       <span style={{color:P.dim,padding:'2px 6px',fontSize:8}}>✕</span>
     </div>
   );
@@ -2683,7 +2756,7 @@ function TidelinesApp(){
     const h=()=>{setIsPortrait(window.innerWidth<window.innerHeight);setIsMobile(window.innerWidth<740);};
     window.addEventListener('resize',h);return()=>window.removeEventListener('resize',h);
   },[]);
-  const showOrientHint=playMode&&isPortrait&&isMobile&&!orientDismissed;
+  const showOrientHint=playMode&&isMobile&&!orientDismissed;
 
   const togglePlayMode=useCallback(()=>{
     setPlayMode(prev=>{
@@ -2726,8 +2799,8 @@ function TidelinesApp(){
       const vw=window.innerWidth;
       const isLand=vw>vh;
       const isMob=vw<740||(isLand&&vh<500);
-      if(isMob&&isLand) setSceneH(cl(Math.round(vh*0.28),100,180));
-      else if(isMob) setSceneH(cl(Math.round(vh*0.25),120,220));
+      if(isMob&&isLand) setSceneH(cl(Math.round(vh*0.33),120,210));
+      else if(isMob) setSceneH(cl(Math.round(vh*0.4),180,320));
       else setSceneH(cl(Math.round(vh*0.35),200,420));
     };
     calc();window.addEventListener('resize',calc);
@@ -2841,7 +2914,7 @@ function TidelinesApp(){
       <style>{INJCSS}</style>
 
       <ImpactFrame frame={G.impactFrame} onDismiss={dismissImpact}/>
-      {showOrientHint&&<OrientationHint onDismiss={()=>setOrientDismissed(true)}/>}
+      {showOrientHint&&<OrientationHint isPortrait={isPortrait} onDismiss={()=>setOrientDismissed(true)}/>}
 
       <div className="tl-screen">
 
