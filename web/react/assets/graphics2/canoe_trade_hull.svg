@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152 52" fill="none">
+  <defs>
+    <linearGradient id="tradeHull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6A3820"/>
+      <stop offset="45%" stop-color="#4A2814"/>
+      <stop offset="100%" stop-color="#1E0C06"/>
+    </linearGradient>
+    <linearGradient id="tradeGunwale" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#30160A"/>
+      <stop offset="35%" stop-color="#5A2814"/>
+      <stop offset="65%" stop-color="#6A3418"/>
+      <stop offset="100%" stop-color="#2A120A"/>
+    </linearGradient>
+    <linearGradient id="tradeInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#120804" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#120804" stop-opacity="0.38"/>
+    </linearGradient>
+    <linearGradient id="cargoWood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8A6838"/>
+      <stop offset="100%" stop-color="#5A4020"/>
+    </linearGradient>
+    <linearGradient id="oilBox" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6A4C28"/>
+      <stop offset="100%" stop-color="#3A2814"/>
+    </linearGradient>
+  </defs>
+  <!-- Hull — wider beam than war canoe, sits lower -->
+  <path d="M14 33c3-7 10-13 22-17C49 10 62 8 80 8c19 0 35 2 48 8 9 5 15 10 18 18-13 4-36 6-64 6-28 0-50-2-60-7-4-1-7-4-8-6Z" fill="url(#tradeHull)" stroke="#5A2C14" stroke-width="1"/>
+  <!-- Gunwale — less aggressive profile -->
+  <path d="M10 28c4-6 12-11 22-16C45 5 60 3 78 3c20 0 37 2 50 9 8 4 14 9 18 16h-8c-4-5-10-8-17-10-10-4-24-7-42-7-17 0-32 3-44 7-7 3-13 7-20 14l-5-4Z" fill="url(#tradeGunwale)"/>
+  <!-- Inner shade -->
+  <path d="M32 34c12 2 24 3 40 3 18 0 34-2 50-4" stroke="#D4B020" stroke-opacity="0.16" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M30 36c7 4 22 7 44 8 26 1 46-2 60-7-5 6-16 11-28 13-10 2-21 2-34 2-12 0-22-2-32-5-5-2-10-4-16-11h6Z" fill="url(#tradeInner)"/>
+  <!-- Cargo — bentwood boxes stacked mid-hull -->
+  <rect x="50" y="18" width="12" height="10" rx="1.5" fill="url(#oilBox)" stroke="#4A3018" stroke-width="0.6"/>
+  <rect x="64" y="16" width="14" height="12" rx="1.5" fill="url(#cargoWood)" stroke="#4A3018" stroke-width="0.6"/>
+  <rect x="80" y="17" width="11" height="11" rx="1.5" fill="url(#oilBox)" stroke="#3A2410" stroke-width="0.6"/>
+  <!-- Cedar bark bundle -->
+  <ellipse cx="97" cy="22" rx="6" ry="5" fill="#5A3818" stroke="#3A2410" stroke-width="0.5"/>
+  <line x1="94" y1="20" x2="94" y2="24" stroke="#6A4828" stroke-width="0.4" opacity="0.5"/>
+  <line x1="97" y1="19" x2="97" y2="25" stroke="#6A4828" stroke-width="0.4" opacity="0.5"/>
+  <line x1="100" y1="20" x2="100" y2="24" stroke="#6A4828" stroke-width="0.4" opacity="0.5"/>
+  <!-- Copper piece lashed on top — gleaming -->
+  <rect x="56" y="15" width="6" height="3" rx="0.5" fill="#C87830" fill-opacity="0.7"/>
+  <!-- Formline crest — painted on hull, subtle -->
+  <path d="M40 26c4-2 8-3 12-3 5 0 8 2 8 4-3 1-6 1-10 1-4 0-8 0-10-2Z" fill="#D4B020" fill-opacity="0.08"/>
+  <!-- Water reflection -->
+  <path d="M42 46c15 2 40 2 58 0" stroke="#5A3818" stroke-opacity="0.12" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

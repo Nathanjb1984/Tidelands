@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 96" fill="none">
+  <defs>
+    <linearGradient id="flRoof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2A180C"/>
+      <stop offset="100%" stop-color="#140A06"/>
+    </linearGradient>
+    <linearGradient id="flWalls" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A2C18"/>
+      <stop offset="100%" stop-color="#24140A"/>
+    </linearGradient>
+    <radialGradient id="flFireGlow" cx="50%" cy="85%" r="40%">
+      <stop offset="0%" stop-color="#E8A040" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#E8A040" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flSmokeHole" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C84020" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#C84020" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Main structure — wider than standard longhouse -->
+  <path d="M10 44 74 8l64 36H10Z" fill="url(#flRoof)" stroke="#3A2412" stroke-width="1.8"/>
+  <rect x="18" y="42" width="112" height="50" fill="url(#flWalls)" stroke="#4A3018" stroke-opacity="0.42"/>
+  <!-- Wide open doorway — welcoming -->
+  <rect x="50" y="52" width="48" height="40" fill="#0E0806"/>
+  <!-- Fire glow inside doorway -->
+  <rect x="50" y="52" width="48" height="40" fill="url(#flFireGlow)"/>
+  <!-- Interior fire visible through door -->
+  <path d="M68 82c-1-4 0-8 2-12 1 3 1 6 0 8 1-2 2-5 3-8 1 3 2 7 1 10Z" fill="#E8A030" opacity="0.4"/>
+  <path d="M70 84c0-3 1-6 2-8 0 2 0 5-1 7Z" fill="#F0C840" opacity="0.3"/>
+  <!-- Smoke hole glow on roof -->
+  <ellipse cx="74" cy="20" rx="8" ry="4" fill="url(#flSmokeHole)"/>
+  <!-- Wall planks -->
+  <line x1="26" y1="44" x2="26" y2="90" stroke="#5A381E" stroke-opacity="0.25" stroke-width="1"/>
+  <line x1="36" y1="43" x2="36" y2="91" stroke="#5A381E" stroke-opacity="0.25" stroke-width="1"/>
+  <line x1="46" y1="42" x2="46" y2="92" stroke="#5A381E" stroke-opacity="0.25" stroke-width="1"/>
+  <line x1="102" y1="42" x2="102" y2="92" stroke="#5A381E" stroke-opacity="0.25" stroke-width="1"/>
+  <line x1="112" y1="43" x2="112" y2="91" stroke="#5A381E" stroke-opacity="0.25" stroke-width="1"/>
+  <line x1="122" y1="44" x2="122" y2="90" stroke="#5A381E" stroke-opacity="0.25" stroke-width="1"/>
+  <!-- Formline crest above door — welcome sign -->
+  <path d="M58 48c4-3 8-4 16-4 8 0 12 2 16 4" stroke="#D4B020" stroke-opacity="0.18" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="67" cy="48" rx="2" ry="1.4" fill="#D4B020" fill-opacity="0.1"/>
+  <ellipse cx="81" cy="48" rx="2" ry="1.4" fill="#D4B020" fill-opacity="0.1"/>
+  <!-- Feast benches visible through door — horizontal lines -->
+  <line x1="54" y1="78" x2="72" y2="78" stroke="#3A2010" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <line x1="76" y1="78" x2="94" y2="78" stroke="#3A2010" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Roof detail — cedar bark layers -->
+  <path d="M20 42c12-6 32-10 54-10 28 0 45 4 54 10" stroke="#6A4424" stroke-opacity="0.3" stroke-width="1.2"/>
+  <path d="M35 32c10-4 22-6 39-6 20 0 33 3 39 6" stroke="#6A4424" stroke-opacity="0.2" stroke-width="0.8"/>
+</svg>

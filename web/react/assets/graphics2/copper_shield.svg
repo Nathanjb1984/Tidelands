@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 48" fill="none">
+  <defs>
+    <linearGradient id="copperFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D89040"/>
+      <stop offset="30%" stop-color="#C87830"/>
+      <stop offset="70%" stop-color="#A86020"/>
+      <stop offset="100%" stop-color="#784818"/>
+    </linearGradient>
+    <linearGradient id="copperEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#905020"/>
+      <stop offset="50%" stop-color="#C87830"/>
+      <stop offset="100%" stop-color="#905020"/>
+    </linearGradient>
+    <linearGradient id="copperSheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0B050" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#F0B050" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#F0B050" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield body — T-shape copper -->
+  <path d="M3 2h26v18H3z" fill="url(#copperFace)" stroke="url(#copperEdge)" stroke-width="1.2"/>
+  <path d="M9 20h14v26H9z" fill="url(#copperFace)" stroke="url(#copperEdge)" stroke-width="1"/>
+  <!-- Ridge line — the break between top and bottom half -->
+  <line x1="3" y1="20" x2="29" y2="20" stroke="#684018" stroke-width="1.5"/>
+  <!-- Formline crest — face design -->
+  <ellipse cx="16" cy="10" rx="8" ry="7" fill="none" stroke="#503010" stroke-width="1.2"/>
+  <ellipse cx="12" cy="9" rx="2.2" ry="1.6" fill="#503010"/>
+  <ellipse cx="20" cy="9" rx="2.2" ry="1.6" fill="#503010"/>
+  <ellipse cx="12" cy="9" rx="1" ry="0.8" fill="#C87830"/>
+  <ellipse cx="20" cy="9" rx="1" ry="0.8" fill="#C87830"/>
+  <path d="M12 13c1 2 3 3 4 3 2 0 3-1 4-3" fill="none" stroke="#503010" stroke-width="1" stroke-linecap="round"/>
+  <path d="M10 6c2-2 4-3 6-3 2 0 4 1 6 3" fill="none" stroke="#503010" stroke-width="0.8"/>
+  <!-- Lower half — ribbing pattern -->
+  <line x1="16" y1="22" x2="16" y2="44" stroke="#684018" stroke-width="0.8"/>
+  <line x1="12" y1="24" x2="12" y2="42" stroke="#684018" stroke-width="0.5" opacity="0.5"/>
+  <line x1="20" y1="24" x2="20" y2="42" stroke="#684018" stroke-width="0.5" opacity="0.5"/>
+  <!-- Patina / age marks -->
+  <circle cx="7" cy="8" r="1" fill="#406030" fill-opacity="0.15"/>
+  <circle cx="24" cy="14" r="1.5" fill="#406030" fill-opacity="0.1"/>
+  <!-- Sheen overlay -->
+  <rect x="3" y="2" width="26" height="18" rx="0" fill="url(#copperSheen)"/>
+</svg>

@@ -6,8 +6,8 @@
 <title>TIDELINES — Cedar, Sea &amp; Legacy</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html{scrollbar-width:thin;scrollbar-color:#2a2a4a #060612}
-body{background:#060612;overflow-y:scroll;overflow-x:hidden}
+html{scrollbar-width:thin;scrollbar-color:#404070 #101028}
+body{background:#101028;overflow-y:scroll;overflow-x:hidden}
 </style>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -30,19 +30,19 @@ const {useState,useRef,useEffect,useCallback,useMemo}=React;
 
 /* ─── §2  Palette & Tokens ────────────────────────────────────────────── */
 const P={
-  bg:'#060612',panel:'#0c0c22',panelHi:'#141434',border:'#222248',borderHi:'#3a3a6a',
-  gold:'#d4b020',goldDim:'#8a7818',cedar:'#8c2600',cedarHi:'#b03400',
-  teal:'#0e2828',tealHi:'#1a3e3e',tealBright:'#2a5e5e',
-  text:'#e8dcc8',dim:'#807868',dimHi:'#a09888',
-  green:'#40c030',greenDim:'#286818',greenBright:'#60e050',
-  red:'#d03020',redDim:'#6a1810',redBright:'#ff4030',
-  blue:'#3088cc',purple:'#8050c0',
-  darkBg:'#080814',debugBg:'#050510',legacyBg:'#0a0618',
-  scrim:'rgba(6,6,18,.92)',hint:'#1a1830',
+  bg:'#101028',panel:'#181838',panelHi:'#222250',border:'#383870',borderHi:'#5858a0',
+  gold:'#e0c030',goldDim:'#a89828',cedar:'#a83200',cedarHi:'#c84400',
+  teal:'#1a3e3e',tealHi:'#286060',tealBright:'#3a8080',
+  text:'#f0e8d8',dim:'#a09888',dimHi:'#c0b8a8',
+  green:'#50d840',greenDim:'#388820',greenBright:'#70f060',
+  red:'#e04030',redDim:'#882018',redBright:'#ff5040',
+  blue:'#40a0e0',purple:'#9868d8',
+  darkBg:'#10102a',debugBg:'#0c0c20',legacyBg:'#141030',
+  scrim:'rgba(10,10,28,.88)',hint:'#242050',
 };
 const font="'Press Start 2P',monospace";
-const PHASE_ACCENT=['#a08030','#2878c0','#7030b0','#c03020','#c07020','#c4a000'];
-const PHASE_BG=['#0a0a18','#060818','#0c0614','#120608','#0e0a06','#0a0812'];
+const PHASE_ACCENT=['#b89838','#3890d8','#8840c8','#d84030','#d88030','#d4b010'];
+const PHASE_BG=['#161630','#101830','#181028','#201010','#1a1410','#141020'];
 
 /* ─── §3  Constants & Data ────────────────────────────────────────────── */
 const PHASES=[
@@ -104,13 +104,13 @@ const EULOGIES={
   naang:'This was to be the raid that made his name. Now his mother will carve a memorial post.',
 };
 const SCENE_SKY={
-  village:'linear-gradient(180deg,#10083a 0%,#181050 20%,#221860 40%,#2a1c68 58%,#201550 78%,#180e38 100%)',
-  travel:'linear-gradient(180deg,#061020 0%,#0c1e40 20%,#102850 42%,#143058 58%,#183862 72%,#1c4068 85%,#204470 100%)',
-  encounter:'linear-gradient(180deg,#2a1018 0%,#2c1228 18%,#281438 36%,#221840 54%,#1c1430 72%,#141228 100%)',
-  battle:'linear-gradient(180deg,#3a0a0a 0%,#321010 15%,#2c1414 30%,#261010 50%,#1c0c18 70%,#140a18 100%)',
-  withdrawal:'linear-gradient(180deg,#101428 0%,#141830 20%,#1a2240 42%,#1c2848 58%,#162240 78%,#121c38 100%)',
-  aftermath_w:'linear-gradient(180deg,#10083a 0%,#181050 20%,#221860 40%,#2a1c68 55%,#221450 75%,#180e38 100%)',
-  aftermath_l:'linear-gradient(180deg,#0a0818 0%,#0e0c20 20%,#121028 40%,#0e0c20 60%,#0a0818 80%,#080610 100%)',
+  village:'linear-gradient(180deg,#1c1258 0%,#28206e 20%,#342880 40%,#3c2e88 58%,#302470 78%,#281c58 100%)',
+  travel:'linear-gradient(180deg,#0e1c38 0%,#183060 20%,#203c70 42%,#284478 58%,#304e82 72%,#38588a 85%,#406090 100%)',
+  encounter:'linear-gradient(180deg,#3e1c28 0%,#401e38 18%,#3c2250 36%,#362858 54%,#302248 72%,#281e40 100%)',
+  battle:'linear-gradient(180deg,#541414 0%,#4c1a1a 15%,#442020 30%,#3c1a1a 50%,#301828 70%,#281428 100%)',
+  withdrawal:'linear-gradient(180deg,#182040 0%,#1e2850 20%,#263460 42%,#2c3a68 58%,#243460 78%,#1e2c50 100%)',
+  aftermath_w:'linear-gradient(180deg,#1c1258 0%,#28206e 20%,#342880 40%,#3c2e88 55%,#302470 75%,#281c58 100%)',
+  aftermath_l:'linear-gradient(180deg,#141030 0%,#1a1640 20%,#201c48 40%,#1a1640 60%,#141030 80%,#100e28 100%)',
 };
 const STAR_POS=[[8,10,2,0],[22,6,1.5,1.2],[38,16,1,.5],[52,5,2,1.8],[68,12,1.5,.3],[82,8,1,2.1],[15,20,1,1.5],[72,3,1.5,.8],[45,14,1,2.5],[90,18,1.5,.7]];
 const BUILD={label:'PRIVATE ALPHA',version:'v1.3a',build:'PA-2026-03-15',feedbackEmail:'alpha-feedback@example.com'};
@@ -146,6 +146,15 @@ const GFX2={
     solemn:'assets/graphics2/witness_figure_solemn.svg',
     grief:'assets/graphics2/witness_figure_grief.svg',
   },
+  canoeTradeHull:'assets/graphics2/canoe_trade_hull.svg',
+  copperShield:'assets/graphics2/copper_shield.svg',
+  speakingStaff:'assets/graphics2/speaking_staff.svg',
+  tradeGoodsPile:'assets/graphics2/trade_goods_pile.svg',
+  councilFire:'assets/graphics2/council_fire.svg',
+  poleMemorialGrowing:'assets/graphics2/pole_memorial_growing.svg',
+  longhouseFeast:'assets/graphics2/longhouse_feast.svg',
+  dryingRack:'assets/graphics2/drying_rack.svg',
+  tradePortSettlement:'assets/graphics2/trade_port_settlement.svg',
 };
 
 const WORLD={
@@ -187,6 +196,10 @@ const HINTS={
   vil_prep:'This is your last village decision before departure. Pick the advantage you want to feel most during the crossing and battle.',
   trv_route:'The route shapes the journey. Safer water means slower progress. Open crossings risk weather but save time.',
   trv_event:'Something on the water demands your attention. Your response shapes what you carry to the far shore.',
+  trv_trade_event:'A trade voyage has its own risks. How you handle surprises shapes the negotiation ahead.',
+  trv_trade_negotiate:'The trading ground is set. Your approach to the bargaining will determine what you bring home.',
+  trv_diplo_event:'The diplomatic journey tests your composure before the council even begins.',
+  trv_diplo_council:'The council fire is lit. How you present yourself will shape the peace — or lack of it.',
   trv_arrival:'Arrival timing shapes surprise. More surprise usually means a stronger opening and a clearer early advantage.',
   trv_form:'This decides whether your crew feels hidden or terrifying when Cedar Creek first sees you.',
   enc_tactic:'This is your main battle order. It changes how hard you hit and how much risk your crew carries.',
@@ -467,7 +480,8 @@ function dup(s){
     spoils:[...s.spoils],traitsEarned:[...s.traitsEarned],
     legacyEntries:[...s.legacyEntries],warTraits:[...s.warTraits],
     lastRun:s.lastRun?{...s.lastRun}:null,
-    statDeltas:{...s.statDeltas}};
+    statDeltas:{...s.statDeltas},
+    tradeEventId:s.tradeEventId,diploEventId:s.diploEventId};
 }
 
 /* ─── §7  Engine  (UNCHANGED — pure math) ─────────────────────────────── */
@@ -580,6 +594,7 @@ function initState(carry={}){
     lastRun:carry.lastRun??sv?.lastRun??null,
     traitsEarned:[],spoils:[],showDebug:false,showLegacy:false,impactFrame:null,
     statDeltas:{},expeditionType:'raid',voyageRoute:'coast',voyageWeather:'calm',voyageEventId:null,
+    tradeEventId:null,tradeGoodsQuality:50,diploEventId:null,diploTrust:50,
   };
 }
 
@@ -682,11 +697,21 @@ function pickRoute(prev,id){
       break;
   }
   s.statDeltas={canoe:s.canoeCondition-oldCanoe,morale:s.morale-oldMorale};
-  /* Generate a random voyage event */
-  const events=['whale','rival_canoe','fog_bank','flotsam','calm_beauty','bird_omen'];
-  s.voyageEventId=pick(events);
   s.log.push(L(''));
-  s.step='trv_event';
+  /* Branch by expedition type after route */
+  if(s.expeditionType==='trade'){
+    const tevts=['rival_traders','port_welcome','suspicious_customs','storm_cargo'];
+    s.tradeEventId=pick(tevts);
+    s.step='trv_trade_event';
+  }else if(s.expeditionType==='diplomacy'){
+    const devts=['rival_delegation','gift_protocol','ambush_warning','good_omen'];
+    s.diploEventId=pick(devts);
+    s.step='trv_diplo_event';
+  }else{
+    const events=['whale','rival_canoe','fog_bank','flotsam','calm_beauty','bird_omen'];
+    s.voyageEventId=pick(events);
+    s.step='trv_event';
+  }
   return s;
 }
 
@@ -808,22 +833,23 @@ function pickPrep(prev,id){
 }
 function enterTravel(prev){
   const s=dup(prev);s.scene='travel';s.statDeltas={};
-  /* ── Non-raid expeditions resolve through travel quickly ── */
-  if(s.expeditionType==='trade') return resolveTradeExpedition(s);
-  if(s.expeditionType==='diplomacy') return resolveDiplomacyExpedition(s);
-  /* ── Raid voyage: full route → event → arrival → formation flow ── */
   s.step='trv_route';
   /* ── Home Waters carry-forward: village prep buffs the expedition ── */
   const cReady=s.canoeReadiness||60;
   const fStores=s.foodStores||72;
-  const canoeBonus=Math.round((cReady-60)*0.3);/* 0 at default, up to +12 at 100 */
-  const moraleBonus=Math.round((fStores-60)*0.2);/* 0-ish at default, up to +8 at 100 */
-  if(canoeBonus>0){s.canoeCondition=Math.min(100,s.canoeCondition+canoeBonus);s.log.push(L(`The well-prepared hull rides strong \u2014 +${canoeBonus} Canoe Condition.`,'green','stat'));}
-  if(moraleBonus>0){s.morale=cl(s.morale+moraleBonus,0,100);s.log.push(L(`Full stores aboard \u2014 the crew paddles with confidence. +${moraleBonus} Morale.`,'green','stat'));}
+  const canoeBonus=Math.round((cReady-60)*0.3);
+  const moraleBonus=Math.round((fStores-60)*0.2);
+  if(canoeBonus>0){s.canoeCondition=Math.min(100,s.canoeCondition+canoeBonus);s.log.push(L(`The well-prepared hull rides strong — +${canoeBonus} Canoe Condition.`,'green','stat'));}
+  if(moraleBonus>0){s.morale=cl(s.morale+moraleBonus,0,100);s.log.push(L(`Full stores aboard — the crew paddles with confidence. +${moraleBonus} Morale.`,'green','stat'));}
   s.log.push(L(''));
-  s.log.push(L("The canoe leaves Stoneshell Inlet under the eyes of the witness poles. Cedar Creek lies beyond Seal Narrows and the long grey crossing north."));
-  s.log.push(L(''));
-  s.log.push(L('Choose your route across the water.'));
+  if(s.expeditionType==='trade'){
+    s.log.push(L('The trade canoe pushes off from Stoneshell Inlet, hull heavy with oil and cedar. The northern settlements await.'));
+  }else if(s.expeditionType==='diplomacy'){
+    s.log.push(L('The canoe departs quietly — no war crests, only the speaking staff raised high. The far shore expects words, not weapons.'));
+  }else{
+    s.log.push(L("The canoe leaves Stoneshell Inlet under the eyes of the witness poles. Cedar Creek lies beyond Seal Narrows and the long grey crossing north."));
+  }
+  s.log.push(L(''));s.log.push(L('Choose your route across the water.'));
   s.impactFrame={type:'phase_enter',phase:1,...phaseTransitionCopy(1,s)};
   return s;
 }
@@ -1090,34 +1116,231 @@ function pickCeremony(prev,id){
   s.step='aft_done';return s;
 }
 
-/* ── Trade expedition resolution (simplified for now) ── */
-function resolveTradeExpedition(prev){
+/* ══════════════════════════════════════════════════════════════════════
+   TRADE VOYAGE — multi-step: route → event → negotiate → resolve
+   ══════════════════════════════════════════════════════════════════════ */
+function pickTradeEvent(prev,id){
   const s=dup(prev);s.statDeltas={};
-  s.scene='village';
-  const profit=ri(15,35);
-  s.cargo=profit;s.prestige+=Math.round(profit*0.5);
-  s.foodStores=Math.min(100,(s.foodStores||72)+12);
-  s.morale=cl(s.morale+8,0,100);
-  s.outcome='TRADE_SUCCESS';
-  s.log.push(L(''));s.log.push(L('The northern settlement welcomes your canoe. Copper and dentalium change hands. Both sides profit.'));
-  s.log.push(L(`Trade complete: +${profit} Cargo · +${Math.round(profit*0.5)} Prestige · +12 Food · +8 Morale`,'green','stat'));
-  s.log.push(L(''));s.log.push(L('Your canoe rounds the south headland. The village sees the loaded hull and begins to cheer.'));
+  const oldMorale=s.morale,oldCargo=s.cargo,oldCanoe=s.canoeCondition;
+  const evt=s.tradeEventId;
+  switch(evt){
+    case'rival_traders':
+      if(id==='race'){
+        s.morale=cl(s.morale-3,0,100);
+        s.canoeCondition=Math.max(0,s.canoeCondition-5);
+        s.tradeGoodsQuality+=15;
+        s.log.push(L('A Skidegate trade canoe appears on the same heading — racing for the same port. Your crew digs deep, pushing past them in a spray of white water.'));
+        s.log.push(L(''));s.log.push(L('First to port. +15 Goods Quality · −5 Canoe · −3 Morale','dim','stat'));
+      }else{
+        s.morale=cl(s.morale+3,0,100);
+        s.log.push(L('A Skidegate trade canoe is headed the same direction. Rather than race, you paddle alongside and share route knowledge. They mention a sheltered cove ahead.'));
+        s.log.push(L(''));s.log.push(L('+3 Morale. Shared knowledge.','green','stat'));
+      }
+      break;
+    case'port_welcome':
+      if(id==='feast'){
+        s.morale=cl(s.morale+8,0,100);
+        s.tradeGoodsQuality+=10;
+        s.cargo=Math.max(0,s.cargo-3);
+        s.log.push(L('Smoke rises from a small settlement on the headland. They invite you ashore. Fish, stories, and laughter — and they offer first pick of their copper stock.'));
+        s.log.push(L(''));s.log.push(L('+8 Morale · +10 Goods Quality · −3 Cargo (gifts)','green','stat'));
+      }else{
+        s.tradeGoodsQuality+=5;
+        s.log.push(L('A settlement offers welcome, but you wave and keep paddling. Time is the trader\'s real currency. They toss a small copper ingot as you pass — a gesture of goodwill.'));
+        s.log.push(L(''));s.log.push(L('+5 Goods Quality. Steady progress.','dim','stat'));
+      }
+      break;
+    case'suspicious_customs':
+      if(id==='comply'){
+        s.cargo=Math.max(0,s.cargo-5);
+        s.prestige+=5;
+        s.log.push(L('Warriors on the shore demand a toll — passage through their waters costs trade goods. You hand over oil and dried fish. They let you through without trouble.'));
+        s.log.push(L(''));s.log.push(L('−5 Cargo · +5 Prestige (respected protocol)','dim','stat'));
+      }else{
+        s.morale=cl(s.morale-5,0,100);
+        if(Math.random()<0.4){
+          s.canoeCondition=Math.max(0,s.canoeCondition-8);
+          s.log.push(L('You refuse the toll and push past. Stones from the shore crack against the hull. Your crew flinches but keeps paddling.','red'));
+          s.log.push(L(''));s.log.push(L('−5 Morale · −8 Canoe — hostile passage','red','stat'));
+        }else{
+          s.log.push(L('You refuse the toll and push past. They shout but do not pursue. Your crew is tense but intact.'));
+          s.log.push(L(''));s.log.push(L('−5 Morale. Kept your goods.','dim','stat'));
+        }
+      }
+      break;
+    case'storm_cargo':
+      if(id==='secure'){
+        s.canoeCondition=Math.max(0,s.canoeCondition-4);
+        s.log.push(L('A sudden squall hits. Your crew lashes the cargo tight, but the canoe takes water. When the sky clears, everything is intact — just soaked.'));
+        s.log.push(L(''));s.log.push(L('Cargo safe. −4 Canoe.','dim','stat'));
+      }else{
+        s.cargo=Math.max(0,s.cargo-ri(3,6));
+        s.morale=cl(s.morale+4,0,100);
+        s.log.push(L('The squall hits hard. Rather than risk the hull, you dump heavy cargo over the side. The canoe rides higher, safer. Some goods sink into the grey water.','red'));
+        s.log.push(L(''));s.log.push(L(`−${s.cargo<5?'some':'a few'} Cargo · +4 Morale (crew safe)`,s.cargo<5?'red':'dim','stat'));
+      }
+      break;
+  }
+  s.statDeltas={morale:s.morale-oldMorale,cargo:s.cargo-oldCargo,canoe:s.canoeCondition-oldCanoe};
+  s.log.push(L(''));s.log.push(L('The northern settlement appears ahead. How will you approach the trade?'));
+  s.step='trv_trade_negotiate';return s;
+}
+
+function pickTradeNegotiation(prev,id){
+  const s=dup(prev);s.statDeltas={};
+  const quality=s.tradeGoodsQuality||50;
+  let profitBase=ri(12,28);
+  let prestigeGain=0,foodGain=0,moraleGain=0;
+  switch(id){
+    case'generous':{
+      const bonus=Math.round(quality*0.3);
+      profitBase=Math.round(profitBase*0.7);
+      prestigeGain=Math.round(profitBase*0.8)+bonus;
+      foodGain=8;moraleGain=8;
+      s.feudEscalation=Math.max(0,s.feudEscalation-1);
+      s.log.push(L('You spread your goods wide — oil, woven cedar, dried halibut — and ask only for fair exchange. The northern chief smiles. Copper and dentalium flow freely.'));
+      s.log.push(L('"Come back before the storms. You are welcome here."'));
+      break;}
+    case'hard_bargain':{
+      profitBase=Math.round(profitBase*1.3);
+      prestigeGain=Math.round(profitBase*0.4);
+      foodGain=14;moraleGain=3;
+      s.log.push(L('You hold back your best goods until the price rises. Three rounds of back-and-forth. They grumble but pay what the market demands.'));
+      s.log.push(L('More cargo, less goodwill — but the canoe sits heavy with copper.'));
+      break;}
+    case'gift_first':{
+      const giftCost=Math.round(profitBase*0.2);
+      profitBase=Math.round(profitBase*0.9);
+      prestigeGain=Math.round(profitBase*0.6)+15;
+      foodGain=10;moraleGain=6;
+      s.feudEscalation=Math.max(0,s.feudEscalation-1);
+      s.log.push(L('Before any trade begins, you present gifts — a carved box, the finest oil. The gesture is noticed. When bargaining starts, the terms are warmer.'));
+      s.log.push(L('Generosity opens doors that force cannot.'));
+      break;}
+  }
+  s.cargo+=profitBase;s.prestige+=prestigeGain;
+  s.foodStores=Math.min(100,(s.foodStores||72)+foodGain);
+  s.morale=cl(s.morale+moraleGain,0,100);
+  s.outcome='TRADE_SUCCESS';s.prestigeChange=prestigeGain;
+  s.log.push(L(''));
+  s.log.push(L(`Trade complete: +${profitBase} Cargo · +${prestigeGain} Prestige · +${foodGain} Food · +${moraleGain} Morale`,'green','stat'));
+  s.log.push(L(''));s.log.push(L('The return voyage is calm. Your canoe rounds the south headland heavy with copper and shell. The village sees the loaded hull and begins to cheer.'));
+  s.totalRaids+=1;
+  /* Season wear */
+  s.villageReadiness=Math.max(0,(s.villageReadiness||58)-4);
+  s.foodStores=Math.max(0,s.foodStores-5);
+  s.canoeReadiness=Math.max(0,(s.canoeReadiness||60)-6);
+  s.lastRun={outcome:'TRADE_SUCCESS',killed:0,wounded:0,spoils:`Copper, shell, +${profitBase} cargo`,prestige:signStr(prestigeGain),feud:feudName(s.feudEscalation),named_dead:[]};
+  s.legacyEntries.push(`Trade voyage to the north: +${profitBase} cargo, +${prestigeGain} prestige. ${feudName(s.feudEscalation)}.`);
   s.impactFrame={type:'phase_enter',phase:5,title:'TRADE RETURN',subtitle:'Goods and goodwill. The canoe returns heavy with copper and shell.',place:WORLD.home.name,isWin:true};
+  s.scene='village';
   savePersist(persistFromState(s));s.step='aft_show';return s;
 }
 
-/* ── Diplomacy expedition resolution (simplified for now) ── */
-function resolveDiplomacyExpedition(prev){
+/* ══════════════════════════════════════════════════════════════════════
+   DIPLOMACY VOYAGE — multi-step: route → event → council → resolve
+   ══════════════════════════════════════════════════════════════════════ */
+function pickDiploEvent(prev,id){
   const s=dup(prev);s.statDeltas={};
-  s.scene='village';
-  const fReduce=ri(2,4);
-  s.feudEscalation=Math.max(0,s.feudEscalation-fReduce);
-  s.prestige+=15;s.morale=cl(s.morale+6,0,100);
-  s.outcome='DIPLOMACY_SUCCESS';
-  s.log.push(L(''));s.log.push(L('The speaking staff passes between chiefs. Words are measured. Gifts exchanged. No blood.'));
-  s.log.push(L(`Diplomacy: −${fReduce} Feud · +15 Prestige · +6 Morale`,'green','stat'));
+  const oldMorale=s.morale,oldPrestige=s.prestige;
+  const evt=s.diploEventId;
+  switch(evt){
+    case'rival_delegation':
+      if(id==='wait'){
+        s.diploTrust+=10;
+        s.morale=cl(s.morale-3,0,100);
+        s.log.push(L('A Skidegate delegation is already anchored at the far shore — they arrived first. Your elder advises patience. You wait offshore until their canoe departs before landing.'));
+        s.log.push(L(''));s.log.push(L('+10 Trust (patience respected) · −3 Morale','dim','stat'));
+      }else{
+        s.prestige+=5;
+        s.diploTrust-=5;
+        s.log.push(L('A rival delegation is at the far shore. You land anyway, side by side. The display of confidence draws attention — but it also raises tension.'));
+        s.log.push(L(''));s.log.push(L('+5 Prestige · −5 Trust (bold entrance)','dim','stat'));
+      }
+      break;
+    case'gift_protocol':
+      if(id==='follow'){
+        s.diploTrust+=15;
+        s.cargo=Math.max(0,s.cargo-4);
+        s.log.push(L('Your elder reminds you: "The first gift must be unwrapped before witnesses. The second must be offered with both hands." You follow every step perfectly.'));
+        s.log.push(L(''));s.log.push(L('+15 Trust (protocol honored) · −4 Cargo (gifts)','green','stat'));
+      }else{
+        s.diploTrust+=5;
+        s.prestige+=3;
+        s.log.push(L('You offer the gifts your own way — practical, direct. The far-shore chief accepts them with a slight frown. Not wrong, but not the old way.'));
+        s.log.push(L(''));s.log.push(L('+5 Trust · +3 Prestige (showed independence)','dim','stat'));
+      }
+      break;
+    case'ambush_warning':
+      if(id==='cautious'){
+        s.diploTrust+=8;
+        s.canoeCondition=Math.max(0,s.canoeCondition-3);
+        s.log.push(L('A fisherman warns you: "Armed warriors on the north bluff." Your crew takes the long way around, arriving from the sheltered side. The far-shore chief notes your caution with approval.'));
+        s.log.push(L(''));s.log.push(L('+8 Trust · −3 Canoe (longer route)','dim','stat'));
+      }else{
+        s.prestige+=8;
+        s.morale=cl(s.morale-4,0,100);
+        s.log.push(L('The warning of armed warriors does not slow you. You paddle straight in, speaking staff held high. If they want blood, they will have to draw it in front of witnesses.'));
+        s.log.push(L(''));s.log.push(L('+8 Prestige (courage) · −4 Morale (tension)','dim','stat'));
+      }
+      break;
+    case'good_omen':
+      if(id==='share'){
+        s.diploTrust+=12;s.morale=cl(s.morale+5,0,100);
+        s.log.push(L('An eagle circles three times above both canoes as you approach. Your elder says: "Tell them what we saw. The spirits approve." When you land, you share the omen. The far-shore people nod.'));
+        s.log.push(L(''));s.log.push(L('+12 Trust · +5 Morale','green','stat'));
+      }else{
+        s.morale=cl(s.morale+8,0,100);
+        s.log.push(L('An eagle circles three times. Good fortune. Your crew takes heart but you keep it to yourself — no need to share advantages.'));
+        s.log.push(L(''));s.log.push(L('+8 Morale. Private confidence.','green','stat'));
+      }
+      break;
+  }
+  s.statDeltas={morale:s.morale-oldMorale,prestige:s.prestige-oldPrestige};
+  s.log.push(L(''));s.log.push(L('The council fire is prepared on the far shore. How will you approach?'));
+  s.step='trv_diplo_council';return s;
+}
+
+function pickDiploCouncil(prev,id){
+  const s=dup(prev);s.statDeltas={};
+  const trust=s.diploTrust||50;
+  let feudReduce=ri(2,4),prestigeGain=0,moraleGain=0;
+  switch(id){
+    case'humble':{
+      const trustBonus=Math.round(trust*0.06);
+      feudReduce+=trustBonus;prestigeGain=10+trustBonus;moraleGain=6;
+      s.log.push(L('You sit below the far-shore chief. You speak second. You listen more than you talk. Your elder translates the silences — and the silences say: "This one can be trusted."'));
+      s.log.push(L('The far-shore chief places a copper shield between you. "Peace between our waters."'));
+      break;}
+    case'firm':{
+      feudReduce+=1;prestigeGain=18;moraleGain=4;
+      s.log.push(L('You meet the far-shore chief as an equal. Eye to eye. You lay out your terms clearly: the feud serves neither side. Trade is better than blood. The coast needs stability.'));
+      s.log.push(L('A long silence. Then a nod. "We will hold — for now."'));
+      break;}
+    case'lavish':{
+      const giftValue=Math.max(5,Math.round((s.cargo||0)*0.3));
+      s.cargo=Math.max(0,s.cargo-giftValue);
+      feudReduce+=Math.round(giftValue*0.3);
+      prestigeGain=12+Math.round(giftValue*0.5);moraleGain=8;
+      s.log.push(L(`You bring out the finest goods — ${giftValue} units of oil, cedar, and carved pieces — and lay them at the council fire. Gasps. Even the far-shore elders are impressed.`));
+      s.log.push(L('"Your house speaks with more than words. We hear you."'));
+      break;}
+  }
+  s.feudEscalation=Math.max(0,s.feudEscalation-feudReduce);
+  s.prestige+=prestigeGain;s.morale=cl(s.morale+moraleGain,0,100);
+  s.outcome='DIPLOMACY_SUCCESS';s.prestigeChange=prestigeGain;
+  s.log.push(L(''));
+  s.log.push(L(`Diplomacy: −${feudReduce} Feud · +${prestigeGain} Prestige · +${moraleGain} Morale`,'green','stat'));
   s.log.push(L(''));s.log.push(L('The canoe returns under calm skies. The village sees the speaking staff raised high — a sign of words, not war.'));
+  s.totalRaids+=1;
+  /* Season wear (lighter than raid) */
+  s.villageReadiness=Math.max(0,(s.villageReadiness||58)-3);
+  s.foodStores=Math.max(0,(s.foodStores||72)-4);
+  s.canoeReadiness=Math.max(0,(s.canoeReadiness||60)-5);
+  s.lastRun={outcome:'DIPLOMACY_SUCCESS',killed:0,wounded:0,spoils:'Peace terms',prestige:signStr(prestigeGain),feud:feudName(s.feudEscalation),named_dead:[]};
+  s.legacyEntries.push(`Diplomatic mission: −${feudReduce} feud, +${prestigeGain} prestige. ${feudName(s.feudEscalation)}.`);
   s.impactFrame={type:'phase_enter',phase:5,title:'PEACE RETURN',subtitle:'Words instead of weapons. The feud cools — for now.',place:WORLD.home.name,isWin:true};
+  s.scene='village';
   savePersist(persistFromState(s));s.step='aft_show';return s;
 }
 
@@ -1125,8 +1348,12 @@ const CONT={vil_done:enterTravel,trv_done:enterEncounter,enc_fled:enterWithdrawa
   enc_done:enterResolution,res_done:enterWithdrawal,wth_retreat:enterAftermath,wth_done:enterAftermath};
 /* pickHomeWaters: vil_dawn → vil_expedition (internal)
    pickExpedition: vil_expedition → vil_intel (raid) or vil_done (trade/diplomacy)
-   pickRoute: trv_route → trv_event
+   pickRoute: trv_route → trv_event (raid) / trv_trade_event (trade) / trv_diplo_event (diplo)
    resolveVoyageEvent: trv_event → trv_arrival
+   pickTradeEvent: trv_trade_event → trv_trade_negotiate
+   pickTradeNegotiation: trv_trade_negotiate → aft_show
+   pickDiploEvent: trv_diplo_event → trv_diplo_council
+   pickDiploCouncil: trv_diplo_council → aft_show
    pickCeremony: aft_show → aft_done */
 
 /* ─── §10  CSS ────────────────────────────────────────────────────────── */
@@ -1457,9 +1684,9 @@ const INJCSS=`
 /* Bottom-sheet drag handle */
 .tl-sheet-handle{width:32px;height:4px;border-radius:2px;background:${P.dim}40;margin:0 auto 4px}
 
-.tl-worldbar{display:grid;grid-template-columns:1.15fr 1fr 1.1fr;gap:6px;padding:6px 8px;background:linear-gradient(180deg,${P.panelHi},${P.panel});border-bottom:1px solid ${P.border}}
-.tl-worldpanel{min-height:72px;padding:6px 7px;background:linear-gradient(180deg,rgba(20,20,52,.92),rgba(12,12,34,.96));border:1px solid ${P.border};border-radius:4px;overflow:hidden;position:relative}
-.tl-worldpanel::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.02),transparent 45%);pointer-events:none}
+.tl-worldbar{display:grid;grid-template-columns:1.15fr 1fr 1.1fr;gap:6px;padding:6px 8px;background:linear-gradient(180deg,${P.panelHi},${P.panel}ee);border-bottom:1px solid ${P.border}}
+.tl-worldpanel{min-height:72px;padding:6px 7px;background:linear-gradient(180deg,rgba(30,30,70,.88),rgba(20,20,50,.92));border:1px solid ${P.border};border-radius:4px;overflow:hidden;position:relative}
+.tl-worldpanel::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.05),transparent 45%);pointer-events:none}
 .tl-route-seg{position:relative;flex:1 1 0;height:8px;border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.05)}
 .tl-route-seg::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);background-size:24px 100%;animation:tl-route-flow 2.4s linear infinite;mix-blend-mode:screen;opacity:.45}
 .tl-seg-sheltered{background:linear-gradient(90deg,#163a48,#1e4c5a)}
@@ -1521,7 +1748,7 @@ function SceneMoon({right='14%',top='6%',size=22}){
 }
 
 /* ── Parallax Mountain Range (SVG) ── */
-function MountainRange({yTop,height,speed='far',fill1='#142430',fill2='#182838',zIndex=3}){
+function MountainRange({yTop,height,speed='far',fill1='#1e3648',fill2='#263e50',zIndex=3}){
   const pts1='0,100 3,72 8,55 14,48 19,58 22,50 28,35 33,40 38,30 42,38 46,28 50,20 54,32 58,25 62,35 66,42 70,30 74,45 78,38 82,50 86,55 90,48 94,60 97,52 100,100';
   const pts2='0,100 4,65 10,50 15,42 20,55 25,38 30,30 35,45 40,25 45,35 50,28 55,40 60,32 65,22 70,38 75,48 80,35 85,52 90,42 95,58 100,100';
   const dbl=(p,off=0)=>p.split(' ').map(pt=>{const[x,y]=pt.split(',');return(parseFloat(x)*2+off)+','+y;}).join(' ');
@@ -1535,7 +1762,7 @@ function MountainRange({yTop,height,speed='far',fill1='#142430',fill2='#182838',
 }
 
 /* ── Forest Treeline ── */
-function ForestLine({yTop,height,color='#122c1c',altColor='#0e2418',density=80,speed='mid',zIndex=4}){
+function ForestLine({yTop,height,color='#1c3e2c',altColor='#183828',density=80,speed='mid',zIndex=4}){
   const trees=useMemo(()=>Array.from({length:density},(_,i)=>({
     tx:i*(200/density)+Math.sin(i*0.7)*0.8,
     th:10+Math.sin(i*1.3)*5+Math.cos(i*0.5)*4,
@@ -1608,9 +1835,9 @@ function FogBand({top,opacity=0.08,speed=14,delay=0,color='180,190,200',height=1
 }
 
 /* ── Vignette Overlay ── */
-function Vignette({color='4,8,18',intensity=0.35,focus='50% 45%'}){
+function Vignette({color='4,8,18',intensity=0.18,focus='50% 45%'}){
   return<div style={{position:'absolute',inset:0,zIndex:10,pointerEvents:'none',
-    background:`radial-gradient(ellipse at ${focus},transparent 40%,rgba(${color},${intensity}) 100%)`,
+    background:`radial-gradient(ellipse at ${focus},transparent 50%,rgba(${color},${intensity}) 100%)`,
   }}/>;
 }
 
@@ -1720,10 +1947,10 @@ function BeachStrip({top,height=14,zIndex=4}){
     w:1+Math.random()*2,o:0.4+Math.random()*0.3,
   })),[height]);
   return<div style={{position:'absolute',top,left:0,right:0,height,zIndex,
-    background:'linear-gradient(180deg,#1a1810 0%,#141208 40%,#100e06 100%)',
+    background:'linear-gradient(180deg,#2e2820 0%,#262018 40%,#201c14 100%)',
   }}>
     {pebbles.map((p,i)=><div key={i} style={{position:'absolute',
-      top:p.t,left:p.l+'%',width:p.w,height:1,background:'#2a2418',borderRadius:1,opacity:p.o,
+      top:p.t,left:p.l+'%',width:p.w,height:1,background:'#3e3828',borderRadius:1,opacity:p.o,
     }}/>)}
   </div>;
 }
@@ -1856,6 +2083,85 @@ function HostileFrontage({x,bottom=0,w=80,zIndex=5,opacity=1}){
   </div>;
 }
 
+/* ── NEW External SVG Sprite Components ── */
+/* Trade canoe — wider hull with cargo, used for trade/diplomacy voyages */
+function TradeCanoe({left='26%',bottom=0,w=82,zIndex=6}){
+  return<div style={{position:'absolute',left,bottom,width:w,height:Math.round(w*0.34),zIndex}}>
+    <img src={GFX2.canoeTradeHull} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 8px rgba(0,0,0,.4))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* Copper shield — prestige display, T-shape copper with crest */
+function CopperShieldDisplay({x='50%',bottom=0,h=28,zIndex=7}){
+  return<div style={{position:'absolute',left:x,bottom,width:Math.round(h*0.67),height:h,zIndex}}>
+    <img src={GFX2.copperShield} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 6px rgba(0,0,0,.35))',userSelect:'none',pointerEvents:'none'}}/>
+    <div style={{position:'absolute',top:-3,left:-3,width:'120%',height:'110%',
+      background:`radial-gradient(ellipse at 50% 35%,${P.gold}08,transparent 60%)`,pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* Speaking staff — diplomacy icon */
+function SpeakingStaffDisplay({x='50%',bottom=0,h=42,zIndex=7}){
+  return<div style={{position:'absolute',left:x,bottom,width:Math.round(h*0.2),height:h,zIndex}}>
+    <img src={GFX2.speakingStaff} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 5px rgba(0,0,0,.32))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* External trade goods pile — richer than inline version */
+function ExternalTradeGoods({x='50%',bottom=0,w=64,zIndex=6}){
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*0.42),zIndex}}>
+    <img src={GFX2.tradeGoodsPile} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 5px rgba(0,0,0,.3))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* External council fire — stone-ringed ceremony fire with glow */
+function ExternalCouncilFire({x='50%',bottom=0,w=48,zIndex=7}){
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*0.81),zIndex}}>
+    <img src={GFX2.councilFire} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 8px rgba(0,0,0,.35))',userSelect:'none',pointerEvents:'none'}}/>
+    <div className="tl-ember-pulse" style={{position:'absolute',bottom:-4,left:'-10%',width:'120%',height:'80%',
+      background:'radial-gradient(ellipse,rgba(230,160,50,.1) 0%,transparent 65%)',pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* Growing memorial pole — 3 stages revealed by poleProgress */
+function GrowingMemorialPole({x='50%',bottom=0,h=62,poleProgress=0,zIndex=7}){
+  /* The SVG has 3 CSS class stages: mp-stage-1 (always visible), mp-stage-2 (>=30), mp-stage-3 (>=70) */
+  /* We inject a <style> scoped to this instance to control opacity */
+  const s2=poleProgress>=30?1:0;
+  const s3=poleProgress>=70?1:0;
+  return<div style={{position:'absolute',left:x,bottom,width:Math.round(h*0.3),height:h,zIndex}}>
+    <img src={GFX2.poleMemorialGrowing} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 7px rgba(0,0,0,.38))',userSelect:'none',pointerEvents:'none'}}/>
+    {/* Overlay glow that intensifies with progress */}
+    <div style={{position:'absolute',top:-4,left:-6,width:'140%',height:'110%',
+      background:`radial-gradient(ellipse at 50% 20%,${P.gold}0${Math.round(poleProgress/16)},transparent 60%)`,pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* Feast longhouse — wide open door, fire glow */
+function FeastLonghouse({x='40%',bottom=0,w=84,zIndex=5}){
+  const h=Math.round(w*0.65);
+  return<div className="tl-structure-life" style={{position:'absolute',left:x,bottom,width:w,height:h,zIndex}}>
+    <img src={GFX2.longhouseFeast} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 3px 8px rgba(0,0,0,.38))',userSelect:'none',pointerEvents:'none'}}/>
+    <div className="tl-heat-haze" style={{position:'absolute',left:'30%',bottom:'5%',width:'40%',height:'50%',
+      background:'linear-gradient(180deg,rgba(220,150,90,.08),transparent)',filter:'blur(2px)',pointerEvents:'none'}}/>
+    <div className="tl-smoke" style={{position:'absolute',top:-12,left:'48%',zIndex:zIndex+1}}/>
+  </div>;
+}
+
+/* External drying rack — fish drying detail */
+function ExternalDryingRack({x='60%',bottom=0,w=42,zIndex=6}){
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*1.14),zIndex}}>
+    <img src={GFX2.dryingRack} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 5px rgba(0,0,0,.3))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
+/* Trade port — distant settlement across water */
+function TradePortSettlement({x='55%',bottom=0,w=120,zIndex=4}){
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:Math.round(w*0.4),zIndex}}>
+    <img src={GFX2.tradePortSettlement} alt="" draggable="false" style={{position:'absolute',left:0,bottom:0,width:'100%',height:'100%',objectFit:'contain',filter:'drop-shadow(0 2px 6px rgba(0,0,0,.25))',userSelect:'none',pointerEvents:'none'}}/>
+  </div>;
+}
+
 /* ── Graphics 2.0 scene-layer helpers ── */
 function SceneLayer({zIndex=1,className='',style={},children}){
   return <div className={className} style={{position:'absolute',zIndex,pointerEvents:'none',...style}}>{children}</div>;
@@ -1982,10 +2288,10 @@ function TravelHeroCanoe({left='18%',bottom=32,width=176,crew,Paddler,CYCLE,zInd
 function VillageShoreGround({top,height,zIndex=4}){
   return(
     <SceneLayer zIndex={zIndex} style={{top,left:0,right:0,height,
-      background:'linear-gradient(180deg,#0c1a0c 0%,#0e1a08 30%,#141808 60%,#181a0c 100%)'}}>
+      background:'linear-gradient(180deg,#1c3018 0%,#1e3014 30%,#243018 60%,#283018 100%)'}}>
       {[5,12,20,30,42,55,65,78,88,95].map((x,i)=><div key={i} style={{position:'absolute',top:-3-(i%3)*2,left:x+'%',
         width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
-        borderBottom:`${5+(i%2)*3}px solid #0c1a0c`}}/>) }
+        borderBottom:`${5+(i%2)*3}px solid #1c3018`}}/>) }
     </SceneLayer>
   );
 }
@@ -2462,6 +2768,135 @@ function RavenOmenSVG({x='22%',bottom=0,zIndex=9}){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   §10c2  TRADE & DIPLOMACY VOYAGE SVGs
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Trade Port — settlement with goods laid out on the beach ── */
+function TradePortSVG({x='58%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:80,height:48}}>
+    <svg viewBox="0 0 80 48" width="80" height="48" style={{overflow:'visible'}}>
+      <defs>
+        <linearGradient id="tp-beach" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5a5040"/><stop offset="100%" stopColor="#3a3428"/>
+        </linearGradient>
+      </defs>
+      {/* Beach/landing area */}
+      <path d="M0,40 Q20,34 40,36 Q60,34 80,40 L80,48 L0,48Z" fill="url(#tp-beach)" opacity=".7"/>
+      {/* Simple longhouse silhouette */}
+      <path d="M30,20 L40,10 L50,20 L50,36 L30,36Z" fill="#2a2820" stroke="#3a3628" strokeWidth=".5"/>
+      <rect x="37" y="28" width="6" height="8" fill="#1a1810" rx=".5"/>
+      {/* Smoke from longhouse */}
+      <g className="tl-plank-steam" style={{animationDelay:'0s'}}>
+        <ellipse cx="40" cy="6" rx="4" ry="2.5" fill="rgba(160,160,180,.1)"/>
+      </g>
+      {/* Trade goods on beach — bundles, baskets */}
+      <rect x="12" y="34" width="5" height="4" rx="1" fill="#8a6838"/>
+      <rect x="18" y="35" width="4" height="3" rx=".5" fill="#6a5028"/>
+      <ellipse cx="56" cy="36" rx="3.5" ry="2.5" fill="#7a5830" stroke="#5a4020" strokeWidth=".3"/>
+      <rect x="60" y="34" width="6" height="4" rx="1" fill="#9a7848"/>
+      <ellipse cx="66" cy="33" rx="2.5" ry="2" fill="#6a5838"/>
+      {/* Copper piece — gleaming */}
+      <rect x="24" y="34" width="3" height="4" rx=".5" fill="#c87830" className="tl-oil-gleam"/>
+      {/* Figures waiting */}
+      <circle cx="26" cy="28" r="1.5" fill="#c8a870"/>
+      <rect x="25" y="29.5" width="2" height="4" fill="#3a2818" rx=".5"/>
+      <circle cx="54" cy="29" r="1.5" fill="#c8a870"/>
+      <rect x="53" y="30.5" width="2" height="4" fill="#2a3830" rx=".5"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Rival Trader Canoe — distant silhouette with trade goods visible ── */
+function RivalTraderSVG({x='68%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:48,height:18}}>
+    <svg viewBox="0 0 48 18" width="48" height="18" style={{overflow:'visible'}}>
+      {/* Hull — smaller than war canoe */}
+      <path d="M2,12 Q0,10 4,9 Q12,7 24,6 Q36,7 44,9 Q48,10 46,12" fill="#3a2818" stroke="#2a1c10" strokeWidth=".4"/>
+      {/* Cargo bundles */}
+      <rect x="14" y="6" width="4" height="3" rx=".5" fill="#8a6838" opacity=".8"/>
+      <rect x="20" y="5.5" width="5" height="3.5" rx=".5" fill="#7a5828" opacity=".8"/>
+      <rect x="28" y="6" width="3" height="3" rx=".5" fill="#9a7848" opacity=".7"/>
+      {/* Paddlers — tiny silhouettes */}
+      <circle cx="10" cy="7" r="1.2" fill="#2a2018"/>
+      <circle cx="35" cy="7" r="1.2" fill="#2a2018"/>
+      {/* Wake */}
+      <ellipse cx="24" cy="14" rx="18" ry="2" fill="rgba(100,140,180,.08)"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Council Fire — large ceremonial fire for diplomacy ── */
+function CouncilFireSVG({x='52%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:50,height:40,transform:'translateX(-50%)'}}>
+    <svg viewBox="0 0 50 40" width="50" height="40" style={{overflow:'visible'}}>
+      {/* Fire pit stones */}
+      <ellipse cx="25" cy="32" rx="14" ry="4" fill="#3a3028" stroke="#4a4038" strokeWidth=".5"/>
+      {/* Fire — layered flames */}
+      <path d="M20,30 Q18,22 22,16 Q25,12 25,8 Q25,12 28,16 Q32,22 30,30" fill="#c84020" opacity=".7" className="tl-fire"/>
+      <path d="M22,30 Q21,24 24,18 Q25,15 26,18 Q29,24 28,30" fill="#e8a020" opacity=".6" className="tl-fire" style={{animationDelay:'.3s'}}/>
+      <path d="M24,30 Q23,26 25,22 Q27,26 26,30" fill="#f0c840" opacity=".5" className="tl-fire" style={{animationDelay:'.6s'}}/>
+      {/* Embers */}
+      <circle cx="22" cy="33" r=".8" fill="#e86020" className="tl-ember-pulse"/>
+      <circle cx="28" cy="33" r=".6" fill="#e86020" className="tl-ember-pulse" style={{animationDelay:'1s'}}/>
+      {/* Seated figures — two sides of the fire */}
+      <circle cx="10" cy="28" r="2" fill="#c8a870"/><rect x="9" y="30" width="2.5" height="5" fill="#3a2818" rx=".5"/>
+      <circle cx="14" cy="29" r="1.8" fill="#c8a870"/><rect x="13" y="31" width="2.2" height="4.5" fill="#2a3828" rx=".5"/>
+      <circle cx="36" cy="28" r="2" fill="#c8a870"/><rect x="35" y="30" width="2.5" height="5" fill="#2a2838" rx=".5"/>
+      <circle cx="40" cy="29" r="1.8" fill="#c8a870"/><rect x="39" y="31" width="2.2" height="4.5" fill="#3a2828" rx=".5"/>
+      {/* Speaking staff between them */}
+      <line x1="25" y1="24" x2="25" y2="36" stroke="#a08050" strokeWidth="1" strokeLinecap="round"/>
+      <circle cx="25" cy="23" r="1.5" fill="none" stroke="#c0a060" strokeWidth=".5"/>
+      {/* Fire glow */}
+      <ellipse cx="25" cy="28" rx="18" ry="10" fill="rgba(200,120,40,.06)"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Diplomacy Canoe — peaceful canoe with speaking staff, no war crests ── */
+function DiplomacyCanoeFlag({x='20%',bottom=0,zIndex=9}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:20,height:28}}>
+    <svg viewBox="0 0 20 28" width="20" height="28" style={{overflow:'visible'}}>
+      {/* Speaking staff — tall, with carved top */}
+      <line x1="10" y1="2" x2="10" y2="26" stroke="#a08050" strokeWidth="1.2" strokeLinecap="round"/>
+      {/* Carved head piece */}
+      <circle cx="10" cy="3" r="2.5" fill="none" stroke="#c0a060" strokeWidth=".6"/>
+      <path d="M8,1 L10,0 L12,1" fill="none" stroke="#c0a060" strokeWidth=".5"/>
+      {/* Cedar bark streamers */}
+      <path d="M10,8 Q14,10 12,14" fill="none" stroke="#8a6838" strokeWidth=".6" className="tl-fish-sway"/>
+      <path d="M10,10 Q6,12 8,16" fill="none" stroke="#7a5828" strokeWidth=".5" className="tl-fish-sway" style={{animationDelay:'1.5s'}}/>
+      {/* Peace tokens tied to staff */}
+      <circle cx="12" cy="12" r="1" fill="#d4b020" opacity=".6"/>
+      <circle cx="8" cy="14" r=".8" fill="#c8a870" opacity=".5"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ── Gift Pile — trade goods arranged for exchange ── */
+function GiftPileSVG({x='45%',bottom=0,zIndex=7}){
+  return<SceneLayer zIndex={zIndex} style={{left:x,bottom,width:44,height:24}}>
+    <svg viewBox="0 0 44 24" width="44" height="24" style={{overflow:'visible'}}>
+      {/* Cedar bark bundles */}
+      <rect x="2" y="14" width="8" height="6" rx="1.5" fill="#7a5830" stroke="#5a4020" strokeWidth=".4"/>
+      <rect x="6" y="12" width="7" height="5" rx="1" fill="#8a6838" stroke="#5a4020" strokeWidth=".3"/>
+      {/* Oil containers */}
+      <ellipse cx="20" cy="17" rx="4" ry="5" fill="#4a3420" stroke="#3a2410" strokeWidth=".4"/>
+      <ellipse cx="20" cy="13" rx="3" ry="1.5" fill="#5a4430"/>
+      {/* Copper pieces — gleaming */}
+      <rect x="28" y="14" width="4" height="6" rx=".5" fill="#c87830" className="tl-oil-gleam"/>
+      <rect x="33" y="15" width="3" height="5" rx=".5" fill="#b86820" className="tl-oil-gleam" style={{animationDelay:'2s'}}/>
+      {/* Dentalium shells */}
+      <ellipse cx="40" cy="18" rx="2" ry="3" fill="#e8e0d0" opacity=".6"/>
+      <ellipse cx="38" cy="19" rx="1.5" ry="2.5" fill="#d8d0c0" opacity=".5"/>
+      {/* Woven blanket draped */}
+      <path d="M10,10 Q16,8 22,10 Q22,14 16,14 Q10,14 10,10" fill="#6a4838" opacity=".6"/>
+      <line x1="12" y1="10" x2="12" y2="14" stroke="#5a3828" strokeWidth=".3" opacity=".4"/>
+      <line x1="16" y1="9" x2="16" y2="14" stroke="#5a3828" strokeWidth=".3" opacity=".4"/>
+      <line x1="20" y1="10" x2="20" y2="14" stroke="#5a3828" strokeWidth=".3" opacity=".4"/>
+    </svg>
+  </SceneLayer>;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    §10d  CEREMONY SCENE SVG — potlatch, pole raising, feast
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -2581,29 +3016,38 @@ function VillageScene({sceneH,G}){
   return<div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.village}}>
     <StarField count={22} region={28}/>
     <SceneMoon right="16%" top="5%" size={18}/>
-    <MountainRange yTop={skyH-10} height={mtH+18} fill1="#0c0e20" fill2="#0e1228"/>
-    <ForestLine yTop={skyH+mtH-14} height={shoreH+22} color="#0c1a10" altColor="#081408"/>
+    <MountainRange yTop={skyH-10} height={mtH+18} fill1="#1c2040" fill2="#202848"/>
+    <ForestLine yTop={skyH+mtH-14} height={shoreH+22} color="#1c3020" altColor="#182818"/>
     <FogBand top={skyH+mtH-2} opacity={0.06} speed={16}/>
     <FogBand top={skyH+mtH+shoreH-4} opacity={0.04} delay={6} speed={20}/>
     <VillageShoreGround top={landTop} height={groundH} zIndex={4}/>
     <VillageSettlement groundBottom={gb} zIndex={5}/>
     <VillageCeremonyFront groundBottom={gb} zIndex={6}/>
     <BeachedCanoeDisplay left="3%" bottom={waterH-2} w={72} zIndex={5}/>
+    {/* ── Growing memorial pole — grows with prestige over time ── */}
+    {G&&(G.poleProgress||0)>0&&<GrowingMemorialPole x="92%" bottom={gb+1} h={48} poleProgress={G.poleProgress||0} zIndex={7}/>}
+    {/* ── Trade canoe beached when trade/diplomacy expedition is being prepared ── */}
+    {G&&(G.expeditionType==='trade'||G.expeditionType==='diplomacy')&&G.step==='vil_outfit'&&
+      <TradeCanoe left="4%" bottom={waterH+2} w={72} zIndex={6}/>}
     {/* ── Home Waters: rich village-life scene ── */}
     {isHomeWaters&&<>
       <DryingRacks x="68%" bottom={gb+1} zIndex={6}/>
+      <ExternalDryingRack x="80%" bottom={gb-1} w={36} zIndex={5}/>
       <CanoeWorkshop x="12%" bottom={gb-1} zIndex={6}/>
       <CarverWorkshop x="44%" bottom={gb+4} zIndex={7}/>
       <TradeGoodsPile x="85%" bottom={gb+2} zIndex={6}/>
+      <ExternalTradeGoods x="56%" bottom={gb+1} w={44} zIndex={5}/>
       <VillageWorkers bottom={gb} zIndex={6}/>
       <DawnSmoke x="16%" bottom={gb+20} zIndex={3}/>
       <DawnSmoke x="50%" bottom={gb+24} zIndex={3}/>
       <DawnSmoke x="74%" bottom={gb+18} zIndex={3}/>
       {/* Extra warmth from workshop fires */}
       <CeremonialFire x="66%" bottom={gb+2} size="small" zIndex={7}/>
+      {/* Copper shield on display if prestige is high */}
+      {G&&G.prestige>=30&&<CopperShieldDisplay x="40%" bottom={gb+3} h={22} zIndex={7}/>}
     </>}
     <WaterBody top={landTop+groundH}
-      gradient="linear-gradient(180deg,#113053 0%,#0d2748 28%,#0a2140 58%,#081838 100%)"
+      gradient="linear-gradient(180deg,#1e4470 0%,#183c62 28%,#143658 58%,#102c50 100%)"
       waveCount={5} phosphorCount={2}/>
     <SurfBand top={landTop+groundH-4} height={11} foam="226,214,188" undertow="120,150,180" intensity={0.72} zIndex={6}/>
     <SceneLayer zIndex={4} style={{left:'6%',bottom:waterH+2,width:78,height:18,
@@ -2614,7 +3058,7 @@ function VillageScene({sceneH,G}){
     {isHomeWaters&&<FireGlow x="72%" bottom={gb-2} r={30} color="180,120,50" intensity={0.12} zIndex={4}/>}
     <SceneLayer zIndex={9} style={{inset:0,
       background:'linear-gradient(180deg,rgba(200,140,60,.03),transparent 24%,transparent 76%,rgba(200,140,60,.03))'}}/>
-    <Vignette color="8,6,16" intensity={0.18} focus="52% 55%"/>
+    <Vignette color="8,6,16" intensity={0.10} focus="52% 55%"/>
   </div>;
 }
 
@@ -2627,8 +3071,8 @@ function EncounterScene({sceneH}){
     {/* Dawn glow on horizon */}
     <SceneLayer zIndex={1} style={{top:skyH-20,left:0,right:0,height:30,
       background:'linear-gradient(180deg,transparent,rgba(120,40,30,.06),transparent)'}}/>
-    <MountainRange yTop={skyH-8} height={mtH+14} fill1="#120c18" fill2="#0e0a14"/>
-    <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#0c120e" altColor="#08100a"/>
+    <MountainRange yTop={skyH-8} height={mtH+14} fill1="#221c30" fill2="#1e1828"/>
+    <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#1c2418" altColor="#182018"/>
     <HostileShore shoreBottom={waterH+beachH} zIndex={5}/>
     <BeachStrip top={landTop} height={beachH} zIndex={4}/>
     <FogBand top={skyH+mtH} opacity={0.06} speed={16} color="160,140,140"/>
@@ -2636,7 +3080,7 @@ function EncounterScene({sceneH}){
     <SceneLayer zIndex={5} style={{left:'58%',top:landTop-16,width:'34%',height:42,
       background:'radial-gradient(ellipse,rgba(150,50,40,.08),transparent 72%)',filter:'blur(2px)'}}/>
     <WaterBody top={landTop+beachH}
-      gradient="linear-gradient(180deg,#123058 0%,#0e2848 30%,#0a2040 60%,#081838 100%)"
+      gradient="linear-gradient(180deg,#1e4470 0%,#183c62 30%,#143658 60%,#102c50 100%)"
       waveCount={5} phosphorCount={2}/>
     <SurfBand top={landTop+beachH-4} height={10} foam="214,224,236" undertow="96,132,174" intensity={0.84} zIndex={6}/>
     <ApproachWarCanoe left="10%" bottom={waterH*0.25} zIndex={8}/>
@@ -2647,7 +3091,7 @@ function EncounterScene({sceneH}){
       background:'linear-gradient(180deg,rgba(140,20,10,.04),transparent)'}}/>
     <SceneLayer zIndex={9} style={{inset:0,
       background:'linear-gradient(180deg,rgba(130,40,30,.03),transparent 26%,transparent 74%,rgba(130,40,30,.04))'}}/>
-    <Vignette color="18,6,6" intensity={0.2}/>
+    <Vignette color="18,6,6" intensity={0.12}/>
   </div>;
 }
 
@@ -2662,7 +3106,7 @@ function BattleScene({sceneH,G}){
   return<div className="tl-scene-pressure" style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.battle}}>
     <SceneLayer zIndex={1} style={{top:0,left:0,right:0,height:H*0.25,
       background:'linear-gradient(180deg,rgba(40,8,8,.45),transparent)'}}/>
-    <ForestLine yTop={H*0.25} height={40} color="#0e0808" altColor="#120a08" density={60} speed="far"/>
+    <ForestLine yTop={H*0.25} height={40} color="#1e1414" altColor="#221810" density={60} speed="far"/>
     <SceneLayer zIndex={4} style={{right:'7%',top:H*0.22,width:118,height:66,opacity:isWin?0.48:0.74}}>
       <HostileLonghouse x="22%" w={58} h={22} bottom={8} smoke={true} emberGlow={!isWin} zIndex={4}/>
       <HostileWatchPole x="8%" h={42} bottom={8} zIndex={5}/>
@@ -2722,7 +3166,7 @@ function BattleScene({sceneH,G}){
     <div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
       background:'radial-gradient(ellipse at 48% 46%,rgba(180,30,10,.08),transparent 55%)',
       animation:'tl-pulse 3s ease-in-out infinite'}}/>
-    <Vignette color="24,4,4" intensity={0.25} focus="48% 46%"/>
+    <Vignette color="24,4,4" intensity={0.15} focus="48% 46%"/>
   </div>;
 }
 
@@ -2737,8 +3181,8 @@ function WithdrawalScene({G,sceneH}){
   return<div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',
     background:SCENE_SKY.withdrawal}}>
     <StarField count={10} brightness="#a0a0c0" region={22}/>
-    <MountainRange yTop={skyH-6} height={mtH+12} fill1="#0a0e18" fill2="#0c1020"/>
-    <ForestLine yTop={skyH+mtH-10} height={shoreH+16} color="#0a140e" altColor="#081008"/>
+    <MountainRange yTop={skyH-6} height={mtH+12} fill1="#182030" fill2="#1c2438"/>
+    <ForestLine yTop={skyH+mtH-10} height={shoreH+16} color="#1a2a1e" altColor="#182218"/>
     <MemoryShore top={skyH+mtH+2} left="3%" isBurning={!!isWin} zIndex={5} opacity={0.5}/>
     <HomeShore top={skyH+mtH-2} right="6%" waterH={waterH} mood={shoreMood} zIndex={5}/>
     <FogBand top={skyH+mtH-2} opacity={0.08} speed={18}/>
@@ -2750,7 +3194,7 @@ function WithdrawalScene({G,sceneH}){
       filter:'blur(4px)'}}/>
     {/* Water */}
     <WaterBody top={waterTop}
-      gradient="linear-gradient(180deg,#123058 0%,#0e2848 25%,#0a2040 55%,#081838 100%)"
+      gradient="linear-gradient(180deg,#1e4470 0%,#183c62 25%,#143658 55%,#102c50 100%)"
       waveCount={7} phosphorCount={8}/>
     <SurfBand top={waterTop-4} height={10} foam={isWin?'230,220,194':isStale?'196,198,220':'182,186,208'} undertow={isWin?'124,152,184':isStale?'104,118,160':'92,108,146'} intensity={isWin?0.88:isStale?0.66:0.54} zIndex={6}/>
     <WakeTrail left="30%" bottom={waterH*0.28} width={60} strength={isWin?'strong':isStale?'medium':'light'} zIndex={7}/>
@@ -2766,7 +3210,7 @@ function WithdrawalScene({G,sceneH}){
       background:isWin?'linear-gradient(180deg,rgba(200,140,60,.04),transparent 28%,transparent 70%,rgba(200,140,60,.03))'
         :isStale?'linear-gradient(180deg,rgba(110,110,140,.04),transparent 30%,transparent 68%,rgba(110,110,140,.05))'
         :'linear-gradient(180deg,rgba(16,12,26,.08),transparent 32%,transparent 64%,rgba(12,10,22,.12))'}}/>
-    <Vignette color="6,8,16" intensity={0.2} focus="55% 45%"/>
+    <Vignette color="6,8,16" intensity={0.12} focus="55% 45%"/>
   </div>;
 }
 
@@ -2792,22 +3236,24 @@ function AftermathScene({G,sceneH}){
   return<div className={isWin?'tl-scene-arrival':''} style={{height:H,position:'relative',overflow:'hidden',background:skyGrad}}>
     <StarField count={isWin?24:isDev?6:12} brightness={starBright} region={28}/>
     {isWin&&<SceneMoon right="12%" top="4%" size={16}/>}
-    <MountainRange yTop={skyH-8} height={mtH+14} fill1="#0c0e1a" fill2="#0e1020"/>
-    <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#0c1a10" altColor="#081408"/>
+    <MountainRange yTop={skyH-8} height={mtH+14} fill1="#1c1e32" fill2="#1e2038"/>
+    <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#1c3020" altColor="#182818"/>
     <FogBand top={skyH+mtH-2} opacity={isWin?0.04:0.07} speed={18}/>
     {isDev&&<FogBand top={skyH+mtH+shoreH} opacity={0.08} speed={22} color="100,90,100"/>}
     {isWin&&<SceneLayer zIndex={2} className="tl-home-glow" style={{left:'36%',top:skyH+mtH+4,width:120,height:40,
       background:'radial-gradient(ellipse,rgba(210,150,70,.08),transparent 70%)'}}/>}
     {/* Shore ground */}
     <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,
-      background:'linear-gradient(180deg,#0c1a0c 0%,#0e1a08 40%,#141808 100%)'}}>
+      background:'linear-gradient(180deg,#1c3018 0%,#1e3014 40%,#243018 100%)'}}>
       {[8,18,30,42,56,68,80,92].map((x,i)=><div key={i} style={{position:'absolute',top:-2-(i%3)*2,left:x+'%',
         width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
-        borderBottom:`${4+(i%2)*3}px solid #0c1a0c`}}/>)}
+        borderBottom:`${4+(i%2)*3}px solid #1c3018`}}/>)}
     </div>
     {/* ── Longhouses ── */}
     <Longhouse x="14%" w={56} h={22} bottom={gb-1} smoke={true} fireGlow={ci>=1} zIndex={5}/>
-    <Longhouse x="46%" w={74} h={26} bottom={gb} smoke={true} fireGlow={ci>=1} zIndex={5}/>
+    {/* Feast longhouse — replaces plain longhouse for ceremonies */}
+    {ci>=2?<FeastLonghouse x="42%" bottom={gb-2} w={84} zIndex={5}/>
+      :<Longhouse x="46%" w={74} h={26} bottom={gb} smoke={true} fireGlow={ci>=1} zIndex={5}/>}
     {ci>=2&&<Longhouse x="82%" w={44} h={18} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>}
     {ci>=2&&<SceneLayer zIndex={4} className="tl-home-glow" style={{left:'46%',bottom:gb-2,width:100,height:34,
       background:'radial-gradient(ellipse,rgba(220,160,80,.12),transparent 72%)'}}/>}
@@ -2846,18 +3292,32 @@ function AftermathScene({G,sceneH}){
     {/* ── Ceremony SVGs — visible during ceremony choice ── */}
     {G&&G.step==='aft_show'&&isWin&&<>
       <FeastFireSVG x="55%" bottom={gb+6} zIndex={7}/>
+      <ExternalCouncilFire x="54%" bottom={gb+4} w={38} zIndex={6}/>
       <FeastGoodsSVG x="62%" bottom={gb+2} zIndex={6}/>
+      <ExternalTradeGoods x="60%" bottom={gb+1} w={48} zIndex={5}/>
       <CeremonyGatheringSVG x="30%" bottom={gb+1} zIndex={6}/>
       {(G.poleProgress||0)>=20&&<PoleRaisingSVG x="18%" bottom={gb} zIndex={8}/>}
+      {(G.poleProgress||0)>=10&&<GrowingMemorialPole x="20%" bottom={gb+1} h={44} poleProgress={G.poleProgress||0} zIndex={7}/>}
+    </>}
+    {/* ── Trade/Diplomacy ceremony enhancements ── */}
+    {G&&G.step==='aft_show'&&G.outcome==='TRADE_SUCCESS'&&<>
+      <CopperShieldDisplay x="48%" bottom={gb+4} h={24} zIndex={8}/>
+      <ExternalTradeGoods x="38%" bottom={gb+2} w={56} zIndex={6}/>
+    </>}
+    {G&&G.step==='aft_show'&&G.outcome==='DIPLOMACY_SUCCESS'&&<>
+      <SpeakingStaffDisplay x="48%" bottom={gb+4} h={34} zIndex={8}/>
+      <ExternalCouncilFire x="44%" bottom={gb+2} w={32} zIndex={7}/>
     </>}
     {/* ── Homecoming Canoe at the shallows ── */}
-    <ReturnCanoe left="4%" bottom={waterH-2} w={82} isWin={!!isWin} hasDead={!!hasDead} damaged={!!(isDev||isDef)} zIndex={6} anim="tl-canoe-home 6s ease-in-out infinite"/>
+    {G&&(G.expeditionType==='trade'||G.expeditionType==='diplomacy')
+      ?<TradeCanoe left="4%" bottom={waterH-2} w={82} zIndex={6}/>
+      :<ReturnCanoe left="4%" bottom={waterH-2} w={82} isWin={!!isWin} hasDead={!!hasDead} damaged={!!(isDev||isDef)} zIndex={6} anim="tl-canoe-home 6s ease-in-out infinite"/>}
     <SceneLayer zIndex={6} style={{left:'23%',bottom:waterH+2,width:64,height:16,opacity:ci>=2?1:ci===1?.72:.58}}>
       <WitnessCluster x="28px" bottom={1} count={isWin?4:isStale?2:1} mood={shoreMood} zIndex={7}/>
     </SceneLayer>
     {/* Water */}
     <WaterBody top={landTop+groundH}
-      gradient="linear-gradient(180deg,#123058 0%,#0f2a4a 25%,#0a2242 55%,#081838 100%)"
+      gradient="linear-gradient(180deg,#1e4470 0%,#1a3e62 25%,#143858 55%,#102c50 100%)"
       waveCount={6} phosphorCount={isWin?3:0}/>
     <SurfBand top={landTop+groundH-4} height={10} foam={isWin?'228,216,190':ci===1?'198,202,218':'184,188,204'} undertow={isWin?'126,156,188':ci===1?'108,124,160':'96,108,144'} intensity={isWin?0.84:ci===1?0.62:0.5} zIndex={5}/>
     {isWin&&<WakeTrail left="12%" bottom={waterH-1} width={80} strength="strong" zIndex={5}/>} 
@@ -2876,7 +3336,7 @@ function AftermathScene({G,sceneH}){
       background:ci>=2?'linear-gradient(180deg,rgba(200,140,60,.03),transparent 24%,transparent 76%,rgba(200,140,60,.03))'
         :ci===1?'linear-gradient(180deg,rgba(120,120,150,.03),transparent 28%,transparent 72%,rgba(120,120,150,.04))'
         :'linear-gradient(180deg,rgba(12,10,24,.05),transparent 30%,transparent 68%,rgba(12,10,24,.08))'}}/>
-    <Vignette color={isWin?"8,6,16":"6,4,10"} intensity={isWin?0.18:isDev?0.35:0.25} focus="55% 55%"/>
+    <Vignette color={isWin?"8,6,16":"6,4,10"} intensity={isWin?0.10:isDev?0.20:0.15} focus="55% 55%"/>
   </div>;
 }
 
@@ -2991,15 +3451,15 @@ function TravelScene({sceneH,G}){
         background:'linear-gradient(90deg,transparent,rgba(120,130,160,.05),rgba(120,130,160,.08),rgba(120,130,160,.05),transparent)',
         borderRadius:3,animationDelay:'30s'}}/>
 
-      <MountainRange yTop={skyH-8} height={mtH+16} fill1="#142430" fill2="#182838" zIndex={3}/>
+      <MountainRange yTop={skyH-8} height={mtH+16} fill1="#223848" fill2="#284650" zIndex={3}/>
       <SceneLayer zIndex={3} className="tl-shore-far" style={{top:skyH-2,left:0,width:'200%',height:6}}>
         {[{x:50,w:6},{x:65,w:4},{x:40,w:5},{x:150,w:5},{x:165,w:4}].map((p,i)=><div key={i} style={{position:'absolute',left:p.x+'%',top:0,width:p.w,height:2,background:'rgba(200,210,230,.15)',borderRadius:1}}/>)}
       </SceneLayer>
-      <ForestLine yTop={skyH+mtH-12} height={shoreH+20} color="#122c1c" altColor="#0e2418" density={80} zIndex={4}/>
+      <ForestLine yTop={skyH+mtH-12} height={shoreH+20} color="#1c3e2c" altColor="#183828" density={80} zIndex={4}/>
 
       <FogBand top={skyH+mtH-4} height={18} opacity={0.1} color="140,160,180" zIndex={5}/>
       <FogBand top={skyH+mtH+shoreH-6} height={14} opacity={0.09} color="120,140,170" delay={5} speed={18} zIndex={5}/>
-      <WaterBody top={waterTop} gradient="linear-gradient(180deg,#14385e 0%,#103050 20%,#0c2848 45%,#082040 70%,#061838 100%)" waveCount={9} phosphorCount={18} zIndex={5}/>
+      <WaterBody top={waterTop} gradient="linear-gradient(180deg,#204c72 0%,#1a4468 20%,#163c60 45%,#123458 70%,#102c50 100%)" waveCount={9} phosphorCount={18} zIndex={5}/>
       <FogBand top={waterTop+waterH*0.3} height={10} opacity={0.07} color="100,120,150" delay={10} speed={22} zIndex={7}/>
 
       <SceneLayer zIndex={6} style={{top:waterTop+8,right:'13%',width:28,height:waterH-20,
@@ -3015,6 +3475,28 @@ function TravelScene({sceneH,G}){
       {G&&G.step==='trv_event'&&G.voyageEventId==='fog_bank'&&<FogWallSVG x="15%" bottom={waterH*0.2} zIndex={6}/>}
       {G&&G.step==='trv_event'&&G.voyageEventId==='flotsam'&&<FlotsamSVG x="50%" bottom={waterH*0.35} zIndex={7}/>}
       {G&&G.step==='trv_event'&&G.voyageEventId==='bird_omen'&&<RavenOmenSVG x="32%" bottom={waterH*0.32+20} zIndex={9}/>}
+      {/* ── Trade voyage SVGs ── */}
+      {G&&G.step==='trv_trade_event'&&G.tradeEventId==='rival_traders'&&<RivalTraderSVG x="62%" bottom={waterH*0.52} zIndex={7}/>}
+      {G&&G.step==='trv_trade_event'&&G.tradeEventId==='port_welcome'&&<TradePortSettlement x="52%" bottom={waterH*0.08} w={110} zIndex={4}/>}
+      {G&&G.step==='trv_trade_event'&&G.tradeEventId==='port_welcome'&&<TradePortSVG x="68%" bottom={waterH*0.15} zIndex={6}/>}
+      {G&&G.step==='trv_trade_event'&&G.tradeEventId==='suspicious_customs'&&<TradePortSettlement x="48%" bottom={waterH*0.06} w={100} zIndex={4}/>}
+      {G&&G.step==='trv_trade_event'&&G.tradeEventId==='suspicious_customs'&&<TradePortSVG x="66%" bottom={waterH*0.15} zIndex={6}/>}
+      {G&&G.step==='trv_trade_event'&&G.tradeEventId==='storm_cargo'&&<FlotsamSVG x="50%" bottom={waterH*0.35} zIndex={7}/>}
+      {G&&G.step==='trv_trade_negotiate'&&<TradePortSettlement x="46%" bottom={waterH*0.05} w={120} zIndex={4}/>}
+      {G&&G.step==='trv_trade_negotiate'&&<ExternalTradeGoods x="56%" bottom={waterH*0.16} w={52} zIndex={7}/>}
+      {G&&G.step==='trv_trade_negotiate'&&<CopperShieldDisplay x="52%" bottom={waterH*0.22} h={18} zIndex={7}/>}
+      {G&&G.step==='trv_trade_negotiate'&&<TradePortSVG x="62%" bottom={waterH*0.12} zIndex={6}/>}
+      {G&&G.step==='trv_trade_negotiate'&&<GiftPileSVG x="52%" bottom={waterH*0.18} zIndex={7}/>}
+      {/* ── Diplomacy voyage SVGs ── */}
+      {G&&G.expeditionType==='diplomacy'&&G.step==='trv_route'&&<DiplomacyCanoeFlag x="30%" bottom={waterH*0.32+20} zIndex={9}/>}
+      {G&&G.expeditionType==='diplomacy'&&G.step==='trv_route'&&<SpeakingStaffDisplay x="34%" bottom={waterH*0.32+8} h={28} zIndex={9}/>}
+      {G&&G.step==='trv_diplo_event'&&<DiplomacyCanoeFlag x="30%" bottom={waterH*0.32+20} zIndex={9}/>}
+      {G&&G.step==='trv_diplo_event'&&<SpeakingStaffDisplay x="34%" bottom={waterH*0.32+8} h={28} zIndex={9}/>}
+      {G&&G.step==='trv_diplo_council'&&<TradePortSettlement x="50%" bottom={waterH*0.06} w={100} zIndex={4}/>}
+      {G&&G.step==='trv_diplo_council'&&<ExternalCouncilFire x="58%" bottom={waterH*0.12} w={42} zIndex={7}/>}
+      {G&&G.step==='trv_diplo_council'&&<SpeakingStaffDisplay x="64%" bottom={waterH*0.18} h={24} zIndex={7}/>}
+      {G&&G.step==='trv_diplo_council'&&<CouncilFireSVG x="58%" bottom={waterH*0.15} zIndex={7}/>}
+      {G&&G.step==='trv_diplo_council'&&<GiftPileSVG x="42%" bottom={waterH*0.18} zIndex={7}/>}
       {G&&G.voyageWeather==='squall'&&<>
         <SceneLayer zIndex={10} style={{inset:0,background:'linear-gradient(180deg,rgba(20,30,40,.15),transparent 40%,transparent 60%,rgba(20,30,40,.1))',pointerEvents:'none'}}/>
         <FogBand top={skyH} height={30} opacity={0.14} color="80,90,110" speed={8} zIndex={6}/>
@@ -3022,7 +3504,7 @@ function TravelScene({sceneH,G}){
 
       <SceneLayer zIndex={9} style={{left:0,right:0,bottom:0,height:waterH*0.3,
         background:'linear-gradient(180deg,transparent 0%,rgba(4,8,18,.15) 100%)'}}/>
-      <Vignette color="4,8,18" intensity={0.18} focus="50% 45%"/>
+      <Vignette color="4,8,18" intensity={0.10} focus="50% 45%"/>
     </div>
   );
 }
@@ -3192,7 +3674,7 @@ function HudBar({G,phase,isFirstRaid}){
               {renderDelta(s.delta)}
             </span>
           </div>
-          <div style={{height:3,background:'#0c0c20',borderRadius:2,marginTop:2,overflow:'hidden'}}>
+          <div style={{height:3,background:'#1a1a40',borderRadius:2,marginTop:2,overflow:'hidden'}}>
             <div style={{height:'100%',width:pct+'%',background:danger?P.red:s.col,borderRadius:2,transition:'width .4s ease'}}/>
           </div>
           {isFirstRaid&&STAT_TOOLTIPS[k]&&<div style={{fontSize:5,color:P.dim+'90',marginTop:1}}>{STAT_TOOLTIPS[k]}</div>}
@@ -3231,7 +3713,7 @@ function BattleBoard({G}){
           {isTP&&r.event.text&&<div style={{fontSize:7,color:P.gold,marginBottom:4,lineHeight:1.4}}>{r.event.text}</div>}
           <div style={{display:'flex',alignItems:'center',gap:4}}>
             <span style={{fontSize:7,color:P.text,width:30,textAlign:'right'}}>YOU {Math.round(r.atk)}</span>
-            <div style={{flex:1,height:8,background:'#0c0c20',borderRadius:3,overflow:'hidden'}}>
+            <div style={{flex:1,height:8,background:'#1a1a40',borderRadius:3,overflow:'hidden'}}>
               <div style={{height:'100%',width:atkPct+'%',background:won?P.green:P.red,borderRadius:2,transition:'width .5s ease'}}/>
             </div>
             <span style={{fontSize:7,color:P.dim,width:30}}>{Math.round(r.def)} DEF</span>
@@ -4231,6 +4713,185 @@ function TidelinesApp(){
                   archetype="Rely on skill, not signs"
                   onClick={()=>act(resolveVoyageEvent,'ignore')}/>
               </>}
+            </div>
+          </>}
+
+          {/* ─ Trade: Voyage Event ─ */}
+          {G.step==='trv_trade_event'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {(()=>{switch(G.tradeEventId){
+                case'rival_traders':return 'A Skidegate trade canoe appears on the same heading — racing for the same port.';
+                case'port_welcome':return 'Smoke rises from a headland settlement. They wave you ashore.';
+                case'suspicious_customs':return 'Warriors line the shore ahead — this stretch of water has a toll.';
+                case'storm_cargo':return 'The sky darkens. Wind picks up. Your cargo shifts in the hull.';
+                default:return 'Something on the water demands attention.';
+              }})()}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              {G.tradeEventId==='rival_traders'&&<>
+                <CommandCard icon="🏁" title="Race Them"
+                  flavor="First to port gets first pick of copper. Your crew digs deep, pushing past them in a spray of white water."
+                  effect="+15 Goods Quality · −5 Canoe · −3 Morale"
+                  archetype="Win the market"
+                  onClick={()=>act(pickTradeEvent,'race')}/>
+                <CommandCard icon="🤝" title="Paddle Alongside"
+                  flavor="No need to exhaust the crew. Share route knowledge. Arrive together."
+                  effect="+3 Morale. Shared knowledge."
+                  archetype="Traders, not rivals"
+                  onClick={()=>act(pickTradeEvent,'share')}/>
+              </>}
+              {G.tradeEventId==='port_welcome'&&<>
+                <CommandCard icon="🍖" title="Accept the Feast"
+                  flavor="Go ashore. Share food and stories. They offer first pick of their copper stock."
+                  effect="+8 Morale · +10 Goods Quality · −3 Cargo (gifts)"
+                  archetype="Build lasting ties"
+                  onClick={()=>act(pickTradeEvent,'feast')}/>
+                <CommandCard icon="⏩" title="Wave and Keep Moving"
+                  flavor="Time is the trader's real currency. A small copper ingot tossed as you pass — goodwill without delay."
+                  effect="+5 Goods Quality. Steady progress."
+                  archetype="Time over friendship"
+                  onClick={()=>act(pickTradeEvent,'pass')}/>
+              </>}
+              {G.tradeEventId==='suspicious_customs'&&<>
+                <CommandCard icon="💰" title="Pay the Toll"
+                  flavor="Hand over oil and dried fish. Passage through their waters costs trade goods. They let you through without trouble."
+                  effect="−5 Cargo · +5 Prestige (respected protocol)"
+                  archetype="Honor the custom"
+                  onClick={()=>act(pickTradeEvent,'comply')}/>
+                <CommandCard icon="💨" title="Push Past"
+                  flavor="Refuse the toll. Paddle hard through their reach. They may not pursue."
+                  effect="−5 Morale · 40% chance of hull damage"
+                  risk="Hostile passage"
+                  archetype="Keep your goods"
+                  onClick={()=>act(pickTradeEvent,'refuse')}/>
+              </>}
+              {G.tradeEventId==='storm_cargo'&&<>
+                <CommandCard icon="🪢" title="Lash Down the Cargo"
+                  flavor="The crew secures everything tight. The canoe takes water but nothing goes overboard."
+                  effect="Cargo safe · −4 Canoe"
+                  archetype="Protect the goods"
+                  onClick={()=>act(pickTradeEvent,'secure')}/>
+                <CommandCard icon="🌊" title="Dump Weight, Save the Crew"
+                  flavor="Heavy cargo over the side. The canoe rides higher, safer. Some goods sink into the grey water."
+                  effect="−Cargo · +4 Morale (crew safe)"
+                  archetype="People over profit"
+                  onClick={()=>act(pickTradeEvent,'dump')}/>
+              </>}
+            </div>
+          </>}
+
+          {/* ─ Trade: Negotiation ─ */}
+          {G.step==='trv_trade_negotiate'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              The northern settlement's trade ground is prepared. Goods are laid out. How will you negotiate?
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🕊" title="Generous Terms"
+                flavor="Spread your goods wide and ask only for fair exchange. The northern chief smiles. Goodwill flows with the copper."
+                effect="Less cargo, more Prestige · +8 Morale · −1 Feud"
+                archetype="The generous trader"
+                onClick={()=>act(pickTradeNegotiation,'generous')}/>
+              <CommandCard icon="⚖" title="Hard Bargain"
+                flavor="Hold back your best goods until the price rises. Three rounds of back-and-forth. They grumble but pay."
+                effect="Maximum cargo · moderate Prestige"
+                archetype="The shrewd merchant"
+                onClick={()=>act(pickTradeNegotiation,'hard_bargain')}/>
+              <CommandCard icon="🎁" title="Gift First, Trade Second"
+                flavor="Present gifts before bargaining begins — a carved box, the finest oil. The gesture warms the terms."
+                effect="Good cargo · high Prestige · −1 Feud"
+                archetype="Generosity opens doors"
+                onClick={()=>act(pickTradeNegotiation,'gift_first')}/>
+            </div>
+          </>}
+
+          {/* ─ Diplomacy: Voyage Event ─ */}
+          {G.step==='trv_diplo_event'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {(()=>{switch(G.diploEventId){
+                case'rival_delegation':return 'A Skidegate delegation is already anchored at the far shore — they arrived first.';
+                case'gift_protocol':return 'Your elder reminds you of the correct gift-giving protocol for this shore.';
+                case'ambush_warning':return 'A fisherman paddles close and whispers: "Armed warriors on the north bluff."';
+                case'good_omen':return 'An eagle circles three times above both canoes as you approach the far shore.';
+                default:return 'Something on the water tests your composure.';
+              }})()}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              {G.diploEventId==='rival_delegation'&&<>
+                <CommandCard icon="⏳" title="Wait Patiently"
+                  flavor="Anchor offshore. Let the rival delegation finish. Patience is a diplomatic strength."
+                  effect="+10 Trust · −3 Morale (waiting)"
+                  archetype="Respect the process"
+                  onClick={()=>act(pickDiploEvent,'wait')}/>
+                <CommandCard icon="⚡" title="Land Alongside"
+                  flavor="Beach your canoe next to theirs. The display of confidence draws attention — and tension."
+                  effect="+5 Prestige · −5 Trust"
+                  archetype="Bold entrance"
+                  onClick={()=>act(pickDiploEvent,'bold')}/>
+              </>}
+              {G.diploEventId==='gift_protocol'&&<>
+                <CommandCard icon="📜" title="Follow Protocol Exactly"
+                  flavor="Unwrap the first gift before witnesses. Offer the second with both hands. Every step perfect."
+                  effect="+15 Trust · −4 Cargo (gifts)"
+                  archetype="Honor the old way"
+                  onClick={()=>act(pickDiploEvent,'follow')}/>
+                <CommandCard icon="💪" title="Do It Your Own Way"
+                  flavor="Offer gifts directly — practical, confident. Not wrong, but not the traditional way."
+                  effect="+5 Trust · +3 Prestige"
+                  archetype="Show independence"
+                  onClick={()=>act(pickDiploEvent,'direct')}/>
+              </>}
+              {G.diploEventId==='ambush_warning'&&<>
+                <CommandCard icon="🛡" title="Take the Long Way"
+                  flavor="Steer around the bluff. Arrive from the sheltered side. The far-shore chief notes your caution with approval."
+                  effect="+8 Trust · −3 Canoe (longer route)"
+                  archetype="Cautious wisdom"
+                  onClick={()=>act(pickDiploEvent,'cautious')}/>
+                <CommandCard icon="🗣" title="Paddle Straight In"
+                  flavor="If they want blood, they'll have to draw it in front of witnesses. Speaking staff held high."
+                  effect="+8 Prestige · −4 Morale (tension)"
+                  archetype="Courage is its own message"
+                  onClick={()=>act(pickDiploEvent,'direct')}/>
+              </>}
+              {G.diploEventId==='good_omen'&&<>
+                <CommandCard icon="🦅" title="Share the Omen"
+                  flavor="Tell them what you saw. The spirits approve of this meeting. The far-shore people nod."
+                  effect="+12 Trust · +5 Morale"
+                  archetype="Build shared meaning"
+                  onClick={()=>act(pickDiploEvent,'share')}/>
+                <CommandCard icon="🤫" title="Keep It Private"
+                  flavor="Good fortune is yours. No need to share advantages before the council begins."
+                  effect="+8 Morale. Private confidence."
+                  archetype="Quiet strength"
+                  onClick={()=>act(pickDiploEvent,'keep')}/>
+              </>}
+            </div>
+          </>}
+
+          {/* ─ Diplomacy: Council ─ */}
+          {G.step==='trv_diplo_council'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              The council fire burns between you and the far-shore chief. How will you present your case for peace?
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🙏" title="Humble Approach"
+                flavor="Sit below the chief. Speak second. Listen more than you talk. Let the silences do the work."
+                effect="Maximum Feud reduction · good Prestige · +6 Morale"
+                archetype="Trust through humility"
+                onClick={()=>act(pickDiploCouncil,'humble')}/>
+              <CommandCard icon="⚖" title="Speak as Equals"
+                flavor="Meet the chief eye to eye. Lay out your terms clearly: the feud serves neither side."
+                effect="Moderate Feud reduction · high Prestige"
+                archetype="Firm but fair"
+                onClick={()=>act(pickDiploCouncil,'firm')}/>
+              <CommandCard icon="🎁" title="Lavish Gifts"
+                flavor="Bring out the finest goods and lay them at the council fire. Let generosity speak louder than words."
+                effect="Cargo → Feud reduction · Prestige · +8 Morale"
+                archetype="Wealth builds peace"
+                onClick={()=>act(pickDiploCouncil,'lavish')}/>
             </div>
           </>}
 

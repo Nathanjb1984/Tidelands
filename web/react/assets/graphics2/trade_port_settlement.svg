@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 72" fill="none">
+  <defs>
+    <linearGradient id="tpsWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1A2A3A"/>
+      <stop offset="100%" stop-color="#0A141E"/>
+    </linearGradient>
+    <linearGradient id="tpsSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E2E3E"/>
+      <stop offset="100%" stop-color="#2A3A4A"/>
+    </linearGradient>
+    <linearGradient id="tpsLand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E1610"/>
+      <stop offset="100%" stop-color="#0E0A06"/>
+    </linearGradient>
+    <linearGradient id="tpsSmoke" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#8A7A6A" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#8A7A6A" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tpsTree" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1C2818"/>
+      <stop offset="100%" stop-color="#0C1408"/>
+    </linearGradient>
+  </defs>
+  <!-- Sky band -->
+  <rect width="180" height="35" fill="url(#tpsSky)"/>
+  <!-- Distant treeline / mountain silhouette -->
+  <path d="M0 32c10-3 20-8 30-10 8 1 14 0 20-3 5 2 12 4 20 3 6-2 12-6 18-10 4 3 10 5 16 6 6-1 12-3 18-5 4 2 10 4 16 5 6-1 12-3 20-6 5 4 12 6 22 6V36H0Z" fill="url(#tpsTree)" opacity="0.6"/>
+  <!-- Land mass — distant shore -->
+  <path d="M20 36c20-1 40-2 60-1 30 1 50 2 80 0v8H20Z" fill="url(#tpsLand)"/>
+  <!-- Settlement structures silhouettes -->
+  <!-- Longhouse 1 — large -->
+  <path d="M44 30l10-6 10 6H44Z" fill="#201008"/>
+  <rect x="46" y="30" width="16" height="6" fill="#180C06"/>
+  <!-- Longhouse 2 — medium -->
+  <path d="M72 31l7-5 7 5H72Z" fill="#201008"/>
+  <rect x="73" y="31" width="12" height="5" fill="#180C06"/>
+  <!-- Longhouse 3 — small, receding -->
+  <path d="M96 32l5-4 5 4H96Z" fill="#201008" opacity="0.8"/>
+  <rect x="97" y="32" width="8" height="4" fill="#180C06" opacity="0.8"/>
+  <!-- Totem pole silhouettes -->
+  <rect x="42" y="22" width="2" height="14" fill="#1A0E06"/>
+  <rect x="66" y="24" width="1.5" height="12" fill="#1A0E06"/>
+  <rect x="90" y="26" width="1.5" height="10" fill="#1A0E06" opacity="0.7"/>
+  <!-- Smoke columns -->
+  <path d="M52 24c0-3 1-6 0-10" stroke="#8A7A6A" stroke-opacity="0.08" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M79 25c0-3 0.5-6 0-9" stroke="#8A7A6A" stroke-opacity="0.06" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M101 27c0-2 0.5-5 0-8" stroke="#8A7A6A" stroke-opacity="0.05" stroke-width="1" stroke-linecap="round"/>
+  <!-- Water -->
+  <rect y="40" width="180" height="32" fill="url(#tpsWater)"/>
+  <!-- Water reflections of settlement -->
+  <rect x="46" y="42" width="16" height="4" fill="#201008" opacity="0.08"/>
+  <rect x="73" y="43" width="12" height="3" fill="#201008" opacity="0.06"/>
+  <rect x="97" y="44" width="8" height="2" fill="#201008" opacity="0.05"/>
+  <!-- Gentle wave lines -->
+  <path d="M0 48c8 1 16-1 24 0 8 1 16-1 24 0 8 1 16-1 24 0 8 1 16-1 24 0 8 1 16-1 24 0 8 1 16-1 24 0 8 1 16-1 24 0 8 1 12-1 12 0" stroke="#E0D8C8" stroke-opacity="0.04" stroke-width="0.6" fill="none"/>
+  <path d="M4 54c10 1 18-1 28 0 10 1 18-1 28 0 10 1 18-1 28 0 10 1 18-1 28 0 10 1 18-1 28 0" stroke="#E0D8C8" stroke-opacity="0.03" stroke-width="0.5" fill="none"/>
+  <path d="M0 60c12 1 20-1 32 0 12 1 20-1 32 0 12 1 20-1 32 0 12 1 20-1 32 0 12 1 20-1 20 0" stroke="#E0D8C8" stroke-opacity="0.03" stroke-width="0.4" fill="none"/>
+  <!-- Foreground canoe approach — tiny distant canoe -->
+  <path d="M135 56c-3-1-6-2-10-2-4 0-7 1-10 2 2 0.5 6 1 10 1 4 0 8-0.5 10-1Z" fill="#3A2010" opacity="0.4"/>
+  <!-- Beach detail on shore -->
+  <path d="M30 38c10-0.5 30-1 50-0.5 30 0.5 50 1 70 0.5" stroke="#4A3A2A" stroke-opacity="0.15" stroke-width="0.8" fill="none"/>
+  <!-- Dock / landing posts -->
+  <rect x="55" y="36" width="1.5" height="6" fill="#2A1808" opacity="0.6"/>
+  <rect x="60" y="37" width="1.5" height="5" fill="#2A1808" opacity="0.5"/>
+</svg>
