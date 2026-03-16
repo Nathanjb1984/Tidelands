@@ -1,0 +1,278 @@
+{
+  "eras": [
+    {
+      "id": 1,
+      "name": "Flourishing Villages",
+      "subtitle": "The world is full and the sea provides.",
+      "year_range": [1, 15],
+      "generations": "1-2",
+      "description": "The Pacific coast thrives. Villages dot the shoreline, canoes move freely between islands, and the salmon runs are strong. Your community is young but full of promise.",
+      "tone": "HOPEFUL",
+      "palette_modifier": "warm_golden",
+      "music_theme": "era1_flourishing",
+      "gameplay_focus": [
+        "Learn core systems",
+        "Build first structures",
+        "Establish village identity",
+        "Make initial alliances",
+        "First small conflicts",
+        "Experience seasonal rhythm"
+      ],
+      "available_events": ["exploration", "weather", "village", "spiritual_basic", "diplomacy_basic", "conflict_minor"],
+      "unavailable_systems": ["prestige_canoe", "shame_pole", "historical_pressure"],
+      "transition_conditions": {
+        "min_prestige": 100,
+        "min_poles": 1,
+        "min_potlatches": 1,
+        "min_year": 10
+      },
+      "transition_narrative": "Your name is spoken beyond the inlet now. The first pole stands before your longhouse, and your potlatch table has been full. But the coast is wider than you knew, and other houses watch your rise with interest — and envy.",
+      "weather_weights_modifier": {
+        "CLEAR": 1.1,
+        "STORM": 0.8,
+        "GALE": 0.5
+      },
+      "resource_modifiers": {
+        "salmon_abundance": 1.0,
+        "cedar_availability": 1.0,
+        "trade_frequency": 0.8
+      }
+    },
+    {
+      "id": 2,
+      "name": "Expanding Influence",
+      "subtitle": "Our name is known beyond the inlet.",
+      "year_range": [15, 30],
+      "generations": "2-3",
+      "description": "Your community's reputation reaches across the strait. Longer voyages, bigger trades, deeper rivalries. The time of small things is ending.",
+      "tone": "AMBITIOUS",
+      "palette_modifier": "rich_dramatic",
+      "music_theme": "era2_rising",
+      "gameplay_focus": [
+        "Build war canoe",
+        "Long-distance voyages",
+        "Complex diplomacy",
+        "First major pole",
+        "Larger potlatches",
+        "Significant conflicts"
+      ],
+      "available_events": ["exploration_advanced", "weather", "village", "spiritual", "diplomacy", "conflict", "marriage"],
+      "new_unlocks": ["war_canoe", "history_pole", "shame_pole", "marriage_alliance", "distant_trade"],
+      "transition_conditions": {
+        "min_prestige": 350,
+        "min_poles": 3,
+        "min_potlatches": 4,
+        "min_year": 25,
+        "min_alliances": 2
+      },
+      "transition_narrative": "The greatest houses on the coast know your name. Your poles stand tall, your canoes are feared and admired, and your potlatch table groans with wealth that will become legend. This is the time to build something that will outlast you.",
+      "weather_weights_modifier": {
+        "CLEAR": 1.0,
+        "STORM": 1.0,
+        "GALE": 0.8
+      },
+      "resource_modifiers": {
+        "salmon_abundance": 1.0,
+        "cedar_availability": 0.95,
+        "trade_frequency": 1.2
+      }
+    },
+    {
+      "id": 3,
+      "name": "Great Legacy",
+      "subtitle": "We are among the greatest houses on the coast.",
+      "year_range": [30, 45],
+      "generations": "3-4",
+      "description": "Peak power. The grandest potlatches, the most impressive poles, the most powerful canoes. This is the era of defining choices — what kind of legacy will you build?",
+      "tone": "MAJESTIC",
+      "palette_modifier": "grand_sunset",
+      "music_theme": "era3_great_legacy",
+      "gameplay_focus": [
+        "Prestige canoe construction",
+        "The Great Potlatch",
+        "Masterwork poles",
+        "Peak diplomatic network",
+        "Defining confrontations",
+        "Copper acquisition",
+        "Leadership definition"
+      ],
+      "available_events": ["all"],
+      "new_unlocks": ["prestige_canoe", "copper_exchange", "great_potlatch", "masterwork_pole"],
+      "transition_conditions": {
+        "min_year": 40,
+        "triggered_by": "era_event_historical_change"
+      },
+      "transition_narrative": "You have built something magnificent. The poles cast long shadows. The canoes are known by name. The potlatch feasts are spoken of across the coast.\n\nBut the world is changing. Distant smoke on the horizon. Strange vessels. Whispers from the south of a sickness no healer can name.\n\nThe tide is turning. And you must carry your people through what comes next.",
+      "weather_weights_modifier": {
+        "CLEAR": 1.0,
+        "STORM": 1.0,
+        "GALE": 1.0
+      },
+      "resource_modifiers": {
+        "salmon_abundance": 0.95,
+        "cedar_availability": 0.85,
+        "trade_frequency": 1.3
+      }
+    },
+    {
+      "id": 4,
+      "name": "Disruption and Survival",
+      "subtitle": "The world we knew is changing. We must endure.",
+      "year_range": [45, 55],
+      "generations": "4-5",
+      "description": "Epidemic. Demographic loss. New powers on the coast. Economic disruption. The world that shaped your people for generations is being reshaped by forces beyond any chief's control.",
+      "tone": "SOMBER",
+      "palette_modifier": "muted_grey",
+      "music_theme": "era4_disruption",
+      "gameplay_focus": [
+        "Survive epidemic",
+        "Manage demographic loss",
+        "Navigate external pressures",
+        "Preserve traditions",
+        "Consolidation choices",
+        "Identity preservation"
+      ],
+      "available_events": ["all", "historical_pressure", "epidemic", "external_contact", "resource_loss"],
+      "new_unlocks": ["consolidation", "external_trade", "preservation_choices"],
+      "removed_options": ["expansion_voyage", "offensive_raid"],
+      "forced_events": ["the_sickness_arrives", "strange_vessel", "economic_disruption"],
+      "transition_conditions": {
+        "min_year": 52,
+        "triggered_by": "era_event_final_transition"
+      },
+      "transition_narrative": "The worst has passed — or perhaps it has merely changed form. Your village is smaller. Some longhouses stand empty. But the poles endure. The canoes still ride the waves. And the fire in the chief's house still burns.\n\nWhat will be remembered?",
+      "weather_weights_modifier": {
+        "CLEAR": 0.8,
+        "STORM": 1.2,
+        "GALE": 1.2
+      },
+      "resource_modifiers": {
+        "salmon_abundance": 0.75,
+        "cedar_availability": 0.60,
+        "trade_frequency": 0.8,
+        "external_goods_available": true
+      },
+      "population_modifier": 0.6,
+      "visual_changes": [
+        "some_houses_empty",
+        "fewer_village_npcs",
+        "pole_weathering_visible",
+        "muted_color_palette"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Enduring Memory",
+      "subtitle": "What remains when the tide recedes?",
+      "year_range": [55, 60],
+      "generations": "5",
+      "description": "The final chapter. Shorter than the others — more epilogue than era. The game asks: what did you build? What survives? What is remembered?",
+      "tone": "REFLECTIVE",
+      "palette_modifier": "dawn_resolution",
+      "music_theme": "era5_enduring",
+      "gameplay_focus": [
+        "Final succession",
+        "Last ceremony",
+        "Legacy assessment",
+        "Village review",
+        "Lineage review"
+      ],
+      "available_events": ["reflection", "legacy", "final_ceremony"],
+      "legacy_scoring": {
+        "dimensions": [
+          {
+            "name": "Poles Standing",
+            "description": "Number, quality, and variety of monumental poles created",
+            "max_score": 150,
+            "calculation": "sum(pole.prestige_value * pole.condition)"
+          },
+          {
+            "name": "Potlatches Hosted",
+            "description": "Number, scale, and impressiveness of ceremonies held",
+            "max_score": 150,
+            "calculation": "sum(potlatch.prestige_earned)"
+          },
+          {
+            "name": "Generosity Record",
+            "description": "Total wealth redistributed over the entire campaign",
+            "max_score": 100,
+            "calculation": "total_wealth_given / wealth_threshold"
+          },
+          {
+            "name": "Lineage Strength",
+            "description": "Surviving family members, breadth of alliance network",
+            "max_score": 100,
+            "calculation": "surviving_family + active_alliances * 10"
+          },
+          {
+            "name": "Canoe Legacy",
+            "description": "Greatest canoes built, farthest voyages completed",
+            "max_score": 80,
+            "calculation": "max_canoe_prestige + farthest_voyage_distance"
+          },
+          {
+            "name": "Territorial Memory",
+            "description": "Routes discovered, sites maintained, camps established",
+            "max_score": 80,
+            "calculation": "discovered_locations * 5 + maintained_sites * 10"
+          },
+          {
+            "name": "Diplomatic Web",
+            "description": "Alliances formed, peace achieved, marriages arranged",
+            "max_score": 80,
+            "calculation": "alliances_formed * 10 + marriages * 8 + peace_treaties * 15"
+          },
+          {
+            "name": "Spiritual Harmony",
+            "description": "Omens heeded, blessings sought, ceremonies honored",
+            "max_score": 60,
+            "calculation": "omens_heeded * 3 + blessings * 5 + ceremonies * 8"
+          },
+          {
+            "name": "Resilience",
+            "description": "How the community navigated disruption and loss",
+            "max_score": 100,
+            "calculation": "era4_survival_score"
+          },
+          {
+            "name": "Cultural Continuity",
+            "description": "Traditions maintained through difficulty",
+            "max_score": 100,
+            "calculation": "traditions_preserved * 20"
+          }
+        ],
+        "total_max": 1000,
+        "rating_thresholds": {
+          "900": "Eternal — The Tideline That Never Fades",
+          "750": "Legendary — Remembered Across the Coast",
+          "600": "Great — A House of Honor",
+          "450": "Respected — A Worthy Legacy",
+          "300": "Modest — The Memory Endures",
+          "150": "Fading — Spoken of Less Each Year",
+          "0": "Forgotten — The Tide Has Washed the Shore Clean"
+        }
+      }
+    }
+  ],
+
+  "balance_constants": {
+    "turns_per_season": 3,
+    "seasons_per_year": 4,
+    "food_consumption_per_person_per_turn": 2,
+    "base_fishing_yield_per_fisher": 8,
+    "base_gathering_yield_per_gatherer": 4,
+    "preservation_loss_rate": 0.03,
+    "prestige_decay_per_year": 0.02,
+    "alliance_decay_per_year": 5,
+    "morale_recovery_per_turn": 3,
+    "max_morale": 100,
+    "starvation_threshold": 0,
+    "starvation_population_loss_rate": 0.05,
+    "voyage_food_per_crew_per_turn": 3,
+    "canoe_repair_rate_per_turn": 5,
+    "carving_progress_per_turn": 10,
+    "population_growth_rate_per_year": 0.03,
+    "max_village_population": 300,
+    "copper_base_prestige_value": 100
+  }
+}

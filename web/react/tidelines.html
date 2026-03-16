@@ -1,0 +1,2885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no"/>
+<title>TIDELINES — Cedar, Sea &amp; Legacy</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-width:thin;scrollbar-color:#2a2a4a #060612}
+body{background:#060612;overflow-y:scroll;overflow-x:hidden}
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+/* ═══════════════════════════════════════════════════════════════════════
+   TIDELINES : Cedar, Sea & Legacy — React Vertical-Slice  v1.1
+   ═══════════════════════════════════════════════════════════════════════
+   Ceremony, village, prestige & memory — ceremonial poles, witness
+   crowds, outcome-aware aftermath, goods display, memorial posts.
+   Same single file, same 6-phase loop, same formulas / persistence /
+   state / traits / named crew / impact frames / route strip / sidebar.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── §1  React ───────────────────────────────────────────────────────── */
+const {useState,useRef,useEffect,useCallback,useMemo}=React;
+
+/* ─── §2  Palette & Tokens ────────────────────────────────────────────── */
+const P={
+  bg:'#060612',panel:'#0c0c22',panelHi:'#141434',border:'#222248',borderHi:'#3a3a6a',
+  gold:'#d4b020',goldDim:'#8a7818',cedar:'#8c2600',cedarHi:'#b03400',
+  teal:'#0e2828',tealHi:'#1a3e3e',tealBright:'#2a5e5e',
+  text:'#e8dcc8',dim:'#807868',dimHi:'#a09888',
+  green:'#40c030',greenDim:'#286818',greenBright:'#60e050',
+  red:'#d03020',redDim:'#6a1810',redBright:'#ff4030',
+  blue:'#3088cc',purple:'#8050c0',
+  darkBg:'#080814',debugBg:'#050510',legacyBg:'#0a0618',
+  scrim:'rgba(6,6,18,.92)',hint:'#1a1830',
+};
+const font="'Press Start 2P',monospace";
+const PHASE_ACCENT=['#a08030','#2878c0','#7030b0','#c03020','#c07020','#c4a000'];
+const PHASE_BG=['#0a0a18','#060818','#0c0614','#120608','#0e0a06','#0a0812'];
+
+/* ─── §3  Constants & Data ────────────────────────────────────────────── */
+const PHASES=[
+  {key:'vil',label:'Village',icon:'🏘',tagline:'Preparations — Choose wisely before you depart'},
+  {key:'trv',label:'Travel',icon:'🌊',tagline:'The Crossing — Open water, no turning back'},
+  {key:'enc',label:'Encounter',icon:'⚔',tagline:'First Contact — Your presence is known'},
+  {key:'res',label:'Resolution',icon:'🔥',tagline:'The Fight — Blood on the tide'},
+  {key:'wth',label:'Withdrawal',icon:'🛶',tagline:'Pull Back — Every moment counts'},
+  {key:'aft',label:'Aftermath',icon:'📜',tagline:'What Remains — History remembers'},
+];
+const TACTIC_MODS={
+  overwhelming_assault:{atk:1.30,loss:1.50,label:'Overwhelming Assault'},
+  measured_push:{atk:1.10,loss:1.00,label:'Measured Push'},
+  feint_and_probe:{atk:0.80,loss:0.60,label:'Feint & Probe'},
+  negotiation_under_arms:{atk:0.40,loss:0.10,label:'Negotiate Under Arms'},
+};
+const TURNING_POINTS=[
+  {id:'warrior_falls',text:'A named warrior falls in the fighting.',flavor:'The crew screams. For a heartbeat the line wavers.',atkB:-5,defB:10},
+  {id:'chief_rallies',text:'Your chief rallies the crew with a battle cry!',flavor:'"FOR OUR WATERS!" The sound pushes Cedar Creek back two paces.',atkB:15,defB:0},
+  {id:'canoe_captured',text:'A canoe is seized in the chaos!',flavor:'Three of your warriors drag it up the gravel, whooping.',atkB:12,defB:-8},
+  {id:'fire_breaks_out',text:'Fire erupts — smoke and confusion.',flavor:'Both sides cough and stumble through ash.',atkB:-5,defB:-5},
+  {id:'war_song',text:'Kaahl the War Singer lifts the ancient battle song!',flavor:'The melody cuts through the chaos. Your warriors find their rhythm.',atkB:10,defB:0},
+  {id:'fog_rolls_in',text:'Sudden fog. Both sides lose cohesion.',flavor:'Shapes loom and vanish. A warrior strikes his own ally.',atkB:-8,defB:-3},
+  {id:'champion_duel',text:'Two warriors face each other between the lines.',flavor:'Everyone stops. Weapons lower. The duel begins.',atkB:8,defB:8},
+];
+const ROUND_NARR={
+  opening:[
+    "Your warriors hit Cedar Creek's line like a wave against a seawall. Shields crack. The defenders stagger — your surprise and momentum carry the first moments.",
+    "The beach erupts. Your crew charges through ankle-deep surf, howling. Cedar Creek's warriors brace — but the shock hits them before they're set.",
+  ],
+  sustained:[
+    "Cedar Creek's chief rallies his people. The fighting becomes close and grinding. Your veteran Gwaay holds the center with terrible calm.",
+    "Blow after blow. The surf runs pink. Cedar Creek will not break easily — they fight for their home. But your crew has fire in them too.",
+  ],
+  turning:["Something shifts. The balance of the fight tilts on a single moment —"],
+};
+const OUTCOME_LABEL={
+  DECISIVE_VICTORY:{text:'DECISIVE VICTORY',icon:'⚜'},VICTORY:{text:'VICTORY',icon:'✦'},
+  STALEMATE:{text:'STALEMATE',icon:'⊘'},DEFEAT:{text:'DEFEAT',icon:'✖'},
+  DEVASTATING_DEFEAT:{text:'DEVASTATING DEFEAT',icon:'☠'},
+};
+const OUTCOME_NARR={
+  DECISIVE_VICTORY:"Cedar Creek's line shatters. Warriors flee into the trees. The beach — their beach — belongs to you now.",
+  VICTORY:"Cedar Creek's line breaks. Some fight on from the tree line, but the beach is yours.",
+  STALEMATE:"Neither side can press the advantage. The fighting slows, then stops. Both crews withdraw to count their wounded.",
+  DEFEAT:"Your crew is pushed back through the surf. The assault has failed. Cedar Creek still holds their beach.",
+  DEVASTATING_DEFEAT:"Your line collapses. Warriors fall or scatter. The retreat to the canoe is desperate, bloody, and unforgettable.",
+};
+const TRAIT_DESC={
+  grief_hardened:'Grief-Hardened — You have buried warriors. The weight changes a leader.',
+  battle_tested:'Battle-Tested — A decisive victory. Your name carries further now.',
+  blood_enemy:'Blood Enemy — The feud has become generational. There is no forgetting.',
+  raider:'Raider — Multiple expeditions. Your crew knows the rhythm of war.',
+};
+const EULOGIES={
+  gwaay:'Twenty raids. Not once did he flinch. The village will feel his absence for years.',
+  kaahl:'The war songs die with him. No one else knows all the verses.',
+  naang:'This was to be the raid that made his name. Now his mother will carve a memorial post.',
+};
+const SCENE_SKY={
+  village:'linear-gradient(180deg,#10083a 0%,#181050 20%,#221860 40%,#2a1c68 58%,#201550 78%,#180e38 100%)',
+  travel:'linear-gradient(180deg,#061020 0%,#0c1e40 20%,#102850 42%,#143058 58%,#183862 72%,#1c4068 85%,#204470 100%)',
+  encounter:'linear-gradient(180deg,#2a1018 0%,#2c1228 18%,#281438 36%,#221840 54%,#1c1430 72%,#141228 100%)',
+  battle:'linear-gradient(180deg,#3a0a0a 0%,#321010 15%,#2c1414 30%,#261010 50%,#1c0c18 70%,#140a18 100%)',
+  withdrawal:'linear-gradient(180deg,#101428 0%,#141830 20%,#1a2240 42%,#1c2848 58%,#162240 78%,#121c38 100%)',
+  aftermath_w:'linear-gradient(180deg,#10083a 0%,#181050 20%,#221860 40%,#2a1c68 55%,#221450 75%,#180e38 100%)',
+  aftermath_l:'linear-gradient(180deg,#0a0818 0%,#0e0c20 20%,#121028 40%,#0e0c20 60%,#0a0818 80%,#080610 100%)',
+};
+const STAR_POS=[[8,10,2,0],[22,6,1.5,1.2],[38,16,1,.5],[52,5,2,1.8],[68,12,1.5,.3],[82,8,1,2.1],[15,20,1,1.5],[72,3,1.5,.8],[45,14,1,2.5],[90,18,1.5,.7]];
+
+/* ─ Onboarding hints (first raid only) ─ */
+const HINTS={
+  vil_intel:'Intelligence shapes your approach. Better information means better decisions — but it costs time or certainty.',
+  vil_prep:'Your last act before the crossing. Each choice strengthens a different part of the raid.',
+  trv_arrival:'Timing determines surprise. Surprise amplifies your opening strike and can break enemy morale before battle.',
+  trv_form:'Your approach sets the tone. Stealth preserves surprise; intimidation can end the fight before it starts.',
+  enc_tactic:'The decisive order. Aggressive tactics hit harder but risk heavier losses if the line breaks.',
+  wth_choose:'The battle is won but danger remains. Speed is safe; greed is tempting; legacy lasts longest.',
+};
+
+/* ─── §4  Pure Helpers  (UNCHANGED) ───────────────────────────────────── */
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rf=(a,b)=>Math.random()*(b-a)+a;
+const cl=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+const L=(t,c='',s='')=>({t,c,s});
+const signStr=n=>(n>=0?'+':'')+n;
+const feudName=e=>e<=0?'Resolved':e<=3?'Smouldering':e<=5?'Grievance':e<=12?'Active Feud':'Blood Feud';
+const phaseIdx=step=>PHASES.findIndex(p=>step.startsWith(p.key));
+
+/* ─ Cause/effect explanation builder ─ */
+function buildIntimExplain(s){
+  const f=[];
+  if(s.intimidationBonus>=10) f.push('war paint and crests');
+  if(s.formation==='intimidating') f.push('spread formation');
+  if(s.surpriseBonus>=20) f.push(s.approachTime+' approach');
+  else if(s.surpriseBonus>=10) f.push('good timing');
+  if(s.prestige>=300) f.push('fearsome reputation');
+  if(f.length===0) return '';
+  if(s.intimDelta>=15) return 'Your advantages carried weight: '+f.join(', ')+'.';
+  if(s.intimDelta>=1) return 'A slight edge from '+f.join(', ')+' — but Cedar Creek held firm.';
+  return 'Despite '+f.join(', ')+' — Cedar Creek stood resolute.';
+}
+function buildBattleExplain(s){
+  const f=[];
+  if(s.surpriseBonus>15) f.push('strong surprise');
+  if(s.morale>=70) f.push('high morale');
+  if(s.morale<40) f.push('wavering morale');
+  const tm=TACTIC_MODS[s.attackerTactic]||{};
+  if(tm.atk>=1.3) f.push('overwhelming aggression');
+  else if(tm.atk<=0.5) f.push('cautious restraint');
+  if(s.crewAlive>s.defender.crewSize+3) f.push('numerical advantage');
+  const rW=s.rounds.filter(r=>r.winner==='atk').length;
+  if(rW>=3) f.push('dominance in every round');
+  else if(rW===0) f.push('no round won');
+  if(f.length===0) return '';
+  const isW=s.outcome.includes('VICTORY');
+  return (isW?'Decisive factors: ':'The tide turned on: ')+f.join(', ')+'.';
+}
+function buildCasualtyExplain(s){
+  const tm=TACTIC_MODS[s.attackerTactic]||{};
+  if(s.crewKilled===0&&s.crewWounded===0) return 'Your crew emerged unscathed — skill and fortune both.';
+  const parts=[];
+  if(tm.loss>=1.5) parts.push('the ferocity of your own assault');
+  if(s.outcome==='DEVASTATING_DEFEAT') parts.push('the collapse of your line');
+  else if(s.outcome==='DEFEAT') parts.push('a losing position');
+  if(s.crewKilled>=2) parts.push('close fighting on the gravel');
+  if(parts.length===0) return '';
+  return 'Losses driven by '+parts.join(' and ')+'.';
+}
+
+/* ─── §5  Persistence  (UNCHANGED) ───────────────────────────────────── */
+const SAVE_KEY='tidelines_save_v1';
+function loadPersist(){try{const r=localStorage.getItem(SAVE_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+function savePersist(d){try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){}}
+function clearPersist(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+function persistFromState(s){return{prestige:s.prestige,feudEscalation:s.feudEscalation,legacyEntries:s.legacyEntries,warTraits:s.warTraits,totalRaids:s.totalRaids,lastRun:s.lastRun};}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §5.5  AUDIO ENGINE — Web Audio API synth, fully self-contained
+   ═══════════════════════════════════════════════════════════════════════
+   Lightweight procedural audio. No samples, no external files.
+   All sounds are tiny Web Audio API oscillator / noise bursts.
+   ═══════════════════════════════════════════════════════════════════════ */
+const AUDIO_PREF_KEY='tidelines_audio_v1';
+const TL_Audio=(()=>{
+  let ctx=null,masterGain=null,muted=false;
+  /* Restore preference */
+  try{muted=localStorage.getItem(AUDIO_PREF_KEY)==='muted';}catch(e){}
+
+  function ensureCtx(){
+    if(ctx&&ctx.state!=='closed')return ctx;
+    try{ctx=new(window.AudioContext||window.webkitAudioContext)();
+      masterGain=ctx.createGain();masterGain.gain.value=muted?0:0.35;masterGain.connect(ctx.destination);
+    }catch(e){ctx=null;}
+    return ctx;
+  }
+  function resume(){if(ctx&&ctx.state==='suspended')ctx.resume().catch(()=>{});}
+  function setMute(m){muted=m;try{localStorage.setItem(AUDIO_PREF_KEY,m?'muted':'on');}catch(e){}
+    if(masterGain)masterGain.gain.setTargetAtTime(m?0:0.35,ctx.currentTime,0.05);}
+  function isMuted(){return muted;}
+
+  /* ── Primitives ── */
+  function osc(freq,type,dur,vol=0.3,delay=0){
+    const c=ensureCtx();if(!c)return;resume();const t=c.currentTime+delay;
+    const o=c.createOscillator();const g=c.createGain();
+    o.type=type;o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);
+    g.gain.setTargetAtTime(0,t+dur*0.6,dur*0.25);
+    o.connect(g);g.connect(masterGain);o.start(t);o.stop(t+dur+0.1);
+  }
+  function noise(dur,vol=0.08,delay=0){
+    const c=ensureCtx();if(!c)return;resume();const t=c.currentTime+delay;
+    const len=c.sampleRate*dur;const buf=c.createBuffer(1,len,c.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1);
+    const src=c.createBufferSource();src.buffer=buf;
+    const g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);
+    g.gain.setTargetAtTime(0,t+dur*0.5,dur*0.3);
+    const filt=c.createBiquadFilter();filt.type='lowpass';filt.frequency.value=800;
+    src.connect(filt);filt.connect(g);g.connect(masterGain);src.start(t);src.stop(t+dur+0.1);
+  }
+
+  /* ── UI SFX ── */
+  function sfxClick(){osc(520,'sine',0.06,0.15);osc(780,'sine',0.04,0.08,0.02);}
+  function sfxContinue(){osc(440,'sine',0.08,0.12);osc(660,'sine',0.08,0.12,0.06);osc(880,'sine',0.1,0.1,0.12);}
+  function sfxCommandSelect(){osc(350,'triangle',0.08,0.18);osc(520,'triangle',0.06,0.1,0.04);noise(0.04,0.04,0.02);}
+  function sfxOpen(){osc(260,'sine',0.1,0.1);osc(390,'sine',0.1,0.08,0.08);}
+  function sfxClose(){osc(390,'sine',0.08,0.08);osc(260,'sine',0.1,0.1,0.06);}
+  function sfxToggle(){osc(600,'sine',0.05,0.08);}
+
+  /* ── Phase transition cues ── */
+  function cueVillage(){osc(220,'sine',0.5,0.08);osc(330,'sine',0.4,0.06,0.2);noise(0.6,0.03);}
+  function cueTravel(){osc(180,'sine',0.6,0.08);osc(270,'sine',0.5,0.06,0.15);noise(0.8,0.04,0.1);}
+  function cueEncounter(){osc(160,'triangle',0.4,0.12);osc(200,'sawtooth',0.3,0.06,0.15);noise(0.3,0.06,0.3);}
+  function cueBattle(){
+    osc(120,'sawtooth',0.15,0.15);osc(160,'sawtooth',0.15,0.12,0.1);
+    osc(100,'square',0.3,0.08,0.2);noise(0.5,0.08,0.1);
+    osc(200,'triangle',0.2,0.1,0.35);
+  }
+  function cueWithdrawal(){osc(200,'sine',0.5,0.08);osc(150,'sine',0.6,0.06,0.25);noise(0.5,0.02,0.2);}
+  function cueAftermath(isWin){
+    if(isWin){osc(330,'sine',0.4,0.1);osc(440,'sine',0.35,0.1,0.2);osc(550,'sine',0.5,0.08,0.4);}
+    else{osc(200,'sine',0.6,0.1);osc(160,'sine',0.5,0.08,0.3);noise(0.4,0.03,0.5);}
+  }
+
+  /* ── Battle feedback ── */
+  function sfxRoundWin(){osc(440,'triangle',0.1,0.15);osc(660,'triangle',0.12,0.12,0.06);}
+  function sfxRoundLoss(){osc(260,'sawtooth',0.12,0.12);osc(200,'sawtooth',0.15,0.1,0.06);}
+  function sfxTurningPoint(){osc(500,'sine',0.15,0.15);osc(400,'triangle',0.12,0.1,0.1);osc(600,'sine',0.2,0.12,0.2);noise(0.15,0.05,0.1);}
+
+  /* ── Ceremonial stingers ── */
+  function stingerVictory(){
+    osc(330,'sine',0.3,0.15);osc(440,'sine',0.3,0.12,0.15);osc(550,'sine',0.3,0.12,0.3);
+    osc(660,'sine',0.5,0.15,0.45);noise(0.2,0.04,0.5);
+  }
+  function stingerDefeat(){
+    osc(220,'sawtooth',0.4,0.12);osc(180,'sawtooth',0.4,0.1,0.2);
+    osc(140,'sine',0.6,0.15,0.4);noise(0.5,0.06,0.3);
+  }
+  function stingerTrait(){osc(440,'sine',0.15,0.12);osc(550,'sine',0.15,0.1,0.1);osc(660,'sine',0.2,0.12,0.2);osc(880,'sine',0.3,0.08,0.35);}
+  function stingerBloodFeud(){
+    osc(140,'sawtooth',0.3,0.15);osc(120,'square',0.2,0.1,0.15);
+    noise(0.4,0.08,0.1);osc(180,'sawtooth',0.4,0.12,0.35);
+  }
+  function stingerFallen(){osc(220,'sine',0.5,0.12);osc(165,'sine',0.6,0.1,0.3);noise(0.3,0.03,0.6);}
+  function stingerPlayMode(){osc(440,'sine',0.08,0.1);osc(550,'sine',0.08,0.08,0.06);osc(660,'sine',0.12,0.1,0.12);}
+
+  /* ── Stat feedback (micro) ── */
+  function sfxStatUp(){osc(600,'sine',0.05,0.08);osc(800,'sine',0.04,0.06,0.03);}
+  function sfxStatDown(){osc(300,'sine',0.06,0.08);osc(200,'sine',0.05,0.06,0.03);}
+
+  return{ensureCtx,resume,setMute,isMuted,
+    sfxClick,sfxContinue,sfxCommandSelect,sfxOpen,sfxClose,sfxToggle,
+    cueVillage,cueTravel,cueEncounter,cueBattle,cueWithdrawal,cueAftermath,
+    sfxRoundWin,sfxRoundLoss,sfxTurningPoint,
+    stingerVictory,stingerDefeat,stingerTrait,stingerBloodFeud,stingerFallen,stingerPlayMode,
+    sfxStatUp,sfxStatDown};
+})();
+
+/* ─── §6  Deep-dup ───────────────────────────────────────────────────── */
+function dup(s){
+  return{...s,log:[...s.log],defender:{...s.defender},
+    namedCrew:s.namedCrew.map(c=>({...c})),
+    rounds:s.rounds.map(r=>({...r,event:r.event?{...r.event}:null})),
+    spoils:[...s.spoils],traitsEarned:[...s.traitsEarned],
+    legacyEntries:[...s.legacyEntries],warTraits:[...s.warTraits],
+    lastRun:s.lastRun?{...s.lastRun}:null,
+    statDeltas:{...s.statDeltas}};
+}
+
+/* ─── §7  Engine  (UNCHANGED — pure math) ─────────────────────────────── */
+function calcIntimidation(s){
+  let sc=0;sc+=14;sc+=12;sc+=8;sc+=7;
+  sc+=Math.min(Math.floor(s.prestige/100),10);sc+=5;sc+=s.intimidationBonus;return sc;
+}
+function calcResolve(d){
+  let sc=0;sc+=Math.max(20,Math.min(d.communitySize,60));
+  sc+=Math.min(d.leadership,15);sc+=Math.min(d.alliance,15);sc+=Math.min(d.fortification*5,15);return sc;
+}
+function doIntimidation(s){
+  s.intimScore=calcIntimidation(s);s.resolveScore=calcResolve(s.defender);
+  s.intimDelta=s.intimScore-s.resolveScore;
+  if(s.intimDelta>=50){s.intimResult='OVERWHELMING';s.defenderFled=true;s.defender.morale-=30;}
+  else if(s.intimDelta>=30){s.intimResult='DOMINANT';s.defender.morale-=20;}
+  else if(s.intimDelta>=15){s.intimResult='STRONG';s.defender.morale-=ri(15,25);}
+  else if(s.intimDelta>=1){s.intimResult='SLIGHT';s.defender.morale-=ri(5,10);}
+  else if(s.intimDelta<=-15){s.intimResult='REVERSED';s.morale-=ri(5,15);}
+  else{s.intimResult='NEUTRAL';}
+  s.defender.morale=cl(s.defender.morale,5,100);s.morale=cl(s.morale,5,100);
+}
+function roundScore(f,type,isAtk,tacMod){
+  let sc=0;const m=f.morale||50,q=f.quality||f.crewQuality||50,sz=f.crewSize||10,
+    cc=f.canoeCombat||f.canoeCondition||50,lead=f.leadership||50,stam=f.stamina||65;
+  switch(type){
+    case'opening':sc+=m*0.40;sc+=q*0.20;sc+=(sz/20)*100*0.20;sc+=cc*0.10;break;
+    case'sustained':sc+=q*0.35;sc+=(sz/20)*100*0.25;sc+=stam*0.20;sc+=lead*0.15;sc+=cc*0.05;break;
+    case'turning':sc+=m*0.35;sc+=q*0.25;sc+=lead*0.20;sc*=rf(0.80,1.20);break;
+  }
+  sc*=tacMod;if(isAtk){sc+=3;sc+=(type==='turning'?5:2);}return sc;
+}
+function doEngagement(s){
+  const tm=TACTIC_MODS[s.attackerTactic]||TACTIC_MODS.measured_push;
+  const af={morale:s.morale,quality:s.crewQuality,crewSize:s.crewAlive,canoeCombat:s.canoeCondition*0.6,leadership:55,stamina:70};
+  const df={morale:s.defender.morale,quality:s.defender.quality,crewSize:s.defender.crewSize,canoeCombat:s.defender.canoeCombat,leadership:s.defender.leadership,stamina:60};
+  let r1a=roundScore(af,'opening',true,tm.atk),r1d=roundScore(df,'opening',false,1.0);
+  if(s.surpriseBonus>10)r1a*=1+s.surpriseBonus/100;
+  let r2a=roundScore(af,'sustained',true,tm.atk),r2d=roundScore(df,'sustained',false,1.0);
+  const tp=pick(TURNING_POINTS);
+  let r3a=roundScore(af,'turning',true,tm.atk),r3d=roundScore(df,'turning',false,1.0);
+  r3a+=tp.atkB;r3d+=tp.defB;s.turningPoint=tp;
+  s.rounds=[
+    {name:'Opening Clash',atk:r1a,def:r1d,event:null,winner:r1a>=r1d?'atk':'def'},
+    {name:'Sustained Engagement',atk:r2a,def:r2d,event:null,winner:r2a>=r2d?'atk':'def'},
+    {name:'Turning Point',atk:r3a,def:r3d,event:tp,winner:r3a>=r3d?'atk':'def'},
+  ];
+  let ta=(r1a+r2a+r3a)*rf(0.88,1.12),td=(r1d+r2d+r3d)*rf(0.88,1.12);
+  s.atkTotal=ta;s.defTotal=td;s.outcomeRatio=ta/Math.max(td,1);
+  if(s.outcomeRatio>1.8)s.outcome='DECISIVE_VICTORY';
+  else if(s.outcomeRatio>1.3)s.outcome='VICTORY';
+  else if(s.outcomeRatio>0.85)s.outcome='STALEMATE';
+  else if(s.outcomeRatio>0.55)s.outcome='DEFEAT';
+  else s.outcome='DEVASTATING_DEFEAT';
+  s.prestigeChange={DECISIVE_VICTORY:30,VICTORY:15,STALEMATE:0,DEFEAT:-15,DEVASTATING_DEFEAT:-30}[s.outcome]||0;
+}
+function doCasualties(s){
+  const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
+  const tm=TACTIC_MODS[s.attackerTactic]||TACTIC_MODS.measured_push;
+  let bl=0;
+  switch(s.outcome){case'DECISIVE_VICTORY':bl=0.05;break;case'VICTORY':bl=0.12;break;
+    case'STALEMATE':bl=0.10;break;case'DEFEAT':bl=0.25;break;case'DEVASTATING_DEFEAT':bl=0.45;break;}
+  bl=cl(bl*tm.loss*rf(0.7,1.3),0,0.60);
+  const hit=Math.floor(s.crewAlive*bl);
+  s.crewKilled=Math.floor(hit*rf(0.2,0.4));s.crewWounded=hit-s.crewKilled;
+  s.crewAlive=Math.max(s.crewAlive-s.crewKilled,1);
+  let pool=s.namedCrew.filter(c=>c.alive);
+  for(let i=0;i<s.crewKilled&&pool.length;i++){const idx=Math.floor(Math.random()*pool.length);pool[idx].alive=false;pool.splice(idx,1);}
+  for(let i=0;i<s.crewWounded&&pool.length;i++){const idx=Math.floor(Math.random()*pool.length);pool[idx].wounded=true;pool.splice(idx,1);}
+  if(s.outcome==='DEVASTATING_DEFEAT')s.canoeCondition-=ri(30,70);
+  else if(s.outcome==='DEFEAT')s.canoeCondition-=ri(10,30);
+  else s.canoeCondition-=ri(0,15);
+  s.canoeCondition=cl(s.canoeCondition,5,100);
+  s.spoils=[];
+  if(isWin){if(s.outcome==='DECISIVE_VICTORY'){s.spoils=[{r:'Dried Fish',n:25},{r:'Cedar Bark',n:10},{r:'Dentalium',n:8}];s.cargo=40;}
+    else{s.spoils=[{r:'Dried Fish',n:15},{r:'Cedar Bark',n:5}];s.cargo=20;}}
+  if(isWin)s.morale+=(s.outcome==='DECISIVE_VICTORY'?20:10);
+  else s.morale-=(s.outcome==='DEVASTATING_DEFEAT'?25:15);
+  s.morale=cl(s.morale,0,100);s.prestige+=s.prestigeChange;s.feudEscalation+=isWin?3:1;
+}
+
+/* ─── §8  State Factory ──────────────────────────────────────────────── */
+function initState(carry={}){
+  const sv=carry._fromSave?carry:null;
+  return{
+    step:'vil_intel',scene:'village',
+    log:[L(''),L('The decision has been made. Cedar Creek will answer for what they have taken.'),L(''),
+         L('Before the war canoe is loaded, you must learn what awaits.'),L('')],
+    morale:65,fear:0,canoeCondition:100,cargo:0,cargoCapacity:40,
+    prestige:carry.prestige??sv?.prestige??200,
+    feudEscalation:carry.feudEscalation??sv?.feudEscalation??8,
+    crewSize:15,crewQuality:55,crewAlive:15,crewWounded:0,crewKilled:0,captivesTaken:0,
+    intelQuality:'NONE',surpriseBonus:0,stealthBonus:0,
+    intimidationBonus:0,approachTime:'dawn',formation:'single',attackerTactic:'measured_push',
+    intimScore:0,resolveScore:0,intimDelta:0,intimResult:'',defenderFled:false,
+    rounds:[],outcome:'',outcomeRatio:0,atkTotal:0,defTotal:0,turningPoint:null,prestigeChange:0,
+    defender:{name:'Cedar Creek',crewSize:12,morale:55,quality:45,canoeCombat:40,communitySize:35,leadership:40,fortification:0,alliance:5},
+    namedCrew:[
+      {id:'gwaay',name:'Gwaay',role:'Veteran',traits:['veteran'],alive:true,wounded:false},
+      {id:'kaahl',name:'Kaahl',role:'War Singer',traits:['war_singer'],alive:true,wounded:false},
+      {id:'naang',name:'Naang',role:'Young Warrior',traits:[],alive:true,wounded:false},
+    ],
+    legacyEntries:carry.legacyEntries?[...carry.legacyEntries]:sv?.legacyEntries??[],
+    warTraits:carry.warTraits?[...carry.warTraits]:sv?.warTraits??[],
+    totalRaids:carry.totalRaids??sv?.totalRaids??0,
+    lastRun:carry.lastRun??sv?.lastRun??null,
+    traitsEarned:[],spoils:[],showDebug:false,showLegacy:false,impactFrame:null,
+    statDeltas:{},
+  };
+}
+
+/* ─── §9  Transition Functions ────────────────────────────────────────── */
+/*  UNCHANGED logic — added: statDeltas tracking, cause/effect log lines,
+    impact frames for phase transitions, readable explanations.
+    NO formula changes. */
+
+function pickIntel(prev,id){
+  const s=dup(prev); s.statDeltas={};
+  const oldMorale=s.morale;
+  switch(id){
+    case'scouts':
+      s.intelQuality='ACCURATE';s.surpriseBonus+=5;
+      if(Math.random()<0.15){s.defender.morale+=5;s.log.push(L('⚠  Your scouts may have been spotted!','red'));}
+      s.log.push(L('Your scouts return — they counted three canoes, twelve warriors, no fortifications. The chief does not expect trouble.'));
+      s.log.push(L(''));s.log.push(L('Intel: ACCURATE — crew ~12 · defenses: none · alert: unaware','green','stat'));s.morale+=3;break;
+    case'traders':
+      s.intelQuality='VAGUE';
+      s.log.push(L('"A modest village," the eldest trader says. "Their chief talks big but their canoes are old. There was talk of a marriage with the Skidegate people."'));
+      s.log.push(L(''));s.log.push(L('Intel: VAGUE — moderate force · possible alliance','dim','stat'));break;
+    case'omens':
+      s.intelQuality='VAGUE';s.morale+=5;
+      s.log.push(L('"I see water between two fires. The wind will be with you, but the tide will not wait."'));
+      s.log.push(L(''));s.log.push(L('Intel: VAGUE — favorable weather · narrow timing','dim','stat'));break;
+  }
+  s.statDeltas.morale=s.morale-oldMorale;
+  s.statDeltas.surprise=s.surpriseBonus;
+  s.log.push(L(''));s.log.push(L('Your war canoe is loaded. Fifteen warriors sit at the paddles.'));
+  s.step='vil_prep';return s;
+}
+function pickPrep(prev,id){
+  const s=dup(prev); s.statDeltas={};
+  const oldMorale=s.morale,oldIntim=s.intimidationBonus,oldCanoe=s.canoeCondition,oldCap=s.cargoCapacity,oldSurp=s.surpriseBonus;
+  switch(id){
+    case'war_paint':s.intimidationBonus+=10;s.morale=cl(s.morale+5,0,100);
+      s.log.push(L('Eagle and Killer Whale crests shine on every shield. Your crew is ready.'));
+      s.log.push(L('+10 Intimidation · +5 Morale','green','stat'));break;
+    case'extra_supplies':s.cargoCapacity+=10;s.canoeCondition=Math.min(100,s.canoeCondition+10);
+      s.log.push(L('The canoe sits deeper in the water — well provisioned for the crossing.'));
+      s.log.push(L('+10 Cargo Capacity · +10 Canoe','green','stat'));break;
+    case'blessing':s.morale=cl(s.morale+8,0,100);s.surpriseBonus+=5;
+      s.log.push(L('The spiritual advisor places cedar on the fire. "The spirits walk with you."'));
+      s.log.push(L('+8 Morale · +5 Surprise','green','stat'));break;
+  }
+  s.statDeltas={morale:s.morale-oldMorale,intimidation:s.intimidationBonus-oldIntim,canoe:s.canoeCondition-oldCanoe,cargo:s.cargoCapacity-oldCap,surprise:s.surpriseBonus-oldSurp};
+  s.step='vil_done';return s;
+}
+function enterTravel(prev){
+  const s=dup(prev);s.step='trv_arrival';s.scene='travel';s.statDeltas={};
+  s.log.push(L(''));
+  s.log.push(L("The morning fog clings to the water as you push off. Cedar Creek lies half a day's paddle to the north."));
+  s.log.push(L(''));
+  s.log.push(L('Every stroke takes you closer to the moment where words end and actions begin.'));
+  s.impactFrame={type:'phase_enter',phase:1,title:'THE CROSSING',subtitle:'Half a day north. No turning back.'};
+  return s;
+}
+function pickArrival(prev,id){
+  const s=dup(prev);s.statDeltas={};
+  const oldSurp=s.surpriseBonus,oldStealth=s.stealthBonus,oldCanoe=s.canoeCondition;
+  switch(id){
+    case'dawn':s.approachTime='dawn';s.surpriseBonus+=15;
+      s.log.push(L('You paddle through the night. As the first grey light touches the sky, Cedar Creek appears — smoke rising, a dog barking. No one is on the beach.'));break;
+    case'night':s.approachTime='night';s.surpriseBonus+=25;
+      if(Math.random()<0.20){s.canoeCondition-=10;s.log.push(L('A rock scrapes the hull — hearts stop — but the canoe holds.','red'));}
+      s.log.push(L('The darkness is total except for phosphorescence. You reach the shallows in absolute silence.'));break;
+    case'fog':s.approachTime='fog';s.surpriseBonus+=20;s.stealthBonus+=5;
+      s.log.push(L('The fog is a gift. Your canoe slides through it like a spirit. You hear Cedar Creek before you see it.'));break;
+  }
+  s.statDeltas={surprise:s.surpriseBonus-oldSurp,stealth:s.stealthBonus-oldStealth,canoe:s.canoeCondition-oldCanoe};
+  s.log.push(L(''));s.step='trv_form';return s;
+}
+function pickFormation(prev,id){
+  const s=dup(prev);s.statDeltas={};
+  const oldIntim=s.intimidationBonus,oldStealth=s.stealthBonus;
+  if(id==='stealth'){s.formation='stealth';s.stealthBonus+=10;s.intimidationBonus-=5;
+    s.log.push(L('One canoe. One chance. Every paddle dips in unison, silent as breathing.'));
+    s.log.push(L('+10 Stealth · −5 Intimidation','dim','stat'));
+  }else{s.formation='intimidating';s.intimidationBonus+=15;s.stealthBonus-=10;
+    s.log.push(L('Your canoe fans out, war crests visible. Anyone watching will see not a raid but an invasion.'));
+    s.log.push(L('+15 Intimidation · −10 Stealth','dim','stat'));
+  }
+  s.statDeltas={intimidation:s.intimidationBonus-oldIntim,stealth:s.stealthBonus-oldStealth};
+  s.step='trv_done';return s;
+}
+function enterEncounter(prev){
+  const s=dup(prev);s.scene='encounter';s.statDeltas={};
+  s.log.push(L(''));
+  const oldMorale=s.morale;
+  doIntimidation(s);
+  const sign=s.intimDelta>=0?'+':'';
+  s.log.push(L(`Your Intimidation ${s.intimScore}  vs  Their Resolve ${s.resolveScore}  (${sign}${s.intimDelta})`,s.intimDelta>0?'green':'red','stat'));
+  // Readable cause/effect explanation
+  const intimEx=buildIntimExplain(s);
+  if(intimEx) s.log.push(L(intimEx,'dim','stat'));
+  s.log.push(L(''));
+  s.statDeltas.morale=s.morale-oldMorale;
+  if(s.defenderFled){
+    s.log.push(L("Before you beach the canoe, Cedar Creek's chief appears with arms raised."));
+    s.log.push(L('"We will talk! Come ashore as guests, not enemies!"'));
+    s.log.push(L(''));s.log.push(L('Your reputation has done the work. Cedar Creek capitulates.','green'));
+    s.outcome='DECISIVE_VICTORY';s.prestigeChange=30;
+    s.spoils=[{r:'Dried Fish',n:25},{r:'Cedar Bark',n:10},{r:'Dentalium',n:8}];
+    s.cargo=40;s.prestige+=30;s.feudEscalation+=3;s.step='enc_fled';
+    s.impactFrame={type:'outcome',outcome:'DECISIVE_VICTORY'};
+  }else{
+    s.log.push(L('Warriors spill from the longhouse. Not many — but they are armed, and they are moving to the beach.'));
+    s.log.push(L(''));
+    s.log.push(L('The bow of your war canoe grinds into the gravel. Your warriors leap into the shallow water.'));
+    s.step='enc_tactic';
+  }
+  return s;
+}
+function pickTactic(prev,id){
+  const s=dup(prev);s.statDeltas={};
+  const oldMorale=s.morale;
+  switch(id){
+    case'overwhelming':s.attackerTactic='overwhelming_assault';
+      s.log.push(L('You raise your weapon and shout the war cry. Your warriors surge forward!'));s.morale+=5;s.fear=Math.max(s.fear-10,0);break;
+    case'measured':s.attackerTactic='measured_push';
+      s.log.push(L('Your warriors form a line across the beach, moving steadily forward with disciplined silence.'));break;
+    case'feint':s.attackerTactic='feint_and_probe';
+      s.log.push(L("Three warriors rush forward — clash briefly — then fall back. You watch. There. That's where the line is thin."));break;
+    case'negotiate':s.attackerTactic='negotiation_under_arms';
+      s.log.push(L('"We did not come for your lives," you say. "We came for what is owed. Return it, and we leave."'));s.feudEscalation-=1;break;
+  }
+  s.statDeltas.morale=s.morale-oldMorale;
+  s.step='enc_done';return s;
+}
+function enterResolution(prev){
+  const s=dup(prev);s.scene='battle';s.statDeltas={};
+  s.log.push(L(''));
+  if(s.outcome==='DECISIVE_VICTORY'){
+    s.log.push(L('Cedar Creek surrendered before battle was joined.','green'));
+    s.step='res_done';return s;
+  }
+  // Battle enter impact
+  s.impactFrame={type:'phase_enter',phase:3,title:'BATTLE',subtitle:(TACTIC_MODS[s.attackerTactic]||{}).label||'Engaged'};
+  doEngagement(s);
+  s.log.push(L(pick(ROUND_NARR.opening)));s.log.push(L(''));
+  s.log.push(L(pick(ROUND_NARR.sustained)));s.log.push(L(''));
+  if(s.turningPoint){
+    s.log.push(L(`✦  ${s.turningPoint.text}`,'gold'));
+    if(s.turningPoint.flavor)s.log.push(L(s.turningPoint.flavor,'dim'));
+    s.log.push(L(''));
+  }
+  s.log.push(L(OUTCOME_NARR[s.outcome],s.outcome.includes('DEFEAT')?'red':''));
+  // Cause/effect explanation
+  const battleEx=buildBattleExplain(s);
+  if(battleEx) s.log.push(L(battleEx,'dim','stat'));
+  doCasualties(s);
+  // Casualty explanation
+  const casEx=buildCasualtyExplain(s);
+  if(casEx) s.log.push(L(casEx,'dim','stat'));
+  // Override impact for decisive outcomes
+  if(s.outcome==='DECISIVE_VICTORY'||s.outcome==='DEVASTATING_DEFEAT')
+    s.impactFrame={type:'outcome',outcome:s.outcome};
+  s.step='res_done';return s;
+}
+function enterWithdrawal(prev){
+  const s=dup(prev);s.scene='travel';s.statDeltas={};
+  s.log.push(L(''));
+  const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
+  if(!isWin){
+    s.log.push(L('Your crew falls back to the canoe. There are no spoils — only the bitter taste of retreat.'));
+    if(s.crewKilled>0){const dn=s.namedCrew.filter(c=>!c.alive).map(c=>c.name);
+      if(dn.length)s.log.push(L(`${dn.join(' and ')} will not make the journey home.`,'red'));}
+    s.step='wth_retreat';
+  }else{
+    s.log.push(L("The fighting is over. Cedar Creek's warriors watch from the tree line."));
+    s.log.push(L('Your crew must work fast — load the spoils, tend the wounded, and get back to sea.'));
+    s.step='wth_choose';
+  }
+  return s;
+}
+function pickWithdrawal(prev,id){
+  const s=dup(prev);s.statDeltas={};
+  const oldCargo=s.cargo,oldPrestige=s.prestige,oldFeud=s.feudEscalation,oldCrew=s.crewAlive,oldMorale=s.morale;
+  switch(id){
+    case'quick':s.cargo=Math.floor(s.cargo*0.6);
+      s.log.push(L('Speed over greed. Your crew loads what they can. Within minutes, you are pushing off.'));break;
+    case'thorough':s.log.push(L('You strip the fish racks clean. Cedar bark. Dentalium shells.'));
+      if(Math.random()<0.30){s.log.push(L('⚠  Cedar Creek reorganizes and charges!','red'));s.crewAlive=Math.max(s.crewAlive-1,1);s.morale-=5;}
+      s.log.push(L('The canoe is loaded deep and pushing through the surf.'));break;
+    case'mark':s.cargo=Math.floor(s.cargo*0.8);s.prestige+=10;s.feudEscalation+=3;
+      s.log.push(L("Before leaving, you drive a carved Eagle post into Cedar Creek's gravel."));
+      s.log.push(L('Your crest, facing their longhouse. Every morning, their chief will see it.'));
+      s.log.push(L('+10 Prestige · +3 Feud','gold','stat'));break;
+  }
+  s.statDeltas={cargo:s.cargo-oldCargo,prestige:s.prestige-oldPrestige,feud:s.feudEscalation-oldFeud,crew:s.crewAlive-oldCrew,morale:s.morale-oldMorale};
+  s.step='wth_done';return s;
+}
+function enterAftermath(prev){
+  const s=dup(prev);s.scene='village';s.statDeltas={};
+  s.log.push(L(''));
+  const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
+  if(isWin)s.log.push(L('Your canoe rounds the headland and your village comes into view. People are already gathering on the beach — they have seen the loaded canoe, and they are cheering.'));
+  else if(s.outcome==='STALEMATE')s.log.push(L('Your canoe rounds the headland. The village watches in silence. The canoe sits too high in the water — everyone can see it came back light.'));
+  else s.log.push(L('Your canoe limps around the headland. The village sees the empty seats, the blood on the hull. No one cheers. The women begin to wail before you reach the shallows.'));
+  s.log.push(L(''));
+  s.traitsEarned=[];
+  if(s.crewKilled>0&&!s.warTraits.includes('grief_hardened'))s.traitsEarned.push('grief_hardened');
+  if(s.outcome==='DECISIVE_VICTORY'&&!s.warTraits.includes('battle_tested'))s.traitsEarned.push('battle_tested');
+  if(s.feudEscalation>12&&!s.warTraits.includes('blood_enemy'))s.traitsEarned.push('blood_enemy');
+  if(s.totalRaids>=2&&!s.warTraits.includes('raider'))s.traitsEarned.push('raider');
+  s.traitsEarned.forEach(t=>s.warTraits.push(t));
+  const newFeud=feudName(s.feudEscalation);
+  const oldFeud=feudName(s.feudEscalation-(isWin?3:1));
+  if(newFeud==='Blood Feud'){
+    s.log.push(L('There is no trade with Cedar Creek. No communication. No peace. Only the next raid, and the one after.','red'));
+    if(oldFeud!=='Blood Feud') s.log.push(L('Blood feud declared — humiliation and retaliation have crossed the point of no return.','red','stat'));
+  }else if(newFeud==='Active Feud')s.log.push(L('Cedar Creek will remember this. Their chief has lost face. A response is inevitable.'));
+  else s.log.push(L('Tensions with Cedar Creek remain. The wound is fresh but may yet heal — or fester.'));
+  const ret=isWin?(s.outcome==='DECISIVE_VICTORY'?6:4):0;
+  if(ret>0)s.log.push(L(`⏳  Expect retaliation in ~${ret} turns.`,'red'));
+  s.log.push(L(''));
+  if(s.outcome==='DECISIVE_VICTORY'){
+    s.log.push(L('♫  A battle song is composed — "The Beach at Cedar Creek."','gold'));
+    s.log.push(L('🏔  Your master carver offers to begin a war history pole.','gold'));
+    s.log.push(L(''));
+  }
+  // Trait explanation
+  s.traitsEarned.forEach(t=>{
+    if(t==='grief_hardened') s.log.push(L('Grief reshapes you. You carry the names of the fallen now.','gold','stat'));
+    else if(t==='battle_tested') s.log.push(L('A decisive victory etches your name further into the coastal memory.','gold','stat'));
+    else if(t==='blood_enemy') s.log.push(L('The feud has become generational. Cedar Creek will never forgive.','red','stat'));
+    else if(t==='raider') s.log.push(L('Multiple expeditions. Your crew knows the rhythm of war.','gold','stat'));
+  });
+  const toneTxt={DECISIVE_VICTORY:'A great victory — the beach at Cedar Creek was taken without question.',VICTORY:'The crew returned with honor and the spoils to prove it.',STALEMATE:'Neither side could claim victory.',DEFEAT:'A bitter retreat. The village is quieter tonight.',DEVASTATING_DEFEAT:'Many did not return. The village mourns.'}[s.outcome]||'';
+  const dead=s.namedCrew.filter(c=>!c.alive).map(c=>c.name);
+  let leg=toneTxt;
+  if(dead.length>0)leg+=` Lost: ${dead.join(', ')}.`;
+  if(s.traitsEarned.length>0)leg+=` Traits: ${s.traitsEarned.join(', ')}.`;
+  leg+=` Prestige: ${signStr(s.prestigeChange)}. Feud: ${newFeud}.`;
+  s.legacyEntries.push(leg);
+  s.totalRaids+=1;
+  s.lastRun={outcome:s.outcome,killed:s.crewKilled,wounded:s.crewWounded,
+    spoils:s.spoils.map(sp=>`${sp.r} ×${sp.n}`).join(', ')||'None',
+    prestige:signStr(s.prestigeChange),feud:newFeud,named_dead:dead};
+  // Impact frames — prioritized
+  if(dead.length>0) s.impactFrame={type:'fallen',names:dead};
+  else if(newFeud==='Blood Feud'&&oldFeud!=='Blood Feud') s.impactFrame={type:'bloodfeud'};
+  else if(s.traitsEarned.length>0) s.impactFrame={type:'trait',traits:s.traitsEarned};
+  savePersist(persistFromState(s));s.step='aft_show';return s;
+}
+
+const CONT={vil_done:enterTravel,trv_done:enterEncounter,enc_fled:enterWithdrawal,
+  enc_done:enterResolution,res_done:enterWithdrawal,wth_retreat:enterAftermath,wth_done:enterAftermath};
+
+/* ─── §10  CSS ────────────────────────────────────────────────────────── */
+const INJCSS=`
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+@keyframes tl-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes tl-fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tl-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes tl-twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes tl-wave-shift{0%,100%{transform:translateX(0)}50%{transform:translateX(24px)}}
+@keyframes tl-smoke-rise{0%{transform:translateY(0) scaleX(1);opacity:.4}50%{transform:translateY(-18px) scaleX(2.5);opacity:.15}100%{transform:translateY(-35px) scaleX(3);opacity:0}}
+@keyframes tl-fog-drift{0%,100%{transform:translateX(-30px)}50%{transform:translateX(30px)}}
+@keyframes tl-spark-flash{0%{opacity:0;transform:scale(.5)}10%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:scale(.2) translateY(-12px)}}
+@keyframes tl-fire-flicker{0%,100%{opacity:.7;transform:scaleY(1)}25%{opacity:1;transform:scaleY(1.15)}50%{opacity:.4;transform:scaleY(.85)}75%{opacity:.9;transform:scaleY(1.05)}}
+@keyframes tl-glow{0%,100%{box-shadow:0 0 8px var(--gc,${P.gold})}50%{box-shadow:0 0 22px var(--gc,${P.gold})}}
+@keyframes tl-impact-in{0%{opacity:0;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
+@keyframes tl-delta-in{0%{opacity:0;transform:translateY(4px)}30%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-4px)}}
+@keyframes tl-phase-sweep{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+@keyframes tl-hint-in{from{opacity:0;max-height:0}to{opacity:1;max-height:60px}}
+
+/* Ceremony / village animations */
+@keyframes tl-ceremony-glow{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes tl-crowd-arrive{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tl-pole-reveal{from{opacity:0;transform:scaleY(.85)}to{opacity:1;transform:scaleY(1)}}
+.tl-ceremony-glow{animation:tl-ceremony-glow 4s ease-in-out infinite}
+.tl-crowd-arrive{animation:tl-crowd-arrive .8s ease-out}
+.tl-pole-reveal{animation:tl-pole-reveal .6s ease-out;transform-origin:bottom center}
+
+@keyframes tl-row-port{0%,100%{transform:translateX(2px) translateY(0) rotate(0deg)}12%{transform:translateX(3px) translateY(-2px) rotate(-5deg)}40%{transform:translateX(1px) translateY(1.5px) rotate(4deg)}58%{transform:translateX(2px) translateY(.5px) rotate(1deg)}80%{transform:translateX(2px) translateY(-.3px) rotate(-.5deg)}}
+@keyframes tl-row-star{0%,100%{transform:translateX(-2px) translateY(0) rotate(0deg)}12%{transform:translateX(-3px) translateY(-2px) rotate(5deg)}40%{transform:translateX(-1px) translateY(1.5px) rotate(-4deg)}58%{transform:translateX(-2px) translateY(.5px) rotate(-1deg)}80%{transform:translateX(-2px) translateY(-.3px) rotate(.5deg)}}
+@keyframes tl-oar-port{0%,100%{transform:rotate(28deg)}12%{transform:rotate(6deg)}40%{transform:rotate(-28deg)}58%{transform:rotate(-8deg)}80%{transform:rotate(18deg)}}
+@keyframes tl-oar-star{0%,100%{transform:rotate(-28deg) scaleX(-1)}12%{transform:rotate(-6deg) scaleX(-1)}40%{transform:rotate(28deg) scaleX(-1)}58%{transform:rotate(8deg) scaleX(-1)}80%{transform:rotate(-18deg) scaleX(-1)}}
+@keyframes tl-paddle-splash{0%,10%{opacity:0;transform:scale(.4)}13%{opacity:.5;transform:scale(1.1)}22%{opacity:.15;transform:scale(1.5) translateY(2px)}32%,100%{opacity:0;transform:scale(.5) translateY(3px)}}
+@keyframes tl-bless-sway{0%,100%{transform:rotate(0deg)}30%{transform:rotate(1.5deg)}70%{transform:rotate(-1deg)}}
+@keyframes tl-wake{0%{opacity:.35;transform:scaleX(1) translateX(0)}100%{opacity:0;transform:scaleX(2.5) translateX(30px)}}
+@keyframes tl-shore-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes tl-phosphor{0%,100%{opacity:0}20%{opacity:.7}40%{opacity:.9}60%{opacity:.3}80%{opacity:.6}}
+@keyframes tl-ocean-swell{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+@keyframes tl-cloud-drift{0%{transform:translateX(-20%)}100%{transform:translateX(120%)}}
+@keyframes tl-water-shimmer{0%,100%{opacity:.08}50%{opacity:.22}}
+@keyframes tl-canoe-rock{0%,100%{transform:translateY(0) rotate(0deg)}20%{transform:translateY(-1.5px) rotate(-.4deg)}45%{transform:translateY(.8px) rotate(.2deg)}70%{transform:translateY(-.8px) rotate(-.15deg)}90%{transform:translateY(.3px) rotate(.05deg)}}
+
+.tl-paddler{transform-origin:50% 85%}
+.tl-canoe-rock{animation:tl-canoe-rock 3.8s ease-in-out infinite}
+.tl-shore-far{animation:tl-shore-scroll 90s linear infinite}
+.tl-shore-mid{animation:tl-shore-scroll 55s linear infinite}
+.tl-cloud{animation:tl-cloud-drift 80s linear infinite}
+
+.tl-canoe-bob{animation:tl-bob 2.5s ease-in-out infinite}
+.tl-star{animation:tl-twinkle 3s ease-in-out infinite}
+.tl-smoke{width:4px;height:28px;background:linear-gradient(180deg,transparent 0%,rgba(160,160,180,.25) 100%);animation:tl-smoke-rise 4.5s ease-out infinite}
+.tl-fog{background:linear-gradient(90deg,transparent 0%,rgba(180,190,200,.06) 30%,rgba(180,190,200,.1) 50%,rgba(180,190,200,.06) 70%,transparent 100%);animation:tl-fog-drift 14s ease-in-out infinite}
+.tl-spark{animation:tl-spark-flash 1.8s ease-out infinite}
+.tl-fire{animation:tl-fire-flicker 1.2s ease-in-out infinite}
+.tl-glow-pulse{animation:tl-glow 2s ease-in-out infinite}
+
+.tl-water{background:linear-gradient(180deg,#0a2848 0%,#081830 50%,#061428 100%)}
+.tl-wave-1{background:repeating-linear-gradient(90deg,transparent 0px,transparent 14px,rgba(30,60,100,.2) 14px,rgba(30,60,100,.2) 18px,transparent 18px,transparent 30px);animation:tl-wave-shift 5s ease-in-out infinite}
+.tl-wave-2{background:repeating-linear-gradient(90deg,transparent 0px,transparent 20px,rgba(20,50,90,.15) 20px,rgba(20,50,90,.15) 23px,transparent 23px,transparent 40px);animation:tl-wave-shift 8s ease-in-out infinite reverse}
+
+.tl-scroll::-webkit-scrollbar{width:4px}
+.tl-scroll::-webkit-scrollbar-thumb{background:${P.border};border-radius:3px}
+.tl-scroll::-webkit-scrollbar-track{background:transparent}
+
+.tl-cmd{transition:all .2s ease!important;position:relative;overflow:hidden}
+.tl-cmd::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 50%);pointer-events:none;opacity:0;transition:opacity .2s}
+.tl-cmd:hover{border-color:${P.gold}!important;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.tl-cmd:hover::before{opacity:1}
+.tl-cmd:active{transform:translateY(0) scale(.97);box-shadow:0 1px 4px rgba(0,0,0,.3);border-color:${P.goldDim}!important}
+.tl-cmd:focus-visible{outline:2px solid ${P.gold};outline-offset:2px}
+.tl-cmd:focus{outline:none}
+.tl-cmd.tl-cmd-focus{border-color:${P.gold}!important;box-shadow:0 0 12px ${P.gold}40;transform:translateY(-1px)}
+
+.tl-action{transition:all .15s ease!important}
+.tl-action:hover{background:${P.cedarHi}!important;box-shadow:0 0 14px rgba(140,38,0,.5)}
+.tl-action:active{transform:scale(.96)}
+.tl-action:focus-visible{outline:2px solid ${P.gold};outline-offset:2px}
+
+/* Micro-feedback animations */
+@keyframes tl-cmd-flash{0%{background:${P.gold}20}100%{background:transparent}}
+@keyframes tl-stat-flash-up{0%{background:${P.green}20}100%{background:transparent}}
+@keyframes tl-stat-flash-down{0%{background:${P.red}20}100%{background:transparent}}
+@keyframes tl-outcome-slam{0%{transform:scale(.85);opacity:0}40%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+.tl-cmd-flash{animation:tl-cmd-flash .4s ease-out}
+.tl-stat-flash-up{animation:tl-stat-flash-up .6s ease-out}
+.tl-stat-flash-down{animation:tl-stat-flash-down .6s ease-out}
+.tl-outcome-slam{animation:tl-outcome-slam .5s ease-out forwards}
+
+.tl-impact{animation:tl-impact-in .4s ease-out forwards}
+.tl-impact-scrim{backdrop-filter:blur(3px)}
+
+.tl-route-active{box-shadow:0 0 8px ${P.gold}80}
+
+.tl-delta{animation:tl-delta-in 1.8s ease-out forwards;font-size:7px;font-weight:bold;pointer-events:none}
+
+.tl-hint{animation:tl-hint-in .4s ease-out;overflow:hidden}
+
+.tl-screen{display:grid;grid-template-rows:auto auto 1fr auto;grid-template-columns:1fr;max-width:900px;margin:0 auto}
+@media(min-width:740px){
+  .tl-screen{grid-template-columns:1fr 240px;grid-template-rows:auto auto 1fr auto;max-height:100vh;overflow:hidden}
+  .tl-topbar{grid-column:1/-1}
+  .tl-stage{grid-column:1/2;grid-row:2/4;overflow-y:auto}
+  .tl-sidebar{grid-column:2/3;grid-row:2/4;border-left:1px solid ${P.border};overflow-y:auto}
+  .tl-cmdarea{grid-column:1/-1;grid-row:4/5}
+}
+
+/* ═══ PLAY MODE / CONSOLE MODE ═══ */
+.tl-playmode{position:fixed;inset:0;z-index:100;overflow:hidden;background:${P.bg}}
+.tl-playmode .tl-screen{max-width:1400px;width:100%;height:100vh;max-height:100vh;overflow:hidden;margin:0 auto}
+.tl-playmode .tl-stage{overflow-y:auto}
+.tl-playmode .tl-topbar{background:rgba(12,12,34,.97);border-bottom-color:${P.gold}60}
+/* Theater mode — subtle vignette frame */
+.tl-playmode::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  border:1px solid ${P.gold}08;
+  box-shadow:inset 0 0 80px rgba(0,0,0,.35),inset 0 0 200px rgba(4,8,18,.25)}
+/* Sidebar → fixed drawer in play mode */
+.tl-sidebar.tl-sidebar-play{position:fixed;right:0;top:0;bottom:0;width:280px;
+  transform:translateX(100%);transition:transform .3s ease;
+  z-index:200;box-shadow:-4px 0 24px rgba(0,0,0,.6);
+  border-left:1px solid ${P.gold}15;
+  overflow-y:auto;background:${P.panel};
+  grid-column:unset;grid-row:unset}
+.tl-sidebar.tl-sidebar-play.tl-sidebar-open{transform:translateX(0)}
+/* Play mode grid override */
+@media(min-width:740px){
+  .tl-playmode .tl-screen{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+  .tl-playmode .tl-stage{grid-column:1/-1;grid-row:2/3}
+  .tl-playmode .tl-cmdarea{grid-column:1/-1;grid-row:3/4}
+}
+/* Play mode button */
+.tl-play-btn{transition:all .2s;border-radius:3px;padding:1px 6px;cursor:pointer;user-select:none}
+.tl-play-btn:hover{background:${P.gold}20}
+.tl-sidebar-toggle{transition:all .2s;border-radius:3px;padding:1px 5px;cursor:pointer;user-select:none}
+.tl-sidebar-toggle:hover{background:${P.dimHi}20}
+.tl-mute-btn{transition:all .15s;border-radius:3px;padding:1px 5px;cursor:pointer;user-select:none;font-size:8px}
+.tl-mute-btn:hover{background:${P.dimHi}20}
+
+/* ═══ MOBILE PLAY MODE ═══ */
+
+/* Mobile touch targets & command grid */
+@media(max-width:739px){
+  .tl-cmd{min-height:44px}
+  .tl-action{min-height:44px}
+  .tl-play-btn,.tl-mute-btn,.tl-sidebar-toggle{min-width:28px;min-height:28px;display:inline-flex!important;align-items:center;justify-content:center}
+  .tl-cmd-grid{grid-template-columns:1fr!important}
+}
+
+/* Safe-area insets (notch, home indicator) */
+@supports(padding:env(safe-area-inset-top)){
+  .tl-playmode .tl-topbar{
+    padding-top:calc(3px + env(safe-area-inset-top))!important;
+    padding-left:calc(8px + env(safe-area-inset-left))!important;
+    padding-right:calc(8px + env(safe-area-inset-right))!important;
+  }
+  .tl-playmode .tl-cmdarea{
+    padding-bottom:calc(8px + env(safe-area-inset-bottom))!important;
+    padding-left:calc(10px + env(safe-area-inset-left))!important;
+    padding-right:calc(10px + env(safe-area-inset-right))!important;
+  }
+  .tl-playmode .tl-sidebar.tl-sidebar-play{
+    padding-bottom:env(safe-area-inset-bottom)!important;
+  }
+}
+
+/* Mobile bottom-sheet sidebar (play mode) */
+@media(max-width:739px){
+  .tl-sidebar.tl-sidebar-play{
+    top:auto!important;left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;max-height:70vh!important;max-height:70dvh!important;
+    transform:translateY(100%)!important;
+    border-left:none!important;border-top:1px solid ${P.gold}20!important;
+    border-radius:12px 12px 0 0!important;
+    box-shadow:0 -8px 32px rgba(0,0,0,.7)!important;
+  }
+  .tl-sidebar.tl-sidebar-play.tl-sidebar-open{transform:translateY(0)!important}
+}
+
+/* Mobile landscape play mode — minimal chrome, max game area */
+@media(max-height:440px) and (orientation:landscape){
+  .tl-playmode .tl-topbar{padding-top:2px!important;padding-bottom:2px!important}
+  .tl-playmode .tl-screen{grid-template-rows:auto 1fr auto!important}
+  .tl-playmode .tl-cmdarea{max-height:45vh;max-height:45dvh;overflow-y:auto}
+  .tl-sidebar.tl-sidebar-play{max-height:60vh!important;max-height:60dvh!important}
+}
+
+/* Mobile portrait play mode — scrollable commands */
+@media(max-width:480px) and (orientation:portrait){
+  .tl-playmode .tl-screen{grid-template-rows:auto 1fr auto!important}
+  .tl-playmode .tl-cmdarea{max-height:50vh;max-height:50dvh;overflow-y:auto}
+}
+
+/* Orientation hint banner */
+.tl-orient-hint{
+  position:fixed;bottom:0;left:0;right:0;z-index:150;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:6px 16px;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg,rgba(12,12,34,.88),rgba(12,12,34,.96));
+  border-top:1px solid ${P.gold}25;backdrop-filter:blur(6px);
+  font-family:'Press Start 2P',monospace;font-size:6px;color:${P.dimHi};
+  animation:tl-fadein .5s ease-out;cursor:pointer;user-select:none;
+}
+.tl-orient-hint:active{background:rgba(12,12,34,.99)}
+
+/* Bottom-sheet drag handle */
+.tl-sheet-handle{width:32px;height:4px;border-radius:2px;background:${P.dim}40;margin:0 auto 4px}
+`;
+
+/* ─── §11  Sub-components ─────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §10.5  SHARED SCENE PRIMITIVES
+   ═══════════════════════════════════════════════════════════════════════
+   Reusable visual building blocks forming a consistent 16-bit art
+   language across all phases. Each renders as positioned layer(s) inside
+   a scene container. Future sprite art replaces individual blocks
+   without restructuring.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Star Field ── */
+function StarField({count=15,brightness='#c0c0e8',region=24}){
+  const pts=useMemo(()=>Array.from({length:count},()=>({
+    x:2+Math.random()*96,y:1+Math.random()*region,
+    sz:0.7+Math.random()*1.5,d:Math.random()*3,
+  })),[count,region]);
+  return<>{pts.map((s,i)=><div key={i} className="tl-star" style={{
+    position:'absolute',left:s.x+'%',top:s.y+'%',width:s.sz,height:s.sz,
+    borderRadius:'50%',background:brightness,animationDelay:s.d+'s',zIndex:1,
+  }}/>)}</>;
+}
+
+/* ── Moon ── */
+function SceneMoon({right='14%',top='6%',size=22}){
+  return<div style={{position:'absolute',top,right,width:size,height:size,zIndex:2,
+    borderRadius:'50%',
+    background:'radial-gradient(circle at 40% 40%,#e8e0c8 0%,#c8c0a8 50%,#a8a088 100%)',
+    boxShadow:'0 0 20px rgba(200,190,160,.25),0 0 60px rgba(200,190,160,.08)',
+  }}>
+    <div style={{position:'absolute',top:'27%',left:'36%',width:'18%',height:'14%',borderRadius:'50%',background:'rgba(0,0,0,.08)'}}/>
+    <div style={{position:'absolute',top:'55%',left:'23%',width:'14%',height:'10%',borderRadius:'50%',background:'rgba(0,0,0,.06)'}}/>
+  </div>;
+}
+
+/* ── Parallax Mountain Range (SVG) ── */
+function MountainRange({yTop,height,speed='far',fill1='#142430',fill2='#182838',zIndex=3}){
+  const pts1='0,100 3,72 8,55 14,48 19,58 22,50 28,35 33,40 38,30 42,38 46,28 50,20 54,32 58,25 62,35 66,42 70,30 74,45 78,38 82,50 86,55 90,48 94,60 97,52 100,100';
+  const pts2='0,100 4,65 10,50 15,42 20,55 25,38 30,30 35,45 40,25 45,35 50,28 55,40 60,32 65,22 70,38 75,48 80,35 85,52 90,42 95,58 100,100';
+  const dbl=(p,off=0)=>p.split(' ').map(pt=>{const[x,y]=pt.split(',');return(parseFloat(x)*2+off)+','+y;}).join(' ');
+  return<div style={{position:'absolute',top:yTop,left:0,width:'200%',height,zIndex,overflow:'hidden'}}
+    className={speed==='far'?'tl-shore-far':'tl-shore-mid'}>
+    <svg viewBox="0 0 200 100" preserveAspectRatio="none" style={{width:'100%',height:'100%'}}>
+      <polygon points={dbl(pts1)} fill={fill1} opacity=".55"/>
+      <polygon points={dbl(pts2,15)} fill={fill2} opacity=".4"/>
+    </svg>
+  </div>;
+}
+
+/* ── Forest Treeline ── */
+function ForestLine({yTop,height,color='#122c1c',altColor='#0e2418',density=80,speed='mid',zIndex=4}){
+  const trees=useMemo(()=>Array.from({length:density},(_,i)=>({
+    tx:i*(200/density)+Math.sin(i*0.7)*0.8,
+    th:10+Math.sin(i*1.3)*5+Math.cos(i*0.5)*4,
+    tw:2.5+Math.sin(i*0.9)*1.5,alt:i%5===0,
+  })),[density]);
+  return<div style={{position:'absolute',top:yTop,left:0,width:'200%',height,zIndex}}
+    className={speed==='mid'?'tl-shore-mid':'tl-shore-far'}>
+    <div style={{position:'absolute',bottom:0,left:0,width:'100%',height:'100%'}}>
+      {trees.map((t,i)=><div key={i} style={{position:'absolute',bottom:0,left:t.tx+'%',
+        width:0,height:0,borderLeft:`${t.tw}px solid transparent`,borderRight:`${t.tw}px solid transparent`,
+        borderBottom:`${t.th}px solid ${t.alt?altColor:color}`,
+      }}/>)}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:6,background:altColor}}/>
+    </div>
+  </div>;
+}
+
+/* ── Water Body ── */
+function WaterBody({top,gradient,waveCount=6,shimmer=true,phosphorCount=0,zIndex=5}){
+  const phosphor=useMemo(()=>Array.from({length:phosphorCount},()=>({
+    x:5+Math.random()*90,y:Math.random()*100,d:Math.random()*6,sz:1+Math.random()*1.5,
+  })),[phosphorCount]);
+  return<div style={{position:'absolute',top,left:0,right:0,bottom:0,zIndex,
+    background:gradient||'linear-gradient(180deg,#14385e 0%,#103050 20%,#0c2848 45%,#082040 70%,#061838 100%)',
+  }}>
+    {Array.from({length:waveCount},(_,i)=>{const y=3+i*Math.floor(110/waveCount);
+      return<div key={i} className="tl-wave-1" style={{position:'absolute',top:y,left:'-100%',right:'-100%',
+        height:i<2?2:1,
+        background:`repeating-linear-gradient(90deg,transparent 0px,transparent ${14+i*2}px,rgba(${30+i*5},${60+i*8},${120+i*6},${.12+i*.015}) ${14+i*2}px,rgba(${30+i*5},${60+i*8},${120+i*6},${.12+i*.015}) ${16+i*2}px,transparent ${16+i*2}px,transparent ${30+i*3}px)`,
+        animationDuration:(4+i*0.8)+'s',animationDelay:(i*0.4)+'s',
+      }}/>;
+    })}
+    {shimmer&&<div style={{position:'absolute',top:0,left:0,right:0,height:3,
+      background:'linear-gradient(90deg,transparent 5%,rgba(100,140,200,.08) 20%,rgba(120,160,220,.12) 35%,transparent 50%,rgba(100,140,200,.06) 65%,rgba(120,160,220,.1) 80%,transparent 95%)',
+      animation:'tl-water-shimmer 4s ease-in-out infinite',
+    }}/>}
+    {phosphor.map((p,i)=><div key={i} style={{position:'absolute',left:p.x+'%',top:p.y+'%',
+      width:p.sz,height:p.sz,borderRadius:'50%',background:'rgba(100,200,220,.5)',
+      animation:`tl-phosphor ${3+p.d*0.5}s ease-in-out infinite`,animationDelay:p.d+'s',
+    }}/>)}
+  </div>;
+}
+
+/* ── Fog Band ── */
+function FogBand({top,opacity=0.08,speed=14,delay=0,color='180,190,200',height=16,zIndex=6}){
+  return<div className="tl-fog" style={{position:'absolute',top,left:0,right:0,height,zIndex,
+    background:`linear-gradient(90deg,transparent 0%,rgba(${color},${opacity*0.6}) 25%,rgba(${color},${opacity}) 50%,rgba(${color},${opacity*0.6}) 75%,transparent 100%)`,
+    animationDelay:delay+'s',animationDuration:speed+'s',
+  }}/>;
+}
+
+/* ── Vignette Overlay ── */
+function Vignette({color='4,8,18',intensity=0.35,focus='50% 45%'}){
+  return<div style={{position:'absolute',inset:0,zIndex:10,pointerEvents:'none',
+    background:`radial-gradient(ellipse at ${focus},transparent 40%,rgba(${color},${intensity}) 100%)`,
+  }}/>;
+}
+
+/* ── Totem / Carved Post (sprite-ready slot) ── */
+function TotemPole({x,h=40,bottom=0,zIndex=5}){
+  return<div style={{position:'absolute',left:x,bottom,width:10,height:h,zIndex}}>
+    <div style={{position:'absolute',bottom:0,left:2,width:6,height:h,
+      background:'linear-gradient(180deg,#2a1a08 0%,#1a1004 100%)',borderRadius:'2px 2px 0 0'}}/>
+    <div style={{position:'absolute',top:0,left:-1,width:12,height:10,
+      background:'#2a1a08',borderRadius:'3px 3px 1px 1px',border:'1px solid #3a2a1050',
+    }}>
+      <div style={{position:'absolute',top:2,left:2,width:2,height:1.5,background:P.gold+'40',borderRadius:'50%'}}/>
+      <div style={{position:'absolute',top:2,right:2,width:2,height:1.5,background:P.gold+'40',borderRadius:'50%'}}/>
+      <div style={{position:'absolute',top:5,left:4,width:2,height:3,background:'#1a1004',borderRadius:'0 0 1px 1px'}}/>
+    </div>
+    {h>28&&<div style={{position:'absolute',top:Math.floor(h*0.4),left:0,width:10,height:8,background:'#251608',borderRadius:1}}>
+      <div style={{position:'absolute',top:2,left:2,width:2,height:1,background:'#3a2a1060',borderRadius:'50%'}}/>
+      <div style={{position:'absolute',top:2,right:2,width:2,height:1,background:'#3a2a1060',borderRadius:'50%'}}/>
+    </div>}
+    <div style={{position:'absolute',bottom:0,left:0,width:10,height:3,background:'#1a1004',borderRadius:1}}/>
+  </div>;
+}
+
+/* ── Longhouse Structure (sprite-ready slot) ── */
+function Longhouse({x,w=50,h=18,bottom=0,smoke=true,fireGlow=false,zIndex=5}){
+  const rH=Math.floor(h*0.45);
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:h+rH,zIndex}}>
+    <div style={{position:'absolute',top:0,left:-2,width:w+4,height:rH,
+      background:'#1a1004',clipPath:'polygon(0% 100%,50% 0%,100% 100%)'}}/>
+    <div style={{position:'absolute',bottom:0,left:0,width:w,height:h,
+      background:'linear-gradient(180deg,#2a1a08 0%,#201408 100%)',
+      border:'1px solid #3a2a1040',borderTop:'none',borderRadius:'0 0 2px 2px'}}/>
+    <div style={{position:'absolute',bottom:0,left:w*0.4,width:Math.max(w*0.2,6),height:h*0.55,
+      background:'#0a0604',borderRadius:'2px 2px 0 0'}}/>
+    <div style={{position:'absolute',top:rH+2,left:w*0.3,width:w*0.4,height:2,
+      background:`linear-gradient(90deg,transparent,${P.gold}15,${P.gold}22,${P.gold}15,transparent)`}}/>
+    {smoke&&<div className="tl-smoke" style={{position:'absolute',top:-(rH+8),left:w*0.48,zIndex:zIndex+1}}/>}
+    {fireGlow&&<div style={{position:'absolute',bottom:-3,left:w*0.25,width:w*0.5,height:h*0.7,
+      background:'radial-gradient(ellipse,rgba(200,120,40,.12) 0%,transparent 70%)',zIndex:zIndex-1}}/>}
+  </div>;
+}
+
+/* ── Fire Glow (radial warmth) ── */
+function FireGlow({x,bottom,r=50,color='200,120,40',intensity=0.15,zIndex=4}){
+  return<div style={{position:'absolute',left:x,bottom,width:r*2,height:r,
+    transform:'translateX(-50%)',zIndex,
+    background:`radial-gradient(ellipse,rgba(${color},${intensity}) 0%,transparent 70%)`,
+  }}/>;
+}
+
+/* ── Person Silhouette (sprite-ready slot) ── */
+function Figure({x,bottom=0,type='standing',hasWeapon=false,hasHat=true,facing='right',zIndex=5}){
+  const sit=type==='sitting';const h=sit?14:20;const flip=facing==='left'?'scaleX(-1)':'';
+  return<div style={{position:'absolute',left:x,bottom,width:10,height:h,zIndex,transform:flip}}>
+    {hasHat&&<div style={{position:'absolute',top:0,left:1,width:8,height:4,
+      background:'linear-gradient(180deg,#3a2a10,#2a1a08)',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>}
+    <div style={{position:'absolute',top:hasHat?3:0,left:2,width:6,height:5,background:'#1a0e04',borderRadius:'40%'}}/>
+    <div style={{position:'absolute',top:hasHat?7:4,left:1,width:8,height:sit?6:9,
+      background:'#120a02',borderRadius:'2px 2px 1px 1px'}}/>
+    {!sit&&<><div style={{position:'absolute',bottom:0,left:1,width:3,height:5,background:'#0e0802'}}/>
+      <div style={{position:'absolute',bottom:0,right:1,width:3,height:5,background:'#0e0802'}}/></>}
+    {hasWeapon&&<div style={{position:'absolute',top:hasHat?5:2,right:-2,width:2,height:14,
+      background:'#3a2808',borderRadius:1,transform:'rotate(15deg)'}}/>}
+  </div>;
+}
+
+/* ── Warrior Formation (sprite-ready group) ── */
+function WarriorLine({x,count=5,bottom=0,spread=12,facing='right',zIndex=5}){
+  return<>{Array.from({length:count},(_,i)=>(
+    <Figure key={i} x={parseInt(x)+i*spread} bottom={bottom+(i%2)*2}
+      type='standing' hasWeapon={true} hasHat={i%3!==2} facing={facing} zIndex={zIndex}/>
+  ))}</>;
+}
+
+/* ── Gravel Beach Strip ── */
+function BeachStrip({top,height=14,zIndex=4}){
+  const pebbles=useMemo(()=>Array.from({length:30},(_,i)=>({
+    t:2+Math.random()*(height-4),l:i*3.3+Math.random()*2,
+    w:1+Math.random()*2,o:0.4+Math.random()*0.3,
+  })),[height]);
+  return<div style={{position:'absolute',top,left:0,right:0,height,zIndex,
+    background:'linear-gradient(180deg,#1a1810 0%,#141208 40%,#100e06 100%)',
+  }}>
+    {pebbles.map((p,i)=><div key={i} style={{position:'absolute',
+      top:p.t,left:p.l+'%',width:p.w,height:1,background:'#2a2418',borderRadius:1,opacity:p.o,
+    }}/>)}
+  </div>;
+}
+
+/* ── Simple War Canoe (compact, for non-travel scenes; sprite-ready) ── */
+function SimpleCanoe({x,bottom,w=80,facing='right',rocking=true,damaged=false,zIndex=6}){
+  const cls=rocking?'tl-canoe-rock':'';const flip=facing==='left'?'scaleX(-1)':'';
+  const bowW=Math.max(w*0.18,12),hullW=w-bowW*1.4,sternW=Math.max(w*0.12,8);
+  return<div className={cls} style={{position:'absolute',left:x,bottom,width:w,height:28,zIndex,transform:flip}}>
+    {/* hull body */}
+    <div style={{position:'absolute',bottom:0,left:bowW*0.6,width:hullW,height:12,
+      background:damaged?'linear-gradient(180deg,#3a1800,#2a0e00)':'linear-gradient(180deg,#5a2000 0%,#3a1400 60%,#2a0e00 100%)',
+      borderRadius:'2px 2px 8px 8px',border:'1px solid #6a2800',borderTop:'none',
+      boxShadow:'0 2px 8px rgba(0,0,0,.45)'}}/>
+    {/* gunwale */}
+    <div style={{position:'absolute',bottom:10,left:bowW*0.5,width:hullW+4,height:3,
+      background:'linear-gradient(90deg,#4a1a00,#7a3200,#4a1a00)',borderRadius:'2px 2px 0 0'}}/>
+    {/* hull decoration */}
+    <div style={{position:'absolute',bottom:5,left:bowW*0.6+4,width:hullW-8,height:1,
+      background:`linear-gradient(90deg,transparent,${P.gold}15,${P.gold}25,${P.gold}15,transparent)`}}/>
+    {/* bow — swept prow */}
+    <div style={{position:'absolute',bottom:4,left:0,width:bowW,height:bowW*1.3,zIndex:1}}>
+      <div style={{position:'absolute',bottom:0,left:3,width:bowW-3,height:bowW*1.1,
+        background:'linear-gradient(180deg,#3a1400,#4a1a00)',
+        clipPath:'polygon(35% 0%,65% 0%,100% 75%,100% 100%,0% 100%,0% 55%)'}}/>
+      <div style={{position:'absolute',top:0,left:bowW*0.2,width:bowW*0.5,height:bowW*0.4,
+        background:`radial-gradient(ellipse at 50% 40%,${P.gold}35,${P.cedar}50)`,
+        borderRadius:'40% 40% 25% 25%'}}/>
+    </div>
+    {/* stern */}
+    <div style={{position:'absolute',bottom:5,right:0,width:sternW,height:sternW*1.5,
+      background:'linear-gradient(180deg,#3a1400,#4a1a00)',
+      clipPath:'polygon(0% 55%,70% 0%,100% 0%,100% 100%,0% 100%)'}}/>
+    {/* reflection */}
+    <div style={{position:'absolute',bottom:-3,left:bowW*0.6+2,width:hullW-4,height:4,
+      background:'linear-gradient(180deg,rgba(60,30,0,.12),transparent)',filter:'blur(1px)',borderRadius:'0 0 4px 4px'}}/>
+    {damaged&&<div style={{position:'absolute',bottom:2,left:w*0.4,width:w*0.15,height:4,
+      background:'#1a0800',borderRadius:1,transform:'rotate(-8deg)'}}/>}
+  </div>;
+}
+
+/* ── Ceremonial Pole (detailed, sprite-ready — prestige or memorial) ── */
+function CeremonialPole({x,h=55,bottom=0,gold=true,memorial=false,zIndex=6}){
+  const segments=Math.max(2,Math.floor(h/18));
+  const ac=memorial?P.red+'50':P.gold+'40';
+  const wd=memorial?'#1a0808':'#2a1a08';const wl=memorial?'#2a1010':'#3a2810';
+  return<div className="tl-pole-reveal" style={{position:'absolute',left:x,bottom,width:14,height:h,zIndex}}>
+    <div style={{position:'absolute',bottom:0,left:3,width:8,height:h,
+      background:`linear-gradient(180deg,${wl},${wd})`,borderRadius:'3px 3px 0 0',
+      boxShadow:'1px 0 3px rgba(0,0,0,.3)'}}/>
+    <div style={{position:'absolute',top:0,left:-2,width:18,height:14,
+      background:wl,borderRadius:'4px 4px 2px 2px',border:`1px solid ${wd}60`}}>
+      <div style={{position:'absolute',top:3,left:3,width:3,height:2,background:ac,borderRadius:'50%'}}/>
+      <div style={{position:'absolute',top:3,right:3,width:3,height:2,background:ac,borderRadius:'50%'}}/>
+      <div style={{position:'absolute',top:7,left:5,width:4,height:4,background:wd,borderRadius:'1px 1px 3px 3px'}}/>
+      <div style={{position:'absolute',top:1,left:-4,width:5,height:6,background:wl,borderRadius:'3px 0 0 2px',opacity:.7}}/>
+      <div style={{position:'absolute',top:1,right:-4,width:5,height:6,background:wl,borderRadius:'0 3px 2px 0',opacity:.7}}/>
+    </div>
+    {Array.from({length:segments-1},(_,i)=>{const sy=14+i*Math.floor((h-14)/segments);
+      return<div key={i} style={{position:'absolute',top:sy,left:0,width:14,height:12,background:i%2===0?wd:wl,borderRadius:1}}>
+        <div style={{position:'absolute',top:2,left:3,width:2.5,height:1.5,background:ac,borderRadius:'50%'}}/>
+        <div style={{position:'absolute',top:2,right:3,width:2.5,height:1.5,background:ac,borderRadius:'50%'}}/>
+        {i%2===0&&<div style={{position:'absolute',top:5,left:4,width:3,height:4,background:wd+'80',borderRadius:1}}/>}
+      </div>;})}
+    <div style={{position:'absolute',bottom:0,left:1,width:12,height:4,background:wd,borderRadius:'0 0 1px 1px'}}/>
+    {gold&&!memorial&&<div style={{position:'absolute',top:-4,left:-6,width:26,height:h+8,
+      background:`radial-gradient(ellipse at 50% 20%,${P.gold}06,transparent 60%)`,pointerEvents:'none'}}/>}
+    {memorial&&<div style={{position:'absolute',top:-4,left:-6,width:26,height:h+8,
+      background:`radial-gradient(ellipse at 50% 20%,${P.red}04,transparent 60%)`,pointerEvents:'none'}}/>}
+  </div>;
+}
+
+/* ── Ceremonial Fire (larger, animated, with sparks and warmth) ── */
+function CeremonialFire({x,bottom,size='medium',zIndex=7}){
+  const sz=size==='large'?{w:14,h:20,glow:80,sparks:6}:size==='small'?{w:5,h:8,glow:28,sparks:1}:{w:9,h:14,glow:55,sparks:3};
+  return<div style={{position:'absolute',left:x,bottom,width:sz.w*3,height:sz.h*3,zIndex,transform:'translateX(-50%)'}}>
+    <div className="tl-fire" style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',
+      width:sz.w,height:sz.h,
+      background:'radial-gradient(ellipse at 50% 80%,rgba(255,160,40,.6) 0%,rgba(255,100,20,.3) 40%,transparent 70%)'}}/>
+    <div className="tl-fire" style={{position:'absolute',bottom:1,left:'50%',transform:'translateX(-50%)',
+      width:sz.w*0.5,height:sz.h*0.6,animationDelay:'.3s',
+      background:'radial-gradient(ellipse at 50% 80%,rgba(255,220,100,.5) 0%,rgba(255,160,40,.2) 50%,transparent 70%)'}}/>
+    {Array.from({length:sz.sparks},(_,i)=><div key={i} className="tl-spark" style={{
+      position:'absolute',bottom:sz.h-2,left:`${35+i*7}%`,width:2,height:2,borderRadius:'50%',
+      background:'rgba(255,200,80,.7)',animationDelay:(i*0.6)+'s'}}/>)}
+    <div style={{position:'absolute',bottom:-4,left:'50%',transform:'translateX(-50%)',
+      width:sz.glow,height:sz.glow*0.4,
+      background:`radial-gradient(ellipse,rgba(200,120,40,.2) 0%,transparent 70%)`}}/>
+    {/* Ember bed */}
+    <div style={{position:'absolute',bottom:-1,left:'50%',transform:'translateX(-50%)',
+      width:sz.w*1.2,height:3,borderRadius:2,
+      background:'radial-gradient(ellipse,rgba(200,80,20,.35) 0%,rgba(120,40,10,.15) 60%,transparent 100%)'}}/>
+  </div>;
+}
+
+/* ── Witness Cluster (grouped figures — ceremony / gathering, sprite-ready) ── */
+function WitnessCluster({x,bottom=0,count=4,mood='neutral',zIndex=6}){
+  const figs=useMemo(()=>Array.from({length:count},(_,i)=>({
+    dx:i*9-(count*4.5),type:i%3===0?'sitting':'standing',
+    hat:i%2===0,h:i%3===0?12:17+Math.random()*3,
+  })),[count]);
+  const tone=mood==='warm'?'#2a1a08':mood==='grief'?'#140808':'#1a1208';
+  return<>{figs.map((f,i)=><div key={i} className="tl-crowd-arrive" style={{
+    position:'absolute',left:`calc(${x} + ${f.dx}px)`,bottom:bottom+(i%2)*2,
+    width:8,height:f.h,zIndex:zIndex+(f.type==='sitting'?0:1),
+    opacity:mood==='grief'?.55:mood==='solemn'?.7:1,
+    animationDelay:(i*0.1)+'s',animationFillMode:'backwards',
+  }}>
+    {f.hat&&<div style={{position:'absolute',top:0,left:0,width:8,height:3.5,
+      background:`linear-gradient(180deg,${tone},#0e0a04)`,clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>}
+    <div style={{position:'absolute',top:f.hat?3:0,left:1,width:6,height:4,background:tone,borderRadius:'40%'}}/>
+    <div style={{position:'absolute',top:f.hat?6:3,left:0,width:8,height:f.type==='sitting'?5:8,
+      background:`linear-gradient(180deg,${tone},#0c0804)`,borderRadius:'2px 2px 1px 1px'}}/>
+    {f.type==='standing'&&<><div style={{position:'absolute',bottom:0,left:0,width:3,height:4,background:'#0a0604'}}/>
+      <div style={{position:'absolute',bottom:0,right:0,width:3,height:4,background:'#0a0604'}}/></>}
+  </div>)}</>;
+}
+
+/* ── Goods Pile (prestige display — blankets, goods, offerings, sprite-ready) ── */
+function GoodsPile({x,bottom=0,size='medium',zIndex=5}){
+  const big=size==='large';const w=big?30:18,h=big?14:9;
+  return<div style={{position:'absolute',left:x,bottom,width:w,height:h,zIndex}}>
+    <div style={{position:'absolute',bottom:0,left:0,width:w,height:h*0.4,
+      background:'linear-gradient(90deg,#2a1a10,#3a2818,#2a1a10)',borderRadius:1}}/>
+    <div style={{position:'absolute',bottom:h*0.3,left:w*0.1,width:w*0.8,height:h*0.45,
+      background:'linear-gradient(180deg,#241810,#1e1408)',borderRadius:'2px 2px 1px 1px'}}/>
+    <div style={{position:'absolute',bottom:h*0.6,left:w*0.2,width:w*0.5,height:h*0.3,
+      background:'linear-gradient(180deg,#302018,#241608)',borderRadius:2}}/>
+    {big&&<div style={{position:'absolute',bottom:h*0.35,left:w*0.15,width:w*0.7,height:1.5,
+      background:`linear-gradient(90deg,transparent,${P.gold}20,${P.gold}30,${P.gold}20,transparent)`}}/>}
+  </div>;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §11  PHASE SCENES — each uses shared building blocks above
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ VILLAGE SCENE — ceremonial home with poles, fire & witness presence ═══ */
+function VillageScene({sceneH}){
+  const H=sceneH||220,skyH=H*0.28,mtH=H*0.12,shoreH=H*0.08;
+  const landTop=skyH+mtH+shoreH;const groundH=H*0.22;const waterH=H-landTop-groundH;
+  const gb=waterH+groundH;
+  return<div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.village}}>
+    <StarField count={22} region={28}/>
+    <SceneMoon right="16%" top="5%" size={18}/>
+    <MountainRange yTop={skyH-10} height={mtH+18} fill1="#0c0e20" fill2="#0e1228"/>
+    <ForestLine yTop={skyH+mtH-14} height={shoreH+22} color="#0c1a10" altColor="#081408"/>
+    <FogBand top={skyH+mtH-2} opacity={0.06} speed={16}/>
+    <FogBand top={skyH+mtH+shoreH-4} opacity={0.04} delay={6} speed={20}/>
+    {/* Shore ground */}
+    <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,
+      background:'linear-gradient(180deg,#0c1a0c 0%,#0e1a08 30%,#141808 60%,#181a0c 100%)'}}>
+      {[5,12,20,30,42,55,65,78,88,95].map((x,i)=><div key={i} style={{position:'absolute',top:-3-(i%3)*2,left:x+'%',
+        width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
+        borderBottom:`${5+(i%2)*3}px solid #0c1a0c`}}/>)}
+    </div>
+    {/* ── Longhouses with carved frontage ── */}
+    <Longhouse x="10%" w={55} h={20} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>
+    <Longhouse x="36%" w={82} h={28} bottom={gb} smoke={true} fireGlow={true} zIndex={5}/>
+    <Longhouse x="78%" w={48} h={20} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>
+    {/* Carved band on main longhouse */}
+    <div style={{position:'absolute',bottom:gb+10,left:'40%',width:72,height:3,zIndex:6,
+      background:`linear-gradient(90deg,transparent,${P.gold}10,${P.gold}22,${P.gold}28,${P.gold}22,${P.gold}10,transparent)`}}/>
+    {/* ── Ceremonial Poles (prominent) ── */}
+    <CeremonialPole x="33%" h={52} bottom={gb} zIndex={7}/>
+    <CeremonialPole x="72%" h={42} bottom={gb-1} zIndex={7}/>
+    <TotemPole x="92%" h={30} bottom={gb-1} zIndex={6}/>
+    {/* ── Central Ceremonial Fire ── */}
+    <CeremonialFire x="53%" bottom={gb+2} size="medium" zIndex={7}/>
+    {/* ── Witness clusters around fire ── */}
+    <WitnessCluster x="48%" bottom={gb+2} count={4} mood="warm" zIndex={6}/>
+    <WitnessCluster x="62%" bottom={gb+2} count={3} mood="neutral" zIndex={6}/>
+    {/* Elder watching sea */}
+    <Figure x="22%" bottom={gb+2} type="standing" hasHat={true} hasWeapon={false} zIndex={6}/>
+    {/* ── Beached War Canoe ── */}
+    <SimpleCanoe x="3%" bottom={waterH-2} w={72} rocking={false} zIndex={5}/>
+    {/* Water */}
+    <div className="tl-water" style={{position:'absolute',bottom:0,left:0,right:0,height:waterH,zIndex:3}}>
+      <div className="tl-wave-1" style={{position:'absolute',top:3,left:'-50%',right:'-50%',height:2}}/>
+      <div className="tl-wave-2" style={{position:'absolute',top:10,left:'-50%',right:'-50%',height:1}}/>
+    </div>
+    {/* Fire warmth reflected on water */}
+    <FireGlow x="50%" bottom={0} r={130} color="200,140,60" intensity={0.07} zIndex={2}/>
+    <FireGlow x="53%" bottom={gb-4} r={55} intensity={0.2} zIndex={4}/>
+    <Vignette color="8,6,16" intensity={0.18} focus="52% 55%"/>
+  </div>;
+}
+
+/* ═══ ENCOUNTER SCENE ═══ */
+function EncounterScene({sceneH}){
+  const H=sceneH||220,skyH=H*0.30,mtH=H*0.12,shoreH=H*0.08;
+  const landTop=skyH+mtH+shoreH;const beachH=H*0.12;const waterH=H-landTop-beachH;
+  return<div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.encounter}}>
+    <StarField count={8} brightness="#a0a0c8" region={20}/>
+    {/* Dawn glow on horizon */}
+    <div style={{position:'absolute',top:skyH-20,left:0,right:0,height:30,zIndex:1,
+      background:'linear-gradient(180deg,transparent,rgba(120,40,30,.06),transparent)'}}/>
+    <MountainRange yTop={skyH-8} height={mtH+14} fill1="#120c18" fill2="#0e0a14"/>
+    <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#0c120e" altColor="#08100a"/>
+    {/* Cedar Creek settlement — visible across the water */}
+    <Longhouse x="62%" w={38} h={14} bottom={waterH+beachH+2} smoke={true} zIndex={5}/>
+    <Longhouse x="78%" w={28} h={12} bottom={waterH+beachH+1} smoke={true} zIndex={5}/>
+    <TotemPole x="58%" h={28} bottom={waterH+beachH+1} zIndex={5}/>
+    {/* Beach */}
+    <BeachStrip top={landTop} height={beachH} zIndex={4}/>
+    {/* Defender figures on beach */}
+    <WarriorLine x={Math.floor(H*0.62)} count={4} bottom={waterH+beachH+2} spread={10} facing="left" zIndex={6}/>
+    <Figure x="58%" bottom={waterH+beachH+2} type="standing" hasWeapon={false} hasHat={true} zIndex={6}/>
+    {/* Fog — tension */}
+    <FogBand top={skyH+mtH} opacity={0.06} speed={16} color="160,140,140"/>
+    <FogBand top={landTop+beachH-4} opacity={0.05} delay={4} speed={20} color="140,120,130"/>
+    {/* Water */}
+    <WaterBody top={landTop+beachH}
+      gradient="linear-gradient(180deg,#123058 0%,#0e2848 30%,#0a2040 60%,#081838 100%)"
+      waveCount={5}/>
+    {/* Your canoe approaching */}
+    <div className="tl-canoe-rock" style={{position:'absolute',bottom:waterH*0.25,left:'10%',zIndex:8}}>
+      <SimpleCanoe x={0} bottom={0} w={110} rocking={false}/>
+      {/* Bow figure — small standing silhouette at front */}
+      <div style={{position:'absolute',bottom:16,left:12,width:8,height:16,zIndex:10}}>
+        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#3a2a10',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
+        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1c1208',borderRadius:'40%'}}/>
+        <div style={{position:'absolute',top:6,left:0,width:8,height:7,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
+        <div style={{position:'absolute',top:3,left:-2,width:2,height:8,background:'#2a1c08',borderRadius:1,transform:'rotate(-10deg)'}}/>
+      </div>
+      {/* Alternating crew — port low, starboard high */}
+      {[22,40,56,72,86].map((cx,i)=>{const isP=i%2===0;return<div key={i} style={{position:'absolute',bottom:isP?6:22,left:cx,width:8,height:13,zIndex:isP?10:8}}>
+        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:isP?'#3a2a10':'#282010',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
+        <div style={{position:'absolute',top:3,left:1,width:6,height:3,background:isP?'#1c1208':'#120c04',borderRadius:'40%'}}/>
+        <div style={{position:'absolute',top:5,left:0,width:8,height:6,background:isP?'#160c04':'#0e0802',borderRadius:'2px 2px 0 0'}}/>
+        <div style={{position:'absolute',top:5,left:isP?-3:9,width:2,height:10,background:isP?'#4a3010':'#2a1c08',borderRadius:1,transform:`rotate(${isP?25:-25}deg)`}}/>
+      </div>;})}
+      {/* Stern steersman silhouette */}
+      <div style={{position:'absolute',bottom:14,left:94,width:8,height:16,zIndex:10}}>
+        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#3a2a10',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
+        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1c1208',borderRadius:'40%'}}/>
+        <div style={{position:'absolute',top:6,left:0,width:8,height:7,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
+        <div style={{position:'absolute',top:7,right:-3,width:2,height:12,background:'#3a2808',borderRadius:1,transform:'rotate(8deg)'}}/>
+      </div>
+    </div>
+    {/* Red tension atmosphere */}
+    <div style={{position:'absolute',bottom:0,left:0,right:0,height:'40%',zIndex:9,pointerEvents:'none',
+      background:'linear-gradient(180deg,transparent,rgba(140,20,10,.05))'}}/>
+    <div style={{position:'absolute',top:0,left:0,right:0,height:'30%',zIndex:9,pointerEvents:'none',
+      background:'linear-gradient(180deg,rgba(140,20,10,.04),transparent)'}}/>
+    <Vignette color="18,6,6" intensity={0.2}/>
+  </div>;
+}
+
+/* ═══ BATTLE SCENE ═══ */
+function BattleScene({sceneH}){
+  const H=sceneH||220;const groundTop=Math.floor(H*0.45);const groundH=H-groundTop;
+  return<div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.battle}}>
+    {/* Smoke-filled sky */}
+    <div style={{position:'absolute',top:0,left:0,right:0,height:H*0.25,zIndex:1,
+      background:'linear-gradient(180deg,rgba(40,8,8,.4),transparent)'}}/>
+    {/* Distant burning treeline */}
+    <ForestLine yTop={H*0.25} height={40} color="#0e0808" altColor="#120a08" density={60} speed="far"/>
+    {/* Burning structure */}
+    <div style={{position:'absolute',top:H*0.28,right:'20%',width:36,height:18,
+      background:'#1a0a04',border:'1px solid #2a1408',zIndex:5}}>
+      <div className="tl-fire" style={{position:'absolute',top:-10,left:'25%',width:12,height:14,
+        background:'radial-gradient(ellipse,rgba(255,120,30,.5) 0%,transparent 70%)',zIndex:6}}/>
+    </div>
+    {/* Heavy smoke */}
+    <div className="tl-smoke" style={{position:'absolute',top:H*0.14,right:'22%',width:6,height:44,zIndex:7,
+      background:'linear-gradient(180deg,transparent,rgba(120,100,80,.2))',animationDuration:'5s'}}/>
+    <div className="tl-smoke" style={{position:'absolute',top:H*0.18,left:'45%',width:5,height:38,zIndex:7,
+      background:'linear-gradient(180deg,transparent,rgba(120,100,80,.15))',animationDelay:'2s',animationDuration:'6s'}}/>
+    <div className="tl-smoke" style={{position:'absolute',top:H*0.22,left:'30%',width:4,height:30,zIndex:7,
+      background:'linear-gradient(180deg,transparent,rgba(100,80,60,.12))',animationDelay:'3.5s',animationDuration:'5.5s'}}/>
+    {/* Beach ground */}
+    <BeachStrip top={groundTop} height={groundH} zIndex={4}/>
+    {/* Your warriors (left) */}
+    <WarriorLine x={24} count={6} bottom={groundH-8} spread={14} facing="right" zIndex={6}/>
+    {/* Their warriors (right) */}
+    <WarriorLine x={220} count={5} bottom={groundH-6} spread={13} facing="left" zIndex={6}/>
+    {/* Clash zone sparks */}
+    {[[42,46],[46,40],[50,52],[44,36],[48,48],[52,42],[40,50],[54,38],[38,44]].map(([x,y],i)=>
+      <div key={i} className="tl-spark" style={{position:'absolute',left:x+'%',top:y+'%',
+        width:3,height:3,borderRadius:'50%',background:'#ff6020',zIndex:8,animationDelay:(i*0.25)+'s'}}/>
+    )}
+    {/* Central fire */}
+    <div className="tl-fire" style={{position:'absolute',top:'40%',left:'47%',width:10,height:16,
+      background:'radial-gradient(ellipse,rgba(255,100,20,.45) 0%,transparent 70%)',zIndex:6}}/>
+    <FireGlow x="48%" bottom={groundH-20} r={80} color="200,60,20" intensity={0.12} zIndex={3}/>
+    {/* Fog of battle */}
+    <FogBand top={H*0.35} opacity={0.1} speed={10} color="140,100,80" height={24}/>
+    <FogBand top={H*0.55} opacity={0.07} delay={3} speed={14} color="120,90,70" height={18}/>
+    {/* Blood atmosphere pulse */}
+    <div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
+      background:'radial-gradient(ellipse at 48% 46%,rgba(180,30,10,.08),transparent 55%)',
+      animation:'tl-pulse 3s ease-in-out infinite'}}/>
+    <Vignette color="24,4,4" intensity={0.25} focus="48% 46%"/>
+  </div>;
+}
+
+/* ═══ WITHDRAWAL SCENE ═══ */
+function WithdrawalScene({G,sceneH}){
+  const H=sceneH||220,skyH=H*0.30,mtH=H*0.12,shoreH=H*0.08;
+  const waterTop=skyH+mtH+shoreH;const waterH=H-waterTop;
+  const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY');
+  return<div style={{height:H,position:'relative',overflow:'hidden',
+    background:SCENE_SKY.withdrawal}}>
+    <StarField count={10} brightness="#a0a0c0" region={22}/>
+    <MountainRange yTop={skyH-6} height={mtH+12} fill1="#0a0e18" fill2="#0c1020"/>
+    <ForestLine yTop={skyH+mtH-10} height={shoreH+16} color="#0a140e" altColor="#081008"/>
+    {/* Fading Cedar Creek behind (left) */}
+    <div style={{position:'absolute',top:skyH+mtH+2,left:'3%',zIndex:5,opacity:0.5}}>
+      <Longhouse x={0} w={28} h={10} bottom={0} smoke={true}/>
+    </div>
+    {isWin&&<div className="tl-smoke" style={{position:'absolute',top:skyH+mtH-10,left:'6%',width:4,height:26,
+      zIndex:6,opacity:0.4,animationDelay:'1s'}}/>}
+    <FogBand top={skyH+mtH-2} opacity={0.08} speed={18}/>
+    <FogBand top={waterTop+waterH*0.3} opacity={0.05} delay={5} speed={22}/>
+    {/* Water */}
+    <WaterBody top={waterTop}
+      gradient="linear-gradient(180deg,#123058 0%,#0e2848 25%,#0a2040 55%,#081838 100%)"
+      waveCount={7} phosphorCount={8}/>
+    {/* Canoe heading home */}
+    <div className="tl-canoe-rock" style={{position:'absolute',bottom:waterH*0.3,left:'33%',zIndex:8}}>
+      <SimpleCanoe x={0} bottom={0} w={110} damaged={G&&G.canoeCondition<50}/>
+      {/* Bow figure */}
+      <div style={{position:'absolute',bottom:16,left:12,width:8,height:14,zIndex:10}}>
+        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#342410',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
+        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1a0e04',borderRadius:'40%'}}/>
+        <div style={{position:'absolute',top:6,left:0,width:8,height:6,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
+        <div style={{position:'absolute',top:3,left:-2,width:2,height:8,background:'#2a1c08',borderRadius:1,transform:'rotate(-10deg)'}}/>
+      </div>
+      {/* Alternating crew */}
+      {[22,38,54,68].map((cx,i)=>{const isP=i%2===0;return<div key={i} style={{position:'absolute',bottom:isP?6:22,left:cx,width:8,height:12,zIndex:isP?10:8}}>
+        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#342410',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
+        <div style={{position:'absolute',top:3,left:1,width:6,height:3,background:'#1a0e04',borderRadius:'40%'}}/>
+        <div style={{position:'absolute',top:5,left:0,width:8,height:5,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
+        <div style={{position:'absolute',top:5,left:isP?-3:9,width:2,height:9,background:isP?'#3a2810':'#2a1c08',borderRadius:1,transform:`rotate(${isP?25:-25}deg)`}}/>
+      </div>;})}
+      {/* Stern steersman */}
+      <div style={{position:'absolute',bottom:14,left:84,width:8,height:15,zIndex:10}}>
+        <div style={{position:'absolute',top:0,left:0,width:8,height:4,background:'#342410',clipPath:'polygon(50% 0%,100% 100%,0% 100%)'}}/>
+        <div style={{position:'absolute',top:3,left:1,width:6,height:4,background:'#1a0e04',borderRadius:'40%'}}/>
+        <div style={{position:'absolute',top:6,left:0,width:8,height:6,background:'#140a02',borderRadius:'2px 2px 0 0'}}/>
+        <div style={{position:'absolute',top:7,right:-3,width:2,height:10,background:'#3a2808',borderRadius:1,transform:'rotate(8deg)'}}/>
+      </div>
+    </div>
+    {/* Wake trail */}
+    <div style={{position:'absolute',bottom:waterH*0.28,left:'30%',width:60,height:4,zIndex:7}}>
+      {[0,1,2].map(i=><div key={i} style={{position:'absolute',top:i*1.5,left:-i*8,width:35+i*10,height:1.5,
+        background:`linear-gradient(90deg,rgba(80,120,160,${.15-i*.04}),transparent)`,borderRadius:1,
+        animation:'tl-wake 3.5s ease-out infinite',animationDelay:(i*0.5)+'s',
+      }}/>)}
+    </div>
+    {/* Foreground darkening */}
+    <div style={{position:'absolute',bottom:0,left:0,right:0,height:waterH*0.25,zIndex:9,pointerEvents:'none',
+      background:'linear-gradient(180deg,transparent,rgba(4,8,18,.25))'}}/>
+    <Vignette color="6,8,16" intensity={0.2} focus="55% 45%"/>
+  </div>;
+}
+
+/* ═══ AFTERMATH SCENE — outcome-aware ceremony, village memory ═══ */
+function AftermathScene({G,sceneH}){
+  const H=sceneH||220,skyH=H*0.28,mtH=H*0.12,shoreH=H*0.08;
+  const landTop=skyH+mtH+shoreH;const groundH=H*0.22;const waterH=H-landTop-groundH;
+  const gb=waterH+groundH;
+  const isDecisive=G&&G.outcome==='DECISIVE_VICTORY';
+  const isWin=G&&(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY');
+  const isStale=G&&G.outcome==='STALEMATE';
+  const isDef=G&&G.outcome==='DEFEAT';
+  const isDev=G&&G.outcome==='DEVASTATING_DEFEAT';
+  const hasDead=G&&G.crewKilled>0;
+  /* Ceremony intensity — drives fire, crowd, warmth */
+  const ci=isDecisive?3:isWin?2:isStale?1:isDef?0:-1;
+  const fireSize=ci>=3?'large':ci>=1?'medium':'small';
+  const crowdN=ci>=3?6:ci>=2?5:ci>=1?3:2;
+  const crowdMood=ci>=2?'warm':ci<=0?(hasDead?'grief':'solemn'):'neutral';
+  const skyGrad=isWin?SCENE_SKY.aftermath_w:SCENE_SKY.aftermath_l;
+  const starBright=isWin?'#c0c0e8':isDev?'#606070':'#808098';
+  return<div style={{height:H,position:'relative',overflow:'hidden',background:skyGrad}}>
+    <StarField count={isWin?24:isDev?6:12} brightness={starBright} region={28}/>
+    {isWin&&<SceneMoon right="12%" top="4%" size={16}/>}
+    <MountainRange yTop={skyH-8} height={mtH+14} fill1="#0c0e1a" fill2="#0e1020"/>
+    <ForestLine yTop={skyH+mtH-12} height={shoreH+18} color="#0c1a10" altColor="#081408"/>
+    <FogBand top={skyH+mtH-2} opacity={isWin?0.04:0.07} speed={18}/>
+    {isDev&&<FogBand top={skyH+mtH+shoreH} opacity={0.08} speed={22} color="100,90,100"/>}
+    {/* Shore ground */}
+    <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,
+      background:'linear-gradient(180deg,#0c1a0c 0%,#0e1a08 40%,#141808 100%)'}}>
+      {[8,18,30,42,56,68,80,92].map((x,i)=><div key={i} style={{position:'absolute',top:-2-(i%3)*2,left:x+'%',
+        width:0,height:0,borderLeft:'3px solid transparent',borderRight:'3px solid transparent',
+        borderBottom:`${4+(i%2)*3}px solid #0c1a0c`}}/>)}
+    </div>
+    {/* ── Longhouses ── */}
+    <Longhouse x="14%" w={56} h={22} bottom={gb-1} smoke={true} fireGlow={ci>=1} zIndex={5}/>
+    <Longhouse x="46%" w={74} h={26} bottom={gb} smoke={true} fireGlow={ci>=1} zIndex={5}/>
+    {ci>=2&&<Longhouse x="82%" w={44} h={18} bottom={gb-1} smoke={true} fireGlow={true} zIndex={5}/>}
+    {/* Carved frontage on main longhouse (victory ceremony) */}
+    {isWin&&<div style={{position:'absolute',bottom:gb+8,left:'50%',width:64,height:3,zIndex:6,
+      background:`linear-gradient(90deg,transparent,${P.gold}10,${P.gold}22,${P.gold}30,${P.gold}22,${P.gold}10,transparent)`}}/>}
+    {/* ── Ceremonial Poles (prestige / memory) ── */}
+    <CeremonialPole x="42%" h={isDecisive?58:ci>=1?46:38} bottom={gb} gold={isWin} zIndex={7}/>
+    {ci>=2&&<CeremonialPole x="78%" h={36} bottom={gb-1} gold={true} zIndex={7}/>}
+    {/* New pole earned on decisive — taller, golden glow */}
+    {isDecisive&&<div style={{position:'absolute',left:'26%',bottom:gb,zIndex:7}}>
+      <CeremonialPole x={0} h={44} bottom={0} gold={true}/>
+      <div style={{position:'absolute',bottom:0,left:-3,width:20,height:50,
+        background:`radial-gradient(ellipse at 50% 30%,${P.gold}08,transparent 70%)`,pointerEvents:'none'}}/>
+    </div>}
+    {/* ── Memorial Post (when warriors have fallen) ── */}
+    {hasDead&&<CeremonialPole x={isWin?"90%":"32%"} h={32} bottom={gb} gold={false} memorial={true} zIndex={7}/>}
+    {/* ── Central Ceremonial Fire (ceremony warmth) ── */}
+    <CeremonialFire x="55%" bottom={gb+2} size={fireSize} zIndex={7}/>
+    {/* Small secondary fire for victory feast */}
+    {isDecisive&&<CeremonialFire x="35%" bottom={gb+1} size="small" zIndex={7}/>}
+    {/* ── Witness Clusters — village gathering ── */}
+    <WitnessCluster x="50%" bottom={gb+2} count={crowdN} mood={crowdMood} zIndex={6}/>
+    {ci>=2&&<WitnessCluster x="65%" bottom={gb+2} count={3} mood="warm" zIndex={6}/>}
+    {ci>=3&&<WitnessCluster x="36%" bottom={gb+2} count={4} mood="warm" zIndex={6}/>}
+    {/* Solitary mourner near memorial (defeat + dead) */}
+    {!isWin&&hasDead&&<Figure x="30%" bottom={gb+2} type="sitting" hasHat={false} hasWeapon={false} zIndex={6}/>}
+    {/* ── Goods / Offerings displayed (prestige / generosity) ── */}
+    {isDecisive&&<><GoodsPile x="58%" bottom={gb+2} size="large" zIndex={5}/>
+      <GoodsPile x="44%" bottom={gb+1} size="medium" zIndex={5}/></>}
+    {isWin&&!isDecisive&&<GoodsPile x="61%" bottom={gb+1} size="medium" zIndex={5}/>}
+    {/* ── Beached Canoe ── */}
+    <SimpleCanoe x="4%" bottom={waterH-3} w={75} rocking={false} damaged={isDev} zIndex={5}/>
+    {/* Water */}
+    <div className="tl-water" style={{position:'absolute',bottom:0,left:0,right:0,height:waterH,zIndex:3}}>
+      <div className="tl-wave-1" style={{position:'absolute',top:3,left:'-50%',right:'-50%',height:2}}/>
+      <div className="tl-wave-2" style={{position:'absolute',top:10,left:'-50%',right:'-50%',height:1}}/>
+    </div>
+    {/* ── Atmospheric ceremony warmth / cold ── */}
+    {ci>=2&&<FireGlow x="55%" bottom={0} r={120} color="200,140,60" intensity={0.07} zIndex={2}/>}
+    <FireGlow x="55%" bottom={gb-4} r={ci>=2?65:35} color={isWin?"200,140,60":"140,100,80"} intensity={ci>=2?0.22:0.1} zIndex={4}/>
+    {/* Victory warm overlay */}
+    {isDecisive&&<div className="tl-ceremony-glow" style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
+      background:'radial-gradient(ellipse at 55% 65%,rgba(200,140,40,.04),transparent 50%)'}}/>}
+    {/* Grief / cold overlay (defeat) */}
+    {isDev&&<div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
+      background:'linear-gradient(180deg,rgba(10,4,18,.15),transparent 40%,transparent 60%,rgba(10,4,18,.2))'}}/>}
+    {isDef&&<div style={{position:'absolute',inset:0,zIndex:9,pointerEvents:'none',
+      background:'linear-gradient(180deg,rgba(8,4,14,.08),transparent 30%,transparent 70%,rgba(8,4,14,.1))'}}/>}
+    <Vignette color={isWin?"8,6,16":"6,4,10"} intensity={isWin?0.18:isDev?0.35:0.25} focus="55% 55%"/>
+  </div>;
+}
+
+/* ═══ TRAVEL SCENE — premium 16-bit composition ═══ */
+function TravelScene({sceneH}){
+  const H=sceneH||220;
+  const skyH=H*0.30;  // sky band
+  const mtH=H*0.14;   // distant mountains
+  const shoreH=H*0.10;// mid-ground forest
+  const waterTop=skyH+mtH+shoreH;
+  const waterH=H-waterTop;
+
+  /* ── Stroke cycle: 2.4s per full catch→pull→exit→recovery ── */
+  const CYCLE=2.4;
+
+  /* ── Crew seats: 8 paddlers, strongly alternating port(p)/starboard(s) ── */
+  /* Port paddlers sit near-side (visually lower), starboard far-side (higher).
+     Wide lateral offsets make the alternation unmistakable at any size. */
+  const crew=useMemo(()=>{
+    const seats=[];
+    for(let i=0;i<8;i++){
+      const isP=i%2===0;
+      seats.push({
+        x:52+i*18,                 // generous 18px spacing along hull
+        side:isP?'p':'s',
+        delay:isP?0:CYCLE*0.5,     // port group together, starboard half-cycle offset
+      });
+    }
+    return seats;
+  },[]);
+
+  /* ── Paddler silhouette — exaggerated port/starboard lateral offset ── */
+  const Paddler=({x,side,delay})=>{
+    const isP=side==='p';
+    /* Port paddlers: bottom-10 (near viewer, well below gunwale)
+       Starboard:     bottom+14 (far side, well above gunwale)
+       This 24px vertical gap creates unmistakable zigzag at any scale */
+    const yOff=isP?-10:14;
+    const bodyAnim=isP?'tl-row-port':'tl-row-star';
+    const oarAnim=isP?'tl-oar-port':'tl-oar-star';
+    /* Port paddlers render in front (zIndex 5), starboard behind hull (zIndex 1) */
+    const z=isP?5:1;
+    /* Port = brighter for near-side clarity, starboard = dimmer for depth */
+    const hat1=isP?'#5a4420':'#342410';
+    const hat2=isP?'#4a3418':'#281c0c';
+    const skin=isP?'#2e2014':'#1a1208';
+    const torso=isP?'#281c14':'#16100a';
+    const shaft1=isP?'#6a4820':'#3e2c10';
+    const shaft2=isP?'#5a3818':'#2e2008';
+    const blade=isP?'#5a3818':'#2e2008';
+    /* Paddle is on the OUTSIDE of the canoe — port=left, starboard=right */
+    const padX=isP?-8:16;
+    return(
+      <div className="tl-paddler" style={{
+        position:'absolute',bottom:yOff,left:x,width:14,height:28,
+        animation:`${bodyAnim} ${CYCLE}s ease-in-out ${delay}s infinite`,
+        zIndex:z,
+      }}>
+        {/* woven hat — conical, wider for readability */}
+        <div style={{position:'absolute',top:0,left:0,width:14,height:6,
+          background:`linear-gradient(180deg,${hat1},${hat2})`,
+          clipPath:'polygon(50% 0%,100% 100%,0% 100%)',
+        }}/>
+        {/* head */}
+        <div style={{position:'absolute',top:5,left:3,width:8,height:5,
+          background:skin,borderRadius:'40%'}}/>
+        {/* torso — slightly offset toward paddle side */}
+        <div style={{position:'absolute',top:9,left:isP?1:3,width:10,height:9,
+          background:torso,borderRadius:'2px 2px 1px 1px'}}/>
+        {/* near arm reaching out */}
+        <div style={{position:'absolute',top:10,left:isP?-2:12,width:3,height:5,
+          background:torso,borderRadius:1,transform:`rotate(${isP?-18:18}deg)`}}/>
+        {/* paddle assembly — shaft+blade on the CORRECT side */}
+        <div style={{
+          position:'absolute',top:6,left:padX,width:12,height:28,
+          transformOrigin:isP?'8px 3px':'4px 3px',
+          animation:`${oarAnim} ${CYCLE}s ease-in-out ${delay}s infinite`,
+        }}>
+          {/* shaft — thicker for readability */}
+          <div style={{position:'absolute',top:0,left:5,width:3,height:20,
+            background:`linear-gradient(180deg,${shaft1},${shaft2})`,borderRadius:1}}/>
+          {/* blade */}
+          <div style={{position:'absolute',top:18,left:3,width:6,height:7,
+            background:`linear-gradient(180deg,${shaft2},${blade})`,
+            borderRadius:'1px 1px 4px 4px'}}/>
+        </div>
+        {/* paddle catch splash — on correct side */}
+        <div style={{position:'absolute',top:33,left:padX+2,width:8,height:3,
+          background:'radial-gradient(ellipse,rgba(100,170,220,.4),transparent)',
+          borderRadius:'50%',pointerEvents:'none',
+          animation:`tl-paddle-splash ${CYCLE}s ease-in-out ${delay}s infinite`,
+        }}/>
+      </div>
+    );
+  };
+
+  /* ── Stars ── */
+  const stars=useMemo(()=>[
+    [6,5,1.8,0],[14,12,1.2,1.5],[23,3,2,0.8],[34,9,1,2.2],[42,4,1.5,0.4],
+    [55,7,1.3,1.8],[63,2,1.8,0.6],[71,11,1,1.2],[78,5,1.5,2.8],[87,8,1.2,0.3],
+    [93,3,1.6,1.9],[18,18,1,2.6],[48,16,1.3,0.9],[82,14,1,1.4],[30,14,0.8,2.0],
+    [60,13,0.9,0.1],[75,18,1.1,1.7],[10,20,0.7,2.3],[50,1,1.4,0.5],[90,16,0.8,1.1],
+  ],[]);
+
+  /* ── Phosphorescence dots ── */
+  const phosphor=useMemo(()=>Array.from({length:18},(_,i)=>({
+    x:5+Math.random()*90,y:Math.random()*100,d:Math.random()*6,sz:1+Math.random()*1.5,
+  })),[]);
+
+  /* ── Mountain silhouettes (far shore, 200% wide for scrolling) ── */
+  const mtPoints='0,100 3,72 8,55 14,48 19,58 22,50 28,35 33,40 38,30 42,38 46,28 50,20 54,32 58,25 62,35 66,42 70,30 74,45 78,38 82,50 86,55 90,48 94,60 97,52 100,100';
+  const mtPoints2='0,100 4,65 10,50 15,42 20,55 25,38 30,30 35,45 40,25 45,35 50,28 55,40 60,32 65,22 70,38 75,48 80,35 85,52 90,42 95,58 100,100';
+
+  return(
+    <div style={{height:H,position:'relative',overflow:'hidden',background:SCENE_SKY.travel}}>
+
+      {/* ━━ SKY LAYER ━━ */}
+      {stars.map(([x,y,sz,d],i)=>(
+        <div key={i} className="tl-star" style={{position:'absolute',left:x+'%',top:y+'%',width:sz,height:sz,borderRadius:'50%',background:'#c0c0e8',animationDelay:d+'s',zIndex:1}}/>
+      ))}
+
+      {/* Moon */}
+      <div style={{position:'absolute',top:'6%',right:'14%',width:22,height:22,zIndex:2,
+        borderRadius:'50%',
+        background:'radial-gradient(circle at 40% 40%,#e8e0c8 0%,#c8c0a8 50%,#a8a088 100%)',
+        boxShadow:'0 0 20px rgba(200,190,160,.25), 0 0 60px rgba(200,190,160,.08)',
+      }}>
+        {/* crater hints */}
+        <div style={{position:'absolute',top:6,left:8,width:4,height:3,borderRadius:'50%',background:'rgba(0,0,0,.08)'}}/>
+        <div style={{position:'absolute',top:12,left:5,width:3,height:2,borderRadius:'50%',background:'rgba(0,0,0,.06)'}}/>
+      </div>
+
+      {/* Moon reflection on water */}
+      <div style={{position:'absolute',top:waterTop+8,right:'13%',width:28,height:waterH-20,zIndex:5,
+        background:'linear-gradient(180deg,rgba(200,190,160,.1) 0%,rgba(200,190,160,.03) 40%,transparent 100%)',
+        filter:'blur(2px)',
+      }}/>
+
+      {/* Wispy cloud */}
+      <div className="tl-cloud" style={{position:'absolute',top:'12%',left:'-20%',width:'18%',height:6,
+        background:'linear-gradient(90deg,transparent,rgba(140,150,170,.06),rgba(140,150,170,.1),rgba(140,150,170,.06),transparent)',
+        borderRadius:3,zIndex:2,animationDelay:'0s',
+      }}/>
+      <div className="tl-cloud" style={{position:'absolute',top:'18%',left:'-10%',width:'12%',height:4,
+        background:'linear-gradient(90deg,transparent,rgba(120,130,160,.05),rgba(120,130,160,.08),rgba(120,130,160,.05),transparent)',
+        borderRadius:3,zIndex:2,animationDelay:'30s',
+      }}/>
+
+      {/* ━━ DISTANT MOUNTAINS (parallax layer — slow scroll) ━━ */}
+      <div style={{position:'absolute',top:skyH-8,left:0,width:'200%',height:mtH+16,zIndex:3,overflow:'hidden'}} className="tl-shore-far">
+        <svg viewBox="0 0 200 100" preserveAspectRatio="none" style={{width:'100%',height:'100%'}}>
+          <polygon points={mtPoints.split(' ').map(p=>{const[x,y]=p.split(',');return(parseFloat(x)*2)+','+y;}).join(' ')} fill="#142430" opacity=".55"/>
+          <polygon points={mtPoints2.split(' ').map(p=>{const[x,y]=p.split(',');return(parseFloat(x)*2+15)+','+y;}).join(' ')} fill="#182838" opacity=".4"/>
+        </svg>
+      </div>
+
+      {/* Snow caps hint on tallest peaks */}
+      <div style={{position:'absolute',top:skyH-2,left:0,width:'200%',height:6,zIndex:3,pointerEvents:'none'}} className="tl-shore-far">
+        {[{x:50,w:6},{x:65,w:4},{x:40,w:5},{x:150,w:5},{x:165,w:4}].map((p,i)=>(
+          <div key={i} style={{position:'absolute',left:p.x+'%',top:0,width:p.w,height:2,
+            background:'rgba(200,210,230,.15)',borderRadius:1}}/>
+        ))}
+      </div>
+
+      {/* ━━ MID-GROUND FOREST SILHOUETTE (medium scroll) ━━ */}
+      <div style={{position:'absolute',top:skyH+mtH-12,left:0,width:'200%',height:shoreH+20,zIndex:4}} className="tl-shore-mid">
+        {/* Dense treeline — CSS triangles for individual trees */}
+        <div style={{position:'absolute',bottom:0,left:0,width:'100%',height:'100%'}}>
+          {Array.from({length:80},(_,i)=>{
+            const tx=i*2.5+Math.sin(i*0.7)*0.8;
+            const th=12+Math.sin(i*1.3)*6+Math.cos(i*0.5)*4;
+            const tw=3+Math.sin(i*0.9)*1.5;
+            return <div key={i} style={{
+              position:'absolute',bottom:0,left:tx+'%',
+              width:0,height:0,
+              borderLeft:`${tw}px solid transparent`,borderRight:`${tw}px solid transparent`,
+              borderBottom:`${th}px solid ${i%5===0?'#0e2418':'#122c1c'}`,
+            }}/>;
+          })}
+          {/* Solid base */}
+          <div style={{position:'absolute',bottom:0,left:0,right:0,height:8,background:'#0e2418'}}/>
+        </div>
+      </div>
+
+      {/* ━━ FOG LAYERS ━━ */}
+      <div className="tl-fog" style={{position:'absolute',top:skyH+mtH-4,left:0,right:0,height:18,zIndex:5,
+        background:'linear-gradient(90deg,transparent 0%,rgba(140,160,180,.06) 20%,rgba(140,160,180,.1) 50%,rgba(140,160,180,.06) 80%,transparent 100%)',
+      }}/>
+      <div className="tl-fog" style={{position:'absolute',top:skyH+mtH+shoreH-6,left:0,right:0,height:14,zIndex:5,
+        background:'linear-gradient(90deg,transparent 0%,rgba(120,140,170,.05) 25%,rgba(120,140,170,.09) 50%,rgba(120,140,170,.05) 75%,transparent 100%)',
+        animationDelay:'5s',animationDuration:'18s',
+      }}/>
+      <div className="tl-fog" style={{position:'absolute',top:waterTop+waterH*0.3,left:0,right:0,height:10,zIndex:7,
+        background:'linear-gradient(90deg,transparent 0%,rgba(100,120,150,.04) 30%,rgba(100,120,150,.07) 50%,rgba(100,120,150,.04) 70%,transparent 100%)',
+        animationDelay:'10s',animationDuration:'22s',
+      }}/>
+
+      {/* ━━ WATER ━━ */}
+      <div style={{position:'absolute',top:waterTop,left:0,right:0,bottom:0,zIndex:5,
+        background:'linear-gradient(180deg,#14385e 0%,#103050 20%,#0c2848 45%,#082040 70%,#061838 100%)',
+      }}>
+        {/* Horizontal wave lines — multiple layers */}
+        {[4,12,22,34,48,62,78,96,112].map((y,i)=>(
+          <div key={i} className="tl-wave-1" style={{
+            position:'absolute',top:y,left:'-100%',right:'-100%',
+            height:i<3?2:1,
+            background:`repeating-linear-gradient(90deg,transparent 0px,transparent ${14+i*2}px,rgba(${30+i*5},${60+i*8},${120+i*6},${.12+i*.015}) ${14+i*2}px,rgba(${30+i*5},${60+i*8},${120+i*6},${.12+i*.015}) ${16+i*2}px,transparent ${16+i*2}px,transparent ${30+i*3}px)`,
+            animationDuration:(4+i*0.8)+'s',
+            animationDelay:(i*0.4)+'s',
+          }}/>
+        ))}
+
+        {/* Water surface shimmer */}
+        <div style={{position:'absolute',top:0,left:0,right:0,height:3,
+          background:'linear-gradient(90deg,transparent 5%,rgba(100,140,200,.08) 20%,rgba(120,160,220,.12) 35%,transparent 50%,rgba(100,140,200,.06) 65%,rgba(120,160,220,.1) 80%,transparent 95%)',
+          animation:'tl-water-shimmer 4s ease-in-out infinite',
+        }}/>
+
+        {/* Phosphorescence */}
+        {phosphor.map((p,i)=>(
+          <div key={i} style={{
+            position:'absolute',left:p.x+'%',top:p.y+'%',
+            width:p.sz,height:p.sz,borderRadius:'50%',
+            background:'rgba(100,200,220,.5)',
+            animation:`tl-phosphor ${3+p.d*0.5}s ease-in-out infinite`,
+            animationDelay:p.d+'s',
+          }}/>
+        ))}
+      </div>
+
+      {/* ━━ THE WAR CANOE ━━ */}
+      <div className="tl-canoe-rock" style={{
+        position:'absolute',bottom:waterH*0.32,left:'18%',width:260,height:72,zIndex:8,
+      }}>
+        {/* ── Hull ── */}
+        <div style={{position:'absolute',bottom:8,left:28,width:204,height:20,zIndex:2}}>
+          {/* Main hull body */}
+          <div style={{position:'absolute',bottom:0,left:0,width:204,height:16,
+            background:'linear-gradient(180deg,#6a2800 0%,#5a2000 25%,#3a1400 60%,#2a0e00 100%)',
+            borderRadius:'2px 2px 10px 10px',
+            border:'1px solid #7a3000',borderTop:'none',
+            boxShadow:'0 3px 10px rgba(0,0,0,.5),inset 0 2px 4px rgba(120,60,10,.15)',
+          }}/>
+          {/* Gunwale */}
+          <div style={{position:'absolute',bottom:14,left:-2,width:208,height:4,
+            background:'linear-gradient(90deg,#4a1a00 0%,#7a3200 15%,#8a3800 50%,#7a3200 85%,#4a1a00 100%)',
+            borderRadius:'2px 2px 0 0',
+            boxShadow:'0 -1px 2px rgba(0,0,0,.2)',
+          }}/>
+          {/* Hull midline gold band */}
+          <div style={{position:'absolute',bottom:7,left:6,width:192,height:1.5,
+            background:`linear-gradient(90deg,transparent 2%,${P.gold}12 10%,${P.gold}28 30%,${P.gold}35 50%,${P.gold}28 70%,${P.gold}12 90%,transparent 98%)`,
+          }}/>
+          {/* Waterline highlight */}
+          <div style={{position:'absolute',bottom:0,left:8,width:188,height:2,
+            background:'linear-gradient(90deg,transparent,rgba(60,100,140,.08),rgba(60,100,140,.12),rgba(60,100,140,.08),transparent)',
+            borderRadius:'0 0 8px 8px',
+          }}/>
+        </div>
+
+        {/* ── Bow (prow) — high sweep with carved crest ── */}
+        <div style={{position:'absolute',bottom:10,left:0,width:38,height:46,zIndex:3}}>
+          {/* Prow upswept body */}
+          <div style={{position:'absolute',bottom:0,left:10,width:26,height:42,
+            background:'linear-gradient(180deg,#4a1a00 0%,#5a2200 40%,#4a1a00 100%)',
+            clipPath:'polygon(35% 0%,65% 0%,100% 75%,100% 100%,0% 100%,0% 60%)',
+            boxShadow:'2px 0 4px rgba(0,0,0,.3)',
+          }}/>
+          {/* Prow spine highlight */}
+          <div style={{position:'absolute',bottom:14,left:21,width:2,height:28,
+            background:'linear-gradient(180deg,rgba(140,80,20,.35),rgba(140,80,20,.08))',borderRadius:1,
+          }}/>
+          {/* Carved crest — thunderbird */}
+          <div style={{position:'absolute',top:0,left:9,width:20,height:16,zIndex:4}}>
+            <div style={{position:'absolute',bottom:0,left:2,width:16,height:14,
+              background:`radial-gradient(ellipse at 50% 35%,${P.gold}55,#4a1a00 80%)`,
+              borderRadius:'45% 45% 25% 25%',
+              boxShadow:`0 0 6px ${P.gold}30`,
+            }}/>
+            {/* Eye */}
+            <div style={{position:'absolute',top:4,left:5,width:4,height:2.5,borderRadius:'50%',
+              background:P.gold,boxShadow:`0 0 4px ${P.gold}80`}}/>
+            {/* Beak */}
+            <div style={{position:'absolute',top:8,left:4,width:6,height:3,
+              background:'#3a1400',clipPath:'polygon(0% 0%,100% 0%,80% 100%,20% 100%)',borderRadius:1}}/>
+          </div>
+        </div>
+
+        {/* ── Stern — moderate rise ── */}
+        <div style={{position:'absolute',bottom:12,right:0,width:30,height:30,zIndex:3}}>
+          <div style={{position:'absolute',bottom:0,right:2,width:24,height:26,
+            background:'linear-gradient(180deg,#3a1400 0%,#4a1a00 50%,#3a1400 100%)',
+            clipPath:'polygon(0% 60%,55% 0%,100% 0%,100% 100%,0% 100%)',
+            boxShadow:'-2px 0 4px rgba(0,0,0,.25)',
+          }}/>
+          <div style={{position:'absolute',bottom:10,right:10,width:2,height:18,
+            background:'linear-gradient(180deg,rgba(140,80,20,.25),rgba(140,80,20,.05))',borderRadius:1,
+          }}/>
+        </div>
+
+        {/* ── Crew: 8 paddlers, strongly alternating port/starboard ── */}
+        {crew.map((s,i)=>(
+          <Paddler key={i} x={s.x} side={s.side} delay={s.delay}/>
+        ))}
+
+        {/* ── Paddle-entry water disturbances (both sides) ── */}
+        {crew.map((s,i)=>{
+          const isP=s.side==='p';
+          return<div key={'wd'+i} style={{position:'absolute',
+            bottom:isP?-8:16,left:s.x+(isP?-4:12),width:10,height:4,zIndex:isP?1:0,
+            background:`radial-gradient(ellipse,rgba(80,140,180,${isP?.14:.06}),transparent)`,borderRadius:'50%',
+            animation:`tl-paddle-splash ${CYCLE}s ease-in-out ${s.delay}s infinite`,
+          }}/>;
+        })}
+
+        {/* ── Ceremonial bow figure (blessing/spiritual presence) ── */}
+        <div style={{position:'absolute',bottom:12,left:30,width:18,height:42,zIndex:6,
+          animation:'tl-bless-sway 5s ease-in-out infinite',transformOrigin:'50% 100%',
+        }}>
+          {/* Tall ceremonial hat — taller and wider than paddler hats */}
+          <div style={{position:'absolute',top:0,left:1,width:16,height:10,
+            background:'linear-gradient(180deg,#4a3818 0%,#3a2a10 100%)',
+            clipPath:'polygon(50% 0%,95% 100%,5% 100%)',
+          }}/>
+          {/* Gold hat band */}
+          <div style={{position:'absolute',top:8,left:3,width:12,height:2,
+            background:`linear-gradient(90deg,transparent,${P.gold}40,${P.gold}55,${P.gold}40,transparent)`,borderRadius:1}}/>
+          {/* Head */}
+          <div style={{position:'absolute',top:9,left:4,width:10,height:6,
+            background:'#241a0e',borderRadius:'40%'}}/>
+          {/* Torso — upright ceremonial posture */}
+          <div style={{position:'absolute',top:14,left:3,width:12,height:11,
+            background:'linear-gradient(180deg,#201410,#1a0e08)',
+            borderRadius:'2px 2px 1px 1px'}}/>
+          {/* Cedar bough / staff — raised in left hand */}
+          <div style={{position:'absolute',top:4,left:-4,width:2.5,height:24,
+            background:'linear-gradient(180deg,#3a2a10,#2a1c08)',borderRadius:1,
+            transform:'rotate(-12deg)',transformOrigin:'bottom center'}}/>
+          {/* Cedar frond at top of staff */}
+          <div style={{position:'absolute',top:0,left:-8,width:8,height:6,
+            background:'radial-gradient(ellipse at 70% 80%,#1a3a18 0%,#0c2a10 60%,transparent 100%)',
+            borderRadius:'40%',opacity:0.8,
+          }}/>
+          {/* Right arm — blessing gesture, raised */}
+          <div style={{position:'absolute',top:12,right:-3,width:3,height:8,
+            background:'#1e140a',borderRadius:1,
+            transform:'rotate(25deg)',transformOrigin:'top center'}}/>
+          {/* Open hand at end of raised arm */}
+          <div style={{position:'absolute',top:8,right:-5,width:4,height:3,
+            background:'#241a0e',borderRadius:'50% 50% 30% 30%'}}/>
+          {/* Legs — standing */}
+          <div style={{position:'absolute',top:24,left:4,width:4,height:10,background:'#140a04'}}/>
+          <div style={{position:'absolute',top:24,right:4,width:4,height:10,background:'#140a04'}}/>
+          {/* Subtle spiritual glow around figure */}
+          <div style={{position:'absolute',top:-2,left:-4,width:26,height:36,
+            background:`radial-gradient(ellipse at 50% 30%,${P.gold}06,transparent 70%)`,
+            pointerEvents:'none',
+          }}/>
+        </div>
+
+        {/* ── Chief / Steersman at stern (standing, commanding) ── */}
+        <div style={{position:'absolute',bottom:8,left:218,width:20,height:36,zIndex:5}}>
+          {/* Wide ceremonial hat */}
+          <div style={{position:'absolute',top:0,left:-1,width:22,height:8,
+            background:'linear-gradient(180deg,#4a3010 0%,#3a2008 100%)',
+            clipPath:'polygon(50% 0%,100% 100%,0% 100%)',
+          }}/>
+          {/* Gold band on hat */}
+          <div style={{position:'absolute',top:6,left:5,width:10,height:1.5,
+            background:`${P.gold}45`,borderRadius:1}}/>
+          {/* Head */}
+          <div style={{position:'absolute',top:6,left:5,width:10,height:7,
+            background:'#1c1004',borderRadius:'40%'}}/>
+          {/* Broader torso — standing posture */}
+          <div style={{position:'absolute',top:12,left:2,width:16,height:12,
+            background:'linear-gradient(180deg,#1a0e04,#140a02)',
+            borderRadius:'3px 3px 1px 1px'}}/>
+          {/* Legs */}
+          <div style={{position:'absolute',top:23,left:4,width:5,height:9,background:'#100802'}}/>
+          <div style={{position:'absolute',top:23,right:4,width:5,height:9,background:'#100802'}}/>
+          {/* Steering paddle — longer, more vertical */}
+          <div style={{position:'absolute',top:11,right:-5,width:2.5,height:26,
+            background:'linear-gradient(180deg,#4a3010,#3a2808)',borderRadius:1,
+            transform:'rotate(8deg)',transformOrigin:'top center'}}/>
+          <div style={{position:'absolute',top:35,right:-7,width:6,height:8,
+            background:'linear-gradient(180deg,#3a2808,#2a1a06)',
+            borderRadius:'1px 1px 4px 4px',transform:'rotate(8deg)'}}/>
+          {/* Authority shoulder marker */}
+          <div style={{position:'absolute',top:13,left:0,width:16,height:2,
+            background:`linear-gradient(90deg,transparent,${P.gold}20,${P.gold}30,${P.gold}20,transparent)`}}/>
+        </div>
+
+        {/* ── Stern wake — V-trail ── */}
+        <div style={{position:'absolute',bottom:2,right:-55,width:85,height:12,zIndex:1}}>
+          {[0,1,2,3].map(i=>(
+            <div key={i} style={{
+              position:'absolute',top:i*2.8,left:0,width:50+i*12,height:2-i*0.3,
+              background:`linear-gradient(90deg,rgba(100,150,190,${.3-i*.06}),transparent)`,
+              borderRadius:1,
+              animation:'tl-wake 3.2s ease-out infinite',
+              animationDelay:(i*0.5)+'s',
+            }}/>
+          ))}
+        </div>
+
+        {/* ── Bow wave ── */}
+        <div style={{position:'absolute',bottom:3,left:-8,width:16,height:12,zIndex:1}}>
+          <div style={{position:'absolute',bottom:2,left:0,width:12,height:6,
+            background:'radial-gradient(ellipse,rgba(120,180,220,.2) 0%,transparent 70%)',
+          }}/>
+          <div style={{position:'absolute',bottom:0,left:3,width:7,height:3,
+            background:'radial-gradient(ellipse,rgba(200,220,240,.1) 0%,transparent 70%)',
+            animation:'tl-water-shimmer 2s ease-in-out infinite',
+          }}/>
+        </div>
+
+        {/* ── Hull reflection on water ── */}
+        <div style={{position:'absolute',bottom:-6,left:30,width:200,height:8,
+          background:'linear-gradient(180deg,rgba(80,40,0,.16) 0%,rgba(60,30,0,.06) 50%,transparent 100%)',
+          filter:'blur(1.5px)',borderRadius:'0 0 6px 6px',
+        }}/>
+      </div>
+
+      {/* ━━ FOREGROUND WATER DARKENING ━━ */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:waterH*0.3,zIndex:9,
+        background:'linear-gradient(180deg,transparent 0%,rgba(4,8,18,.15) 100%)',
+        pointerEvents:'none',
+      }}/>
+
+      {/* ━━ OVERALL ATMOSPHERIC VIGNETTE ━━ */}
+      <div style={{position:'absolute',inset:0,zIndex:10,pointerEvents:'none',
+        background:'radial-gradient(ellipse at 50% 45%,transparent 40%,rgba(4,8,18,.18) 100%)',
+      }}/>
+    </div>
+  );
+}
+
+/* ═══ SCENE DISPATCHER ═══ */
+/* Routes to the appropriate phase scene using shared building blocks.
+   Each scene is 320px tall, using the same visual language.
+   Pass G and phase so scenes can react to game state (outcome, etc). */
+function Scene({type,tall,G,phase,sceneH}){
+  if(phase===1) return <TravelScene sceneH={sceneH}/>;
+  if(phase===4) return <WithdrawalScene G={G} sceneH={sceneH}/>;
+  if(phase===5) return <AftermathScene G={G} sceneH={sceneH}/>;
+  if(phase===2) return <EncounterScene sceneH={sceneH}/>;
+  if(phase===3) return <BattleScene sceneH={sceneH}/>;
+  return <VillageScene sceneH={sceneH}/>;
+}
+
+/* ═══ ROUTE STRIP ═══ */
+const ROUTE_NODES=[
+  {key:'vil',label:'Home',icon:'🏘',phases:[0]},
+  {key:'sea1',label:'Crossing',icon:'〰',phases:[1]},
+  {key:'enc',label:'Cedar Creek',icon:'⚔',phases:[2,3]},
+  {key:'sea2',label:'Return',icon:'〰',phases:[4]},
+  {key:'aft',label:'Home',icon:'📜',phases:[5]},
+];
+function RouteStrip({phase}){
+  const tension=phase>=2&&phase<=3;
+  return(
+    <div style={{display:'flex',alignItems:'center',gap:0,padding:'4px 10px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+      {ROUTE_NODES.map((n,i)=>{
+        const active=n.phases.includes(phase);
+        const done=n.phases.every(p=>p<phase);
+        const col=active?P.gold:done?P.greenDim:P.dim+'50';
+        return(<React.Fragment key={n.key}>
+          {i>0&&<div style={{flex:'1 1 0',height:2,background:done||active?P.greenDim:P.border,margin:'0 2px',minWidth:8,maxWidth:40,borderRadius:1,transition:'background .4s'}}/>}
+          <div className={active?'tl-route-active':''} style={{
+            display:'flex',flexDirection:'column',alignItems:'center',gap:2,padding:'3px 6px',
+            borderRadius:4,background:active?P.panelHi:'transparent',border:`1px solid ${active?P.gold+'40':'transparent'}`,
+            transition:'all .4s ease',minWidth:44,
+          }}>
+            <span style={{fontSize:active?12:10,transition:'font-size .3s'}}>{n.icon}</span>
+            <span style={{fontSize:5,color:col,letterSpacing:.3,whiteSpace:'nowrap',transition:'color .3s'}}>{n.label}</span>
+          </div>
+        </React.Fragment>);
+      })}
+      {tension&&<div style={{marginLeft:8,fontSize:6,color:P.red,letterSpacing:.3,animation:'tl-pulse 2s infinite'}}>⚡ HOSTILE</div>}
+    </div>
+  );
+}
+
+/* ═══ HUD — contextual stats with deltas ═══ */
+const PHASE_STATS={
+  0:['morale','crew','canoe'],1:['morale','canoe','surprise'],
+  2:['morale','crew','intimidation'],3:['morale','crew','canoe'],
+  4:['morale','canoe','cargo'],5:['prestige','feud','cargo'],
+};
+const STAT_TOOLTIPS={
+  morale:'Crew will to fight',surprise:'Opening strike bonus',intimidation:'Break enemy will',
+  prestige:'Standing among nations',feud:'Cedar Creek hatred',cargo:'Spoils for home',
+  crew:'Warriors ready',canoe:'Hull condition',
+};
+function HudBar({G,phase,isFirstRaid}){
+  const fearVal=cl(G.fear+(G.intimDelta<0?-G.intimDelta:0),0,100);
+  const primary=PHASE_STATS[phase]||PHASE_STATS[0];
+  const d=G.statDeltas||{};
+  const stats={
+    morale:{icon:'♥',label:'MORALE',val:G.morale,max:100,col:P.green,warn:v=>v<30,delta:d.morale},
+    crew:{icon:'⚔',label:'CREW',val:G.crewAlive,max:G.crewSize,col:P.blue,warn:v=>v<G.crewSize*.5,delta:d.crew},
+    canoe:{icon:'🛶',label:'CANOE',val:G.canoeCondition,max:100,col:P.blue,warn:v=>v<40,delta:d.canoe},
+    cargo:{icon:'📦',label:'CARGO',val:G.cargo,max:G.cargoCapacity,col:P.gold,warn:()=>false,delta:d.cargo},
+    prestige:{icon:'⭐',label:'PRESTIGE',val:G.prestige,max:500,col:P.gold,warn:()=>false,delta:d.prestige},
+    feud:{icon:'🔥',label:'FEUD',val:G.feudEscalation,max:20,col:P.cedar,warn:v=>v>12,delta:d.feud},
+    surprise:{icon:'👁',label:'SURPRISE',val:G.surpriseBonus,max:50,col:P.purple,warn:()=>false,delta:d.surprise},
+    intimidation:{icon:'💀',label:'INTIM',val:G.intimidationBonus,max:30,col:P.red,warn:()=>false,delta:d.intimidation},
+  };
+  const all=['morale','crew','canoe','cargo','prestige','feud'];
+  const secondary=all.filter(k=>!primary.includes(k));
+  const renderDelta=(delta)=>{
+    if(!delta||delta===0)return null;
+    const col=delta>0?P.greenBright:P.redBright;
+    return <span className="tl-delta" key={Math.random()} style={{color:col,marginLeft:3}}>{delta>0?'+':''}{delta}</span>;
+  };
+  return(
+    <div style={{display:'flex',flexWrap:'wrap',gap:3,padding:'4px 8px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+      {primary.map(k=>{const s=stats[k];if(!s)return null;
+        const danger=s.warn(s.val);const pct=s.max>0?cl(s.val/s.max*100,0,100):0;
+        return(<div key={k} title={STAT_TOOLTIPS[k]||''} style={{flex:'1 1 80px',minWidth:72,padding:'3px 6px',background:P.panelHi,border:`1px solid ${danger?P.red:P.border}`,borderRadius:3,transition:'border-color .3s'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontSize:6,color:P.dim}}>{s.icon} {s.label}</span>
+            <span style={{fontSize:10,color:danger?P.red:P.text,transition:'color .3s'}}>
+              {typeof s.val==='number'?Math.round(s.val):s.val}
+              {renderDelta(s.delta)}
+            </span>
+          </div>
+          <div style={{height:3,background:'#0c0c20',borderRadius:2,marginTop:2,overflow:'hidden'}}>
+            <div style={{height:'100%',width:pct+'%',background:danger?P.red:s.col,borderRadius:2,transition:'width .4s ease'}}/>
+          </div>
+          {isFirstRaid&&STAT_TOOLTIPS[k]&&<div style={{fontSize:5,color:P.dim+'90',marginTop:1}}>{STAT_TOOLTIPS[k]}</div>}
+        </div>);
+      })}
+      {secondary.map(k=>{const s=stats[k];if(!s)return null;
+        const danger=s.warn(s.val);
+        return(<div key={k} title={STAT_TOOLTIPS[k]||''} style={{padding:'2px 5px',background:P.panelHi,border:`1px solid ${P.border}`,borderRadius:3,display:'flex',alignItems:'center',gap:3,transition:'all .3s'}}>
+          <span style={{fontSize:6,color:P.dim}}>{s.icon}</span>
+          <span style={{fontSize:8,color:danger?P.red:P.dim}}>{typeof s.val==='number'?Math.round(s.val):s.val}</span>
+          {renderDelta(s.delta)}
+        </div>);
+      })}
+    </div>
+  );
+}
+
+/* ═══ BATTLE BOARD ═══ */
+function BattleBoard({G}){
+  if(!G.outcome||G.rounds.length===0)return null;
+  const isWin=G.outcome.includes('VICTORY');
+  const isLoss=G.outcome.includes('DEFEAT');
+  const ocInfo=OUTCOME_LABEL[G.outcome];
+  const tacLabel=(TACTIC_MODS[G.attackerTactic]||{}).label||'';
+  return(
+    <div style={{padding:'10px 12px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+      <div style={{fontSize:7,color:P.dim,letterSpacing:.5,marginBottom:8,textAlign:'center'}}>⚔  BATTLE — {tacLabel}</div>
+      {G.rounds.map((r,i)=>{
+        const total=r.atk+r.def;const atkPct=total>0?r.atk/total*100:50;
+        const won=r.winner==='atk';const isTP=!!r.event;
+        return(<div key={i} style={{padding:'7px 10px',marginBottom:5,background:P.panelHi,border:`1px solid ${isTP?P.goldDim+'60':P.border}`,borderRadius:4,animation:'tl-fadein .3s ease-out',animationDelay:(i*0.1)+'s',animationFillMode:'backwards'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:3}}>
+            <span style={{fontSize:7,color:isTP?P.gold:P.dim}}>{isTP?'✦':'⚔'} R{i+1}: {r.name}</span>
+            <span style={{fontSize:8,color:won?P.green:P.red,fontWeight:'bold'}}>{won?'▲ WON':'▼ LOST'}</span>
+          </div>
+          {isTP&&r.event.text&&<div style={{fontSize:7,color:P.gold,marginBottom:4,lineHeight:1.4}}>{r.event.text}</div>}
+          <div style={{display:'flex',alignItems:'center',gap:4}}>
+            <span style={{fontSize:7,color:P.text,width:30,textAlign:'right'}}>YOU {Math.round(r.atk)}</span>
+            <div style={{flex:1,height:8,background:'#0c0c20',borderRadius:3,overflow:'hidden'}}>
+              <div style={{height:'100%',width:atkPct+'%',background:won?P.green:P.red,borderRadius:2,transition:'width .5s ease'}}/>
+            </div>
+            <span style={{fontSize:7,color:P.dim,width:30}}>{Math.round(r.def)} DEF</span>
+          </div>
+        </div>);
+      })}
+      <div className="tl-glow-pulse tl-outcome-slam" style={{
+        textAlign:'center',padding:'12px 8px',marginTop:6,background:P.darkBg,
+        border:`2px solid ${isWin?P.green+'80':isLoss?P.red+'80':P.dim+'80'}`,borderRadius:6,
+        '--gc':isWin?P.green:isLoss?P.red:P.dim,
+      }}>
+        <div style={{fontSize:13,letterSpacing:3,color:isWin?P.gold:isLoss?P.red:P.dim}}>
+          {ocInfo.icon}  {ocInfo.text}  {ocInfo.icon}
+        </div>
+        <div style={{fontSize:7,color:P.dim,marginTop:5}}>
+          YOUR FORCE {Math.round(G.atkTotal)} vs THEIR DEFENSE {Math.round(G.defTotal)} · ratio ×{G.outcomeRatio.toFixed(2)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ AFTERMATH SUMMARY — ceremonial presentation of legacy ═══ */
+function AftermathSummary({G}){
+  if(phaseIdx(G.step)!==5)return null;
+  const isWin=G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY';
+  const isDecisive=G.outcome==='DECISIVE_VICTORY';
+  const isDev=G.outcome==='DEVASTATING_DEFEAT';
+  const deadC=G.namedCrew.filter(c=>!c.alive);
+  const wndC=G.namedCrew.filter(c=>c.alive&&c.wounded);
+  const newFeud=feudName(G.feudEscalation);
+  const accent=isWin?P.gold:isDev?P.red:P.dim;
+  const crd={padding:'8px 10px',background:P.panelHi,border:`1px solid ${P.border}`,borderRadius:4};
+  return(
+    <div style={{padding:'10px 12px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+      {/* Ceremonial header — carved-edge feel */}
+      <div style={{textAlign:'center',marginBottom:8,padding:'6px 0',position:'relative'}}>
+        <div style={{position:'absolute',top:0,left:'10%',right:'10%',height:1,
+          background:`linear-gradient(90deg,transparent,${accent}30,${accent}50,${accent}30,transparent)`}}/>
+        <div style={{fontSize:8,color:accent,letterSpacing:2,marginBottom:3}}>
+          {isDecisive?'🏔  CEREMONY OF VICTORY':isDev?'🕯  THE VILLAGE MOURNS':'📜  EXPEDITION RECORD'}
+        </div>
+        <div style={{fontSize:6,color:P.dim,letterSpacing:.5,lineHeight:1.5}}>
+          {isDecisive?'The village gathers to witness what you have brought home':
+           isWin?'The war party returns — the village watches with attention':
+           isDev?'The sea gave nothing back. Names are carved into memory':
+           G.outcome==='DEFEAT'?'A quiet return — the village watches in silence':
+           'Neither victory nor defeat — the coast remembers'}
+        </div>
+        <div style={{position:'absolute',bottom:0,left:'10%',right:'10%',height:1,
+          background:`linear-gradient(90deg,transparent,${accent}20,${accent}35,${accent}20,transparent)`}}/>
+      </div>
+
+      {/* ── The Fallen — memorial frame ── */}
+      {(G.crewKilled>0||G.crewWounded>0)?(
+        <div style={{display:'flex',gap:6,marginBottom:8}}>
+          {G.crewKilled>0&&<div style={{...crd,flex:1,borderColor:P.redDim,borderLeft:`3px solid ${P.red}60`}}>
+            <div style={{color:P.red,fontSize:7,marginBottom:5,letterSpacing:.5}}>☠  THE FALLEN — Carved Into Memory</div>
+            {deadC.map(c=>(<div key={c.id} style={{marginBottom:4}}>
+              <div style={{color:P.red,fontSize:7}}>{c.name} — {c.role}</div>
+              {EULOGIES[c.id]&&<div style={{color:P.dim,fontSize:6,marginTop:1,lineHeight:1.4,fontStyle:'italic'}}>{EULOGIES[c.id]}</div>}
+            </div>))}
+            {G.crewKilled>deadC.length&&<div style={{color:P.red,fontSize:6,marginTop:2}}>{G.crewKilled-deadC.length} unnamed warrior{G.crewKilled-deadC.length>1?'s':''}</div>}
+            <div style={{fontSize:5,color:P.dim,marginTop:4,fontStyle:'italic'}}>A memorial post will stand at the waterline.</div>
+          </div>}
+          {G.crewWounded>0&&<div style={{...crd,flex:1}}>
+            <div style={{color:P.dim,fontSize:7,marginBottom:5}}>⚔  WOUNDED</div>
+            {wndC.map(c=><div key={c.id} style={{color:P.dim,fontSize:7,marginBottom:2}}>{c.name} — will recover</div>)}
+            {G.crewWounded>wndC.length&&<div style={{color:P.dim,fontSize:6,marginTop:2}}>{G.crewWounded-wndC.length} other{G.crewWounded-wndC.length>1?'s':''}</div>}
+          </div>}
+        </div>
+      ):(
+        <div style={{...crd,textAlign:'center',color:P.green,marginBottom:8,padding:8,fontSize:8}}>✦ Everyone came home whole.</div>
+      )}
+
+      {/* ── Spoils — laid before the village ── */}
+      {G.spoils.length>0&&<div style={{...crd,marginBottom:8,borderLeft:`3px solid ${P.gold}40`}}>
+        <div style={{color:P.gold,fontSize:7,marginBottom:5}}>📦  SPOILS — Laid Before the Village</div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{G.spoils.map((sp,i)=><span key={i} style={{color:P.green,fontSize:7}}>{sp.r} ×{sp.n}</span>)}</div>
+        <div style={{color:P.dim,fontSize:6,marginTop:3}}>Cargo: {G.cargo} / {G.cargoCapacity}</div>
+        {isDecisive&&<div style={{color:P.goldDim,fontSize:5,marginTop:3,fontStyle:'italic'}}>Enough to redistribute. The village will talk of this generosity.</div>}
+      </div>}
+
+      {/* ── Prestige & Standing — ceremonial frame ── */}
+      <div style={{display:'flex',gap:5,marginBottom:8,flexWrap:'wrap'}}>
+        {[
+          {icon:'⭐',val:signStr(G.prestigeChange),sub:isDecisive?'Witnessed by all':`Now ${G.prestige}`,label:'PRESTIGE',col:G.prestigeChange>=0?P.green:P.red,hi:G.prestigeChange>0},
+          {icon:'🔥',val:G.feudEscalation,sub:newFeud,label:'FEUD',col:G.feudEscalation>12?P.red:P.text,hi:false},
+          {icon:'🛶',val:G.canoeCondition+'%',sub:G.canoeCondition<25?'Critical':G.canoeCondition<50?'Damaged':'Seaworthy',label:'CANOE',col:G.canoeCondition<50?P.red:P.text,hi:false},
+        ].map((m,i)=><div key={i} style={{flex:'1 1 70px',minWidth:66,padding:'6px 5px',background:P.panelHi,
+          border:`1px solid ${m.hi?P.gold+'40':P.border}`,borderRadius:4,textAlign:'center',
+          borderTop:m.hi?`2px solid ${P.gold}40`:`1px solid ${P.border}`,
+        }}>
+          <div style={{fontSize:14,marginBottom:1}}>{m.icon}</div>
+          <div style={{fontSize:9,color:m.col}}>{m.val}</div>
+          <div style={{fontSize:5,color:P.dim,marginTop:1}}>{m.label}</div>
+          <div style={{fontSize:6,color:P.dim}}>{m.sub}</div>
+        </div>)}
+      </div>
+
+      {/* ── War Traits — the village remembers ── */}
+      {G.traitsEarned.length>0&&<div style={{...crd,marginBottom:6,borderColor:P.goldDim+'60',borderLeft:`3px solid ${P.gold}50`}}>
+        <div style={{color:P.gold,fontSize:7,marginBottom:5,letterSpacing:.5}}>🏅  TRAITS WITNESSED — The Village Remembers</div>
+        {G.traitsEarned.map(t=><div key={t} style={{color:P.gold,fontSize:6,marginBottom:2,lineHeight:1.5}}>{TRAIT_DESC[t]||t}</div>)}
+      </div>}
+    </div>
+  );
+}
+
+/* ═══ IMPACT FRAME ═══ */
+function ImpactFrame({frame,onDismiss}){
+  const hasPlayed=useRef(false);
+  useEffect(()=>{
+    if(!frame||hasPlayed.current)return;
+    hasPlayed.current=true;
+    /* Play appropriate stinger */
+    if(frame.type==='outcome'){
+      const isWin=frame.outcome.includes('VICTORY');
+      isWin?TL_Audio.stingerVictory():TL_Audio.stingerDefeat();
+    }else if(frame.type==='fallen')TL_Audio.stingerFallen();
+    else if(frame.type==='trait')TL_Audio.stingerTrait();
+    else if(frame.type==='bloodfeud')TL_Audio.stingerBloodFeud();
+    else if(frame.type==='phase_enter'){
+      const ph=frame.phase;
+      if(ph===1)TL_Audio.cueTravel();
+      else if(ph===2)TL_Audio.cueEncounter();
+      else if(ph===3)TL_Audio.cueBattle();
+      else if(ph===4)TL_Audio.cueWithdrawal();
+      else TL_Audio.sfxContinue();
+    }
+  },[frame]);
+  useEffect(()=>{if(!frame)hasPlayed.current=false;},[frame]);
+  /* Keyboard dismiss */
+  useEffect(()=>{
+    if(!frame)return;
+    const h=e=>{if(e.key==='Enter'||e.key===' '||e.key==='Escape'){e.preventDefault();onDismiss();}};
+    document.addEventListener('keydown',h);return()=>document.removeEventListener('keydown',h);
+  },[frame,onDismiss]);
+
+  if(!frame)return null;
+  let icon='',title='',body='',sub='',accentColor=P.gold,witness='';
+  const isCeremony=frame.type==='outcome'||frame.type==='fallen'||frame.type==='trait'||frame.type==='bloodfeud';
+  if(frame.type==='outcome'){
+    const oc=OUTCOME_LABEL[frame.outcome];
+    const isWin=frame.outcome.includes('VICTORY');
+    icon=oc.icon;title=oc.text;accentColor=isWin?P.gold:P.red;
+    body=OUTCOME_NARR[frame.outcome];
+    sub=isWin?'The beach belongs to you.':'The tide carries you away.';
+    if(isWin)witness='The village will gather to receive you.';
+  }else if(frame.type==='fallen'){
+    icon='☠';title='WARRIORS FALLEN';accentColor=P.red;
+    body=frame.names.join(', ')+' — they will not return.';
+    sub='Their names will be carved into the memorial post.';
+    witness='The village will remember them.';
+  }else if(frame.type==='trait'){
+    icon='🏅';title='TRAIT WITNESSED';accentColor=P.gold;
+    body=frame.traits.map(t=>TRAIT_DESC[t]||t).join(' ');
+    sub='This changes who you are as a leader.';
+    witness='The elders have seen. It is known.';
+  }else if(frame.type==='bloodfeud'){
+    icon='🔥';title='BLOOD FEUD DECLARED';accentColor=P.red;
+    body='The feud with Cedar Creek has become generational. There is no forgetting.';
+    sub='Humiliation and retaliation have crossed the point of no return.';
+  }else if(frame.type==='phase_enter'){
+    icon=PHASES[frame.phase]?.icon||'';
+    title=frame.title||'';accentColor=PHASE_ACCENT[frame.phase]||P.gold;
+    body=frame.subtitle||'';sub='';
+  }
+  return(
+    <div className="tl-impact-scrim" onClick={onDismiss} style={{
+      position:'fixed',top:0,left:0,right:0,bottom:0,zIndex:1000,
+      display:'flex',alignItems:'center',justifyContent:'center',
+      background:P.scrim,cursor:'pointer',
+    }}>
+      <div className="tl-impact" onClick={e=>e.stopPropagation()} style={{
+        maxWidth:480,width:'90%',padding:frame.type==='phase_enter'?'20px 24px':'28px 24px',
+        textAlign:'center',position:'relative',overflow:'hidden',
+        background:P.panel,border:`2px solid ${accentColor}`,borderRadius:8,
+        boxShadow:`0 0 50px ${accentColor}25, inset 0 0 40px ${accentColor}06`,
+      }}>
+        {/* Decorative carved border lines (ceremony events) */}
+        {isCeremony&&<>
+          <div style={{position:'absolute',top:6,left:'8%',right:'8%',height:1,
+            background:`linear-gradient(90deg,transparent,${accentColor}30,${accentColor}50,${accentColor}30,transparent)`}}/>
+          <div style={{position:'absolute',bottom:6,left:'8%',right:'8%',height:1,
+            background:`linear-gradient(90deg,transparent,${accentColor}20,${accentColor}35,${accentColor}20,transparent)`}}/>
+        </>}
+        <div style={{fontSize:frame.type==='phase_enter'?28:36,marginBottom:8}}>{icon}</div>
+        <div style={{fontSize:frame.type==='phase_enter'?11:13,color:accentColor,letterSpacing:frame.type==='phase_enter'?2:3,marginBottom:8,fontFamily:font}}>{title}</div>
+        {body&&<div style={{fontSize:8,color:P.text,lineHeight:1.8,fontFamily:font,marginBottom:sub?8:14}}>{body}</div>}
+        {sub&&<div style={{fontSize:7,color:P.dim,lineHeight:1.6,fontFamily:font,marginBottom:witness?6:14,fontStyle:'italic'}}>{sub}</div>}
+        {witness&&<div style={{fontSize:6,color:accentColor+'90',letterSpacing:.3,marginBottom:12,fontFamily:font}}>{witness}</div>}
+        <div style={{fontSize:6,color:P.dim+'80',letterSpacing:.5}}>— CLICK TO CONTINUE —</div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ HINT — first-raid onboarding ═══ */
+function Hint({text}){
+  if(!text)return null;
+  return(
+    <div className="tl-hint" style={{
+      fontSize:6,color:P.dimHi,lineHeight:1.6,
+      padding:'4px 8px',marginBottom:5,
+      background:P.hint,borderLeft:`2px solid ${P.goldDim}40`,borderRadius:'0 3px 3px 0',
+    }}>
+      💡 {text}
+    </div>
+  );
+}
+
+/* ═══ COMMAND CARD ═══ */
+/* ═══ ORIENTATION HINT (portrait play mode) ═══ */
+function OrientationHint({onDismiss}){
+  return(
+    <div className="tl-orient-hint" onClick={onDismiss}>
+      <span style={{fontSize:14,lineHeight:1}}>📱</span>
+      <span>Rotate for best experience</span>
+      <span style={{color:P.dim,padding:'2px 6px',fontSize:8}}>✕</span>
+    </div>
+  );
+}
+
+function CommandCard({icon,title,flavor,effect,risk,archetype,onClick,tabIdx}){
+  const ref=useRef(null);
+  const handleClick=useCallback(()=>{
+    TL_Audio.sfxCommandSelect();
+    if(ref.current){ref.current.classList.remove('tl-cmd-flash');void ref.current.offsetWidth;ref.current.classList.add('tl-cmd-flash');}
+    onClick&&onClick();
+  },[onClick]);
+  return(
+    <button ref={ref} className="tl-cmd" tabIndex={tabIdx||0} onClick={handleClick} style={{
+      display:'block',width:'100%',textAlign:'left',cursor:'pointer',fontFamily:font,
+      background:`linear-gradient(145deg,${P.teal} 0%,${P.panelHi} 100%)`,
+      border:`1px solid ${P.border}`,borderRadius:5,padding:0,marginBottom:4,
+      borderLeft:`3px solid ${P.tealBright}`,
+    }}>
+      <div style={{padding:'6px 10px 5px'}}>
+        <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:2}}>
+          <span style={{fontSize:12}}>{icon}</span>
+          <span style={{fontSize:8,color:P.text,letterSpacing:.3}}>{title}</span>
+        </div>
+        {flavor&&<div style={{fontSize:6,color:P.dimHi,lineHeight:1.5,marginBottom:2,marginLeft:17}}>{flavor}</div>}
+        {effect&&<div style={{fontSize:6,color:P.green,marginLeft:17,marginBottom:1}}>→ {effect}</div>}
+        {risk&&<div style={{fontSize:6,color:P.red,marginLeft:17,marginTop:1}}>⚠ {risk}</div>}
+        {archetype&&<div style={{fontSize:5,color:P.dim,marginLeft:17,marginTop:2,fontStyle:'italic'}}>⟡ {archetype}</div>}
+      </div>
+    </button>
+  );
+}
+function ContinueBtn({onClick,label}){
+  const handleClick=useCallback(()=>{TL_Audio.sfxContinue();onClick&&onClick();},[onClick]);
+  return <button className="tl-action" style={{
+    display:'inline-block',background:P.cedar,color:P.text,border:`1px solid ${P.gold}`,
+    borderRadius:4,padding:'7px 18px',fontFamily:font,fontSize:9,cursor:'pointer',letterSpacing:.5,
+  }} onClick={handleClick}>{label||'▸  Continue'}</button>;
+}
+
+/* ═══ NARRATIVE LOG ═══ */
+const narrColor=c=>c==='gold'?P.gold:c==='red'?P.red:c==='green'?P.green:c==='dim'?P.dim:P.text;
+function NarrEntry({line,isLast}){
+  if(!line.t)return<div style={{height:10}}/>;
+  const isStat=line.s==='stat';
+  const isGold=line.c==='gold';
+  const isRed=line.c==='red';
+  return(
+    <div style={{
+      marginBottom:isStat?3:5,
+      color:narrColor(line.c),
+      fontSize:isStat?7:8,
+      lineHeight:1.5,
+      opacity:isStat?.85:1,
+      letterSpacing:isStat?.3:0,
+      paddingLeft:isGold||isStat?8:0,
+      borderLeft:isGold?`2px solid ${P.goldDim}40`:isStat?`2px solid ${P.border}`:'none',
+      animation:isLast?'tl-fadein .4s ease-out':'none',
+    }}>
+      {line.t}
+    </div>
+  );
+}
+
+/* ─── §12  MAIN COMPONENT ────────────────────────────────────────────── */
+function TidelinesApp(){
+  const[G,setG]=useState(()=>{const sv=loadPersist();return initState(sv?{...sv,_fromSave:true}:{});});
+  const logRef=useRef(null);
+  useEffect(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight;},[G.log.length]);
+  const act=useCallback((fn,...a)=>setG(p=>fn(p,...a)),[]);
+  const onContinue=useCallback(()=>{TL_Audio.sfxContinue();setG(p=>{const fn=CONT[p.step];return fn?fn(p):p;});},[]);
+  const onReset=useCallback(()=>setG(p=>initState({prestige:p.prestige,feudEscalation:p.feudEscalation,legacyEntries:p.legacyEntries,warTraits:p.warTraits,totalRaids:p.totalRaids,lastRun:p.lastRun})),[]);
+  const onFullReset=useCallback(()=>{clearPersist();setG(initState());},[]);
+  const toggleDebug=useCallback(()=>{TL_Audio.sfxToggle();setG(p=>({...p,showDebug:!p.showDebug}));},[]);
+  const toggleLegacy=useCallback(()=>{TL_Audio.sfxToggle();setG(p=>({...p,showLegacy:!p.showLegacy}));},[]);
+  const dismissImpact=useCallback(()=>{TL_Audio.sfxClick();setG(p=>({...p,impactFrame:null}));},[]);
+
+  /* ── §12.05  Audio state ── */
+  const[audioMuted,setAudioMuted]=useState(TL_Audio.isMuted());
+  const toggleMute=useCallback(()=>{
+    setAudioMuted(prev=>{const next=!prev;TL_Audio.setMute(next);if(!next)TL_Audio.sfxToggle();return next;});
+  },[]);
+
+  /* Initialize audio context on first user interaction */
+  useEffect(()=>{
+    const h=()=>{TL_Audio.ensureCtx();TL_Audio.resume();document.removeEventListener('click',h);document.removeEventListener('keydown',h);};
+    document.addEventListener('click',h);document.addEventListener('keydown',h);
+    return()=>{document.removeEventListener('click',h);document.removeEventListener('keydown',h);};
+  },[]);
+
+  /* ── §12.1  Play Mode / Console Mode ── */
+  const[playMode,setPlayMode]=useState(false);
+  const[sidebarOpen,setSidebarOpen]=useState(false);
+  const[logExpanded,setLogExpanded]=useState(false);
+  const appRef=useRef(null);
+  const[sceneH,setSceneH]=useState(220);
+
+  /* ── §12.05a  Orientation & mobile detection ── */
+  const[isPortrait,setIsPortrait]=useState(()=>window.innerWidth<window.innerHeight);
+  const[isMobile,setIsMobile]=useState(()=>window.innerWidth<740);
+  const[orientDismissed,setOrientDismissed]=useState(false);
+  useEffect(()=>{
+    const h=()=>{setIsPortrait(window.innerWidth<window.innerHeight);setIsMobile(window.innerWidth<740);};
+    window.addEventListener('resize',h);return()=>window.removeEventListener('resize',h);
+  },[]);
+  const showOrientHint=playMode&&isPortrait&&isMobile&&!orientDismissed;
+
+  const togglePlayMode=useCallback(()=>{
+    setPlayMode(prev=>{
+      const next=!prev;
+      TL_Audio.ensureCtx();TL_Audio.resume();
+      if(next)TL_Audio.stingerPlayMode();else TL_Audio.sfxClose();
+      try{
+        if(next){const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el);}
+        else if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
+      }catch(e){}
+      if(!next){setSidebarOpen(false);setLogExpanded(false);setOrientDismissed(false);}
+      return next;
+    });
+  },[]);
+
+  /* Detect fullscreen exit to update UI (play mode stays active as fallback) */
+  const[isFullscreen,setIsFullscreen]=useState(false);
+  useEffect(()=>{
+    const h=()=>setIsFullscreen(!!document.fullscreenElement||!!document.webkitFullscreenElement);
+    document.addEventListener('fullscreenchange',h);document.addEventListener('webkitfullscreenchange',h);
+    return()=>{document.removeEventListener('fullscreenchange',h);document.removeEventListener('webkitfullscreenchange',h);};
+  },[]);
+
+  /* Keyboard: F=toggle play mode, Esc=exit play mode */
+  useEffect(()=>{
+    const h=(e)=>{
+      if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+      if((e.key==='f'||e.key==='F')&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();togglePlayMode();}
+      if(e.key==='Escape'&&playMode&&!document.fullscreenElement){setPlayMode(false);setSidebarOpen(false);}
+    };
+    document.addEventListener('keydown',h);
+    return()=>document.removeEventListener('keydown',h);
+  },[playMode,togglePlayMode]);
+
+  /* Dynamic scene height in play mode — mobile-aware */
+  useEffect(()=>{
+    if(!playMode){setSceneH(220);return;}
+    const calc=()=>{
+      const vh=window.innerHeight;
+      const vw=window.innerWidth;
+      const isLand=vw>vh;
+      const isMob=vw<740||(isLand&&vh<500);
+      if(isMob&&isLand) setSceneH(cl(Math.round(vh*0.28),100,180));
+      else if(isMob) setSceneH(cl(Math.round(vh*0.25),120,220));
+      else setSceneH(cl(Math.round(vh*0.35),200,420));
+    };
+    calc();window.addEventListener('resize',calc);
+    return()=>window.removeEventListener('resize',calc);
+  },[playMode]);
+
+  /* Body overflow lock in play mode */
+  useEffect(()=>{
+    document.body.style.overflow=playMode?'hidden':'';
+    return()=>{document.body.style.overflow='';};
+  },[playMode]);
+
+  /* ── §12.2  Phase audio cues ── */
+  const prevPhaseRef=useRef(null);
+  useEffect(()=>{
+    const phase=phaseIdx(G.step);
+    if(prevPhaseRef.current===null){prevPhaseRef.current=phase;return;}
+    if(phase!==prevPhaseRef.current){
+      prevPhaseRef.current=phase;
+      /* Phase-specific ambient cue (only when not covered by impact frame) */
+      if(!G.impactFrame){
+        if(phase===0)TL_Audio.cueVillage();
+        else if(phase===5){
+          const isW=G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY';
+          TL_Audio.cueAftermath(isW);
+        }
+      }
+    }
+    /* Stat delta micro-SFX */
+    const d=G.statDeltas||{};
+    const hasUp=Object.values(d).some(v=>v>0);
+    const hasDown=Object.values(d).some(v=>v<0);
+    if(hasUp)TL_Audio.sfxStatUp();
+    if(hasDown)setTimeout(()=>TL_Audio.sfxStatDown(),hasUp?150:0);
+  },[G.step,G.statDeltas]);
+
+  /* ── §12.3  Keyboard navigation for command cards + continue ── */
+  const cmdAreaRef=useRef(null);
+  useEffect(()=>{
+    const h=(e)=>{
+      if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+      if(G.impactFrame)return; /* Impact frame has its own keyboard handler */
+      if(!cmdAreaRef.current)return;
+      const btns=[...cmdAreaRef.current.querySelectorAll('.tl-cmd,.tl-action')];
+      if(btns.length===0)return;
+      const focused=btns.findIndex(b=>b===document.activeElement);
+      const hasBtnFocus=focused>=0;
+
+      /* Arrow keys always work; WASD only when a command button is focused */
+      const isArrow=e.key.startsWith('Arrow');
+      if(e.key==='ArrowDown'||(hasBtnFocus&&(e.key==='s'||e.key==='S'))){
+        if(isArrow)e.preventDefault();
+        const next=focused<0?0:Math.min(focused+1,btns.length-1);
+        btns[next].focus();TL_Audio.sfxClick();
+      }else if(e.key==='ArrowUp'||(hasBtnFocus&&(e.key==='w'||e.key==='W'))){
+        if(isArrow)e.preventDefault();
+        const next=focused<0?0:Math.max(focused-1,0);
+        btns[next].focus();TL_Audio.sfxClick();
+      }else if(e.key==='ArrowRight'||(hasBtnFocus&&(e.key==='d'||e.key==='D'))){
+        if(isArrow)e.preventDefault();
+        const next=focused<0?0:Math.min(focused+1,btns.length-1);
+        btns[next].focus();TL_Audio.sfxClick();
+      }else if(e.key==='ArrowLeft'||(hasBtnFocus&&(e.key==='a'||e.key==='A'))){
+        if(isArrow)e.preventDefault();
+        const next=focused<0?0:Math.max(focused-1,0);
+        btns[next].focus();TL_Audio.sfxClick();
+      }else if((e.key==='Enter'||e.key===' ')&&hasBtnFocus){
+        e.preventDefault();btns[focused].click();
+      }else if((e.key==='Enter'||e.key===' ')&&!hasBtnFocus){
+        /* No button focused — trigger continue if available, or focus first command */
+        const contBtn=cmdAreaRef.current.querySelector('.tl-action');
+        if(contBtn){e.preventDefault();contBtn.click();}
+        else if(btns.length){e.preventDefault();btns[0].focus();TL_Audio.sfxClick();}
+      }else if(e.key==='m'||e.key==='M'){
+        if(!e.ctrlKey&&!e.metaKey&&!e.altKey)toggleMute();
+      }
+    };
+    document.addEventListener('keydown',h);
+    return()=>document.removeEventListener('keydown',h);
+  },[G.impactFrame,toggleMute]);
+
+  const phase=phaseIdx(G.step);
+  const hasCont=!!CONT[G.step];
+  const accent=PHASE_ACCENT[phase]||P.gold;
+  const phaseInfo=PHASES[phase]||PHASES[0];
+  const showBattle=G.rounds.length>0&&G.outcome&&phase>=3&&phase<5;
+  const showAftermath=phase===5;
+  const isFirstRaid=G.totalRaids===0;
+  const hint=isFirstRaid?HINTS[G.step]:null;
+
+  return(
+    <div ref={appRef} className={playMode?'tl-playmode':''} style={{fontFamily:font,fontSize:10,lineHeight:1.6,color:P.text,background:P.bg,minHeight:'100vh'}}>
+      <style>{INJCSS}</style>
+
+      <ImpactFrame frame={G.impactFrame} onDismiss={dismissImpact}/>
+      {showOrientHint&&<OrientationHint onDismiss={()=>setOrientDismissed(true)}/>}
+
+      <div className="tl-screen">
+
+        {/* ═══ TOP BAR ═══ */}
+        <div className="tl-topbar" style={{
+          display:'flex',alignItems:'center',justifyContent:'space-between',
+          padding:'5px 12px',background:P.panel,borderBottom:`2px solid ${P.gold}`,
+        }}>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <span style={{fontSize:12,color:P.gold,letterSpacing:2}}>⛵ TIDELINES</span>
+            <span style={{fontSize:6,color:P.dim,letterSpacing:.5}}>Cedar, Sea & Legacy</span>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            {G.totalRaids>0&&<span style={{fontSize:6,color:P.dim}}>Raid #{G.totalRaids+1}</span>}
+            {G.warTraits.length>0&&<span style={{fontSize:6,color:P.goldDim}}>{G.warTraits.length} trait{G.warTraits.length>1?'s':''}</span>}
+            <span onClick={toggleLegacy} style={{fontSize:7,color:P.goldDim,cursor:'pointer',userSelect:'none'}} title="Legacy Log">📜</span>
+            <span onClick={toggleDebug} style={{fontSize:6,color:P.dim+'80',cursor:'pointer',userSelect:'none'}} title="Debug">⚙</span>
+            <span className="tl-mute-btn" onClick={toggleMute} style={{color:audioMuted?P.dim:P.dimHi}} title={audioMuted?'Unmute (M)':'Mute (M)'}>{audioMuted?'🔇':'🔊'}</span>
+            {playMode&&<span className="tl-sidebar-toggle" onClick={()=>{setSidebarOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{fontSize:8,color:sidebarOpen?P.gold:P.dimHi,letterSpacing:1}} title="Toggle Crew Panel">☰</span>}
+            <span className="tl-play-btn" onClick={togglePlayMode} style={{fontSize:7,color:playMode?P.gold:P.dimHi}} title={playMode?'Exit Play Mode (F)':'Enter Play Mode (F)'}>{playMode?(isFullscreen?'⊠ EXIT':'⊠ EXIT'):'\u25a3 PLAY'}</span>
+          </div>
+        </div>
+
+        {/* ═══ MAIN STAGE ═══ */}
+        <div className="tl-stage" style={{display:'flex',flexDirection:'column',background:PHASE_BG[phase]||P.bg,minHeight:0}}>
+
+          {/* Phase header */}
+          <div style={{
+            display:'flex',alignItems:'center',justifyContent:'center',gap:8,
+            padding:'5px 12px',position:'relative',overflow:'hidden',
+            background:`linear-gradient(90deg,${accent}15,transparent 35%,transparent 65%,${accent}15)`,
+            borderBottom:`1px solid ${accent}30`,
+          }}>
+            <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:accent,transformOrigin:'left',animation:'tl-phase-sweep .6s ease-out',opacity:.4}}/>
+            <span style={{fontSize:12}}>{phaseInfo.icon}</span>
+            <div>
+              <div style={{fontSize:10,color:accent,letterSpacing:1.5}}>{phaseInfo.label.toUpperCase()}</div>
+              <div style={{fontSize:6,color:P.dim,letterSpacing:.3}}>{phaseInfo.tagline}</div>
+            </div>
+          </div>
+
+          <RouteStrip phase={phase}/>
+          <HudBar G={G} phase={phase} isFirstRaid={isFirstRaid}/>
+
+          <Scene type={G.scene} tall={true} G={G} phase={phase} sceneH={playMode?sceneH:220}/>
+
+          {showBattle&&<div className="tl-scroll" style={playMode?{maxHeight:180,overflowY:'auto'}:{}}><BattleBoard G={G}/></div>}
+          {showAftermath&&<div className="tl-scroll" style={playMode?{maxHeight:200,overflowY:'auto'}:{}}><AftermathSummary G={G}/></div>}
+
+          {/* Narrative log */}
+          <div className="tl-scroll" ref={logRef} style={{
+            flex:playMode&&!logExpanded?'0 0 auto':'1 1 80px',
+            minHeight:playMode&&!logExpanded?0:60,
+            maxHeight:playMode&&!logExpanded?50:140,
+            overflowY:'auto',
+            padding:playMode&&!logExpanded?'3px 12px':'6px 12px',
+            background:P.darkBg,borderTop:`1px solid ${P.border}`,
+            position:'relative',
+          }}>
+            {playMode&&!logExpanded
+              ? G.log.slice(-3).map((l,i,a)=><NarrEntry key={G.log.length-3+i} line={l} isLast={i===a.length-1}/>)
+              : G.log.map((l,i)=><NarrEntry key={i} line={l} isLast={i===G.log.length-1}/>)
+            }
+            {playMode&&G.log.length>3&&<div onClick={()=>setLogExpanded(v=>!v)} style={{
+              position:'absolute',top:1,right:6,fontSize:5,color:P.dim,cursor:'pointer',userSelect:'none',
+              background:P.darkBg,padding:'1px 4px',borderRadius:2,zIndex:2,
+            }}>{logExpanded?'▾ less':'▸ '+G.log.length+' lines'}</div>}
+          </div>
+        </div>
+
+        {/* ═══ SIDEBAR DRAWER BACKDROP (play mode) ═══ */}
+        {playMode&&sidebarOpen&&<div onClick={()=>setSidebarOpen(false)} style={{
+          position:'fixed',inset:0,background:'rgba(0,0,0,.35)',zIndex:190,backdropFilter:'blur(2px)',
+        }}/>}
+
+        {/* ═══ SIDEBAR ═══ */}
+        <div className={`tl-sidebar${playMode?' tl-sidebar-play':''}${playMode&&sidebarOpen?' tl-sidebar-open':''}`} style={{display:'flex',flexDirection:'column',background:P.panel,minHeight:0}}>
+          {playMode&&<>
+            <div className="tl-sheet-handle" style={{marginTop:6}}/>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 10px 6px',borderBottom:`1px solid ${P.gold}20`,background:P.panelHi}}>
+              <span style={{fontSize:7,color:P.gold,letterSpacing:.5}}>⚓ CREW PANEL</span>
+              <span onClick={()=>setSidebarOpen(false)} style={{fontSize:9,color:P.dim,cursor:'pointer',padding:'0 4px'}}>✕</span>
+            </div>
+          </>}
+
+          {G.step==='vil_intel'&&G.lastRun&&(
+            <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
+              <div style={{color:P.goldDim,fontSize:6,marginBottom:3,letterSpacing:.5}}>LAST EXPEDITION</div>
+              <div style={{fontSize:7}}>
+                {OUTCOME_LABEL[G.lastRun.outcome]?.icon} {OUTCOME_LABEL[G.lastRun.outcome]?.text}
+                {G.lastRun.killed>0&&<span style={{color:P.red}}> · ☠{G.lastRun.killed}</span>}
+                {G.lastRun.wounded>0&&<span style={{color:P.dim}}> · ⚔{G.lastRun.wounded}</span>}
+              </div>
+              <div style={{fontSize:6,color:P.dim,marginTop:2}}>{G.lastRun.prestige} prestige · {G.lastRun.feud}</div>
+              {G.lastRun.named_dead?.length>0&&<div style={{fontSize:6,color:P.red,marginTop:2}}>Fallen: {G.lastRun.named_dead.join(', ')}</div>}
+            </div>
+          )}
+
+          {/* Crew roster */}
+          <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
+            <div style={{fontSize:6,color:P.dim,letterSpacing:.5,marginBottom:5}}>⚔ WAR PARTY</div>
+            {G.namedCrew.map(c=>(
+              <div key={c.id} style={{display:'flex',alignItems:'center',gap:5,marginBottom:3,transition:'opacity .3s',opacity:!c.alive?.5:1}}>
+                <span style={{fontSize:8,width:10,textAlign:'center',color:!c.alive?P.red:c.wounded?P.dim:P.green}}>
+                  {!c.alive?'☠':c.wounded?'⚔':'●'}
+                </span>
+                <span style={{fontSize:7,color:!c.alive?P.redDim:P.text,textDecoration:!c.alive?'line-through':'none'}}>
+                  {c.name}
+                </span>
+                <span style={{fontSize:6,color:P.dim}}>{c.role}</span>
+              </div>
+            ))}
+            <div style={{fontSize:6,color:P.dim,marginTop:3}}>{G.crewAlive} of {G.crewSize} warriors ready</div>
+          </div>
+
+          {G.warTraits.length>0&&(
+            <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
+              <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>🏅 WAR TRAITS</div>
+              <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+                {G.warTraits.map(t=>(
+                  <span key={t} title={TRAIT_DESC[t]} style={{fontSize:6,padding:'2px 5px',background:P.panelHi,border:`1px solid ${P.goldDim}30`,borderRadius:3,color:P.gold,cursor:'help'}}>
+                    {t.replace(/_/g,' ')}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {phase>=2&&phase<=3&&(
+            <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
+              <div style={{fontSize:6,color:P.red,letterSpacing:.5,marginBottom:4}}>🏴 CEDAR CREEK</div>
+              <div style={{fontSize:7,color:P.dim}}>Warriors: ~{G.defender.crewSize}</div>
+              <div style={{fontSize:7,color:P.dim}}>Resolve: {G.defender.morale}</div>
+              {G.intimResult&&<div style={{fontSize:7,color:G.intimDelta>0?P.green:P.red}}>Intimidated: {G.intimResult}</div>}
+            </div>
+          )}
+
+          {G.showLegacy&&(
+            <div style={{flex:'1 1 0',overflowY:'auto',padding:'8px 10px'}} className="tl-scroll">
+              <div style={{fontSize:7,color:P.gold,letterSpacing:.5,marginBottom:6}}>📜 LEGACY LOG</div>
+              {G.legacyEntries.length===0
+                ?<span style={{color:P.dim,fontSize:7}}>No entries yet. Complete a raid to record history.</span>
+                :G.legacyEntries.map((e,i)=>(
+                  <div key={i} style={{marginBottom:8,paddingBottom:8,borderBottom:i<G.legacyEntries.length-1?`1px solid ${P.border}20`:'none'}}>
+                    <div style={{color:P.goldDim,fontSize:6,marginBottom:2}}>Expedition {i+1}</div>
+                    <div style={{fontSize:7,lineHeight:1.6,color:P.text}}>{e}</div>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+
+          {G.showDebug&&(
+            <div style={{flex:'1 1 0',overflowY:'auto',padding:'6px 8px',background:P.debugBg,fontSize:6,color:P.green,lineHeight:1.8}} className="tl-scroll">
+              <span style={{color:P.gold}}>Step:</span> {G.step} · Raid #{G.totalRaids+1}<br/>
+              <span style={{color:P.gold}}>Forces:</span> ATK mor {G.morale} · DEF mor {G.defender.morale} · Crew {G.crewAlive}/{G.crewSize}<br/>
+              <span style={{color:P.gold}}>Mods:</span> Intel {G.intelQuality} · Surp {G.surpriseBonus} · Stealth {G.stealthBonus} · Intim {G.intimidationBonus}<br/>
+              <span style={{color:P.gold}}>Intim:</span> {G.intimScore} vs {G.resolveScore} Δ{G.intimDelta} {G.intimResult||'—'}<br/>
+              <span style={{color:P.gold}}>Combat:</span> {G.attackerTactic} · {G.outcome||'—'} · ×{G.outcomeRatio.toFixed(2)}<br/>
+              {G.rounds.map((r,i)=><span key={i}>R{i+1}: {r.atk.toFixed(1)}/{r.def.toFixed(1)}{r.event?` ✦${r.event.id}`:''}<br/></span>)}
+              <span style={{color:P.gold}}>After:</span> K{G.crewKilled} W{G.crewWounded} Cargo {G.cargo} PΔ{G.prestigeChange} Feud {G.feudEscalation}<br/>
+              <span style={{color:P.gold}}>Persist:</span> {loadPersist()?'saved':'empty'} · Traits: {G.warTraits.join(',')||'—'}
+            </div>
+          )}
+
+          {!G.showDebug&&!G.showLegacy&&<div style={{flex:'1 1 0'}}/>}
+
+          <div style={{padding:'6px 10px',textAlign:'center',borderTop:`1px solid ${P.border}`,fontSize:5,color:P.dim+'50'}}>TIDELINES v1.1</div>
+        </div>
+
+        {/* ═══ COMMAND AREA ═══ */}
+        <div ref={cmdAreaRef} className="tl-cmdarea" style={{
+          padding:'6px 12px 8px',background:P.panel,
+          borderTop:`2px solid ${accent}`,
+        }}>
+
+          {/* ─ Village: Intel ─ */}
+          {G.step==='vil_intel'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'Your first decision as war chief. How will you learn about Cedar Creek?':'How will you gather intelligence?'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🔭" title="Send Scouts"
+                flavor="Eyes on the target. Your best warriors slip through the forest to count heads and canoes."
+                effect="ACCURATE intel · +5 Surprise · +3 Morale"
+                risk="15% detection — they may see your scouts"
+                archetype="The careful strategist"
+                onClick={()=>act(pickIntel,'scouts')}/>
+              <CommandCard icon="🗣" title="Ask Traders"
+                flavor="Coastal traders pass through every village. Their information is free — and possibly stale."
+                effect="VAGUE intel · possible alliance info"
+                archetype="The pragmatic opportunist"
+                onClick={()=>act(pickIntel,'traders')}/>
+              <CommandCard icon="🔮" title="Read the Omens"
+                flavor="Your spiritual advisor studies the fire, the tide, the flight of ravens."
+                effect="VAGUE intel · +5 Morale"
+                archetype="The spiritual leader"
+                onClick={()=>act(pickIntel,'omens')}/>
+            </div>
+          </>}
+
+          {/* ─ Village: Prep ─ */}
+          {G.step==='vil_prep'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'One final preparation before you push off. Each choice shapes a different advantage.':'Final preparations before departure:'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🎨" title="War Paint & Crests"
+                flavor="Eagle and Killer Whale on every shield. The enemy sees your lineage before your weapons."
+                effect="+10 Intimidation · +5 Morale"
+                archetype="Break their will before the fight"
+                onClick={()=>act(pickPrep,'war_paint')}/>
+              <CommandCard icon="🧺" title="Load Extra Supplies"
+                flavor="Dried fish, water, repair materials. The canoe sits deeper — ready for a long campaign."
+                effect="+10 Cargo Capacity · +10 Canoe Condition"
+                archetype="Prepared for anything"
+                onClick={()=>act(pickPrep,'extra_supplies')}/>
+              <CommandCard icon="🙏" title="Spiritual Blessing"
+                flavor="Cedar on the fire. The smoke rises. The spirits walk with you across the water."
+                effect="+8 Morale · +5 Surprise"
+                archetype="Favored by unseen forces"
+                onClick={()=>act(pickPrep,'blessing')}/>
+            </div>
+          </>}
+
+          {/* ─ Travel: Arrival ─ */}
+          {G.step==='trv_arrival'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'Cedar Creek lies ahead. When you arrive determines how much surprise you carry.':'When will you arrive at Cedar Creek?'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🌅" title="Dawn Arrival"
+                flavor="Paddle through the night. Strike as the first grey light touches the sky."
+                effect="+15 Surprise"
+                archetype="Reliable — the proven approach"
+                onClick={()=>act(pickArrival,'dawn')}/>
+              <CommandCard icon="🌙" title="Night Approach"
+                flavor="Total darkness. Phosphorescence the only light. Maximum stealth — maximum risk."
+                effect="+25 Surprise"
+                risk="20% canoe damage from unseen rocks"
+                archetype="High risk, highest reward"
+                onClick={()=>act(pickArrival,'night')}/>
+              <CommandCard icon="🌫" title="Morning Fog"
+                flavor="The fog is a gift from the sea. Your canoe slides through it like a spirit."
+                effect="+20 Surprise · +5 Stealth"
+                archetype="Patient and adaptable"
+                onClick={()=>act(pickArrival,'fog')}/>
+            </div>
+          </>}
+
+          {/* ─ Travel: Formation ─ */}
+          {G.step==='trv_form'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'How you approach sets the tone. Stealth preserves surprise; intimidation breaks will.':'How does your force approach?'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="🤫" title="Tight & Quiet"
+                flavor="One canoe, paddles in perfect unison. Not a sound until the gravel."
+                effect="+10 Stealth · −5 Intimidation"
+                archetype="Strike before they know you're there"
+                onClick={()=>act(pickFormation,'stealth')}/>
+              <CommandCard icon="⚔" title="Maximum Intimidation"
+                flavor="War crests visible across the water. Let them see what comes."
+                effect="+15 Intimidation · −10 Stealth"
+                archetype="Let fear do the work"
+                onClick={()=>act(pickFormation,'intimidating')}/>
+            </div>
+          </>}
+
+          {/* ─ Encounter: Tactic ─ */}
+          {G.step==='enc_tactic'&&<>
+            <div style={{fontSize:7,color:P.red,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'⚔ The moment of truth. Your tactic determines the shape of the battle.':'⚔ Issue your battle order:'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="⚔" title="Overwhelming Assault"
+                flavor="Everything forward. Maximum violence. End this quickly."
+                effect="ATK ×1.3 — strongest strike"
+                risk="Losses ×1.5 if the line breaks"
+                archetype="The fearless war chief"
+                onClick={()=>act(pickTactic,'overwhelming')}/>
+              <CommandCard icon="🛡" title="Measured Push"
+                flavor="Steady advance. Shield wall. Disciplined pressure."
+                effect="ATK ×1.1 · Losses ×1.0 — balanced"
+                archetype="The experienced commander"
+                onClick={()=>act(pickTactic,'measured')}/>
+              <CommandCard icon="👁" title="Feint & Probe"
+                flavor="Test the line. Find the weakness. Strike only where it matters."
+                effect="ATK ×0.8 · Losses ×0.6 — conservative"
+                archetype="The calculating strategist"
+                onClick={()=>act(pickTactic,'feint')}/>
+              <CommandCard icon="🕊" title="Negotiate Under Arms"
+                flavor='"We came for what is owed." Weapons visible. Words first.'
+                effect="ATK ×0.4 · Losses ×0.1 — minimal combat"
+                archetype="The diplomat with a sword"
+                onClick={()=>act(pickTactic,'negotiate')}/>
+            </div>
+          </>}
+
+          {/* ─ Withdrawal ─ */}
+          {G.step==='wth_choose'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              {isFirstRaid?'Victory — but the withdrawal matters. Greed invites counterattack.':'How will you withdraw?'}
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
+              <CommandCard icon="💨" title="Quick Load & Go"
+                flavor="Speed over greed. Load what you can and push off before they regroup."
+                effect="Keep 60% of spoils · Safest option"
+                archetype="Live to raid again"
+                onClick={()=>act(pickWithdrawal,'quick')}/>
+              <CommandCard icon="📦" title="Take Everything"
+                flavor="Strip the fish racks. Cedar bark. Dentalium. Every shell."
+                effect="All spoils"
+                risk="30% counterattack — they may charge"
+                archetype="Maximum gain, real danger"
+                onClick={()=>act(pickWithdrawal,'thorough')}/>
+              <CommandCard icon="🦅" title="Plant Your Crest"
+                flavor="Drive a carved Eagle post into their gravel. Your mark, facing their longhouse."
+                effect="80% spoils · +10 Prestige · +3 Feud"
+                archetype="Legacy over resources"
+                onClick={()=>act(pickWithdrawal,'mark')}/>
+            </div>
+          </>}
+
+          {/* ─ Aftermath ─ */}
+          {G.step==='aft_show'&&(
+            <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center',alignItems:'center'}}>
+              <ContinueBtn label="🔄  Launch Next Raid" onClick={onReset}/>
+              <button className="tl-action" style={{
+                display:'inline-block',background:P.panelHi,color:P.dim,border:`1px solid ${P.border}`,
+                borderRadius:4,padding:'10px 18px',fontFamily:font,fontSize:8,cursor:'pointer',
+              }} onClick={onFullReset}>✖  New Game</button>
+            </div>
+          )}
+
+          {/* ─ Continue ─ */}
+          {hasCont&&<div style={{textAlign:'center',marginTop:8}}>
+            <ContinueBtn onClick={onContinue} label={
+              G.step==='vil_done'?'⛵  Set Sail':
+              G.step==='trv_done'?'⚔  Make Contact':
+              G.step==='enc_done'||G.step==='enc_fled'?'🔥  Begin':
+              G.step==='res_done'?'🛶  Withdraw':
+              G.step==='wth_retreat'?'📜  Return Home':
+              '▸  Continue'
+            }/>
+          </div>}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ─── §13  MOUNT ──────────────────────────────────────────────────────── */
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(TidelinesApp));
+</script>
+</body>
+</html>

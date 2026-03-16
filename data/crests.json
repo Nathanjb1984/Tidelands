@@ -1,0 +1,286 @@
+{
+  "moieties": {
+    "RAVEN": {
+      "id": "RAVEN",
+      "name": "Raven",
+      "haida_name": "Yáahl",
+      "color_primary": "#1A1028",
+      "color_secondary": "#3C2848",
+      "color_accent": "#6E3858",
+      "description": "The Raven moiety — clever, adaptive, transformative. Raven brought light to the world and continues to find opportunity where others see only shadow.",
+      "gameplay_bonuses": {
+        "trickster_fortune": {
+          "description": "Small chance of turning negative events into opportunities",
+          "bad_event_reversal_chance": 0.08
+        },
+        "clever_diplomacy": {
+          "description": "Bonus to trade negotiations and diplomatic encounters",
+          "trade_bonus": 0.05,
+          "diplomacy_bonus": 0.05
+        },
+        "adaptive_navigation": {
+          "description": "Better fog and adverse-condition navigation",
+          "fog_bonus": 0.15,
+          "adverse_navigation_bonus": 0.10
+        }
+      },
+      "available_crests": ["raven", "frog", "beaver", "bear_raven", "grizzly", "moon", "mountain_goat"],
+      "omen_type": "REVERSAL",
+      "omen_description": "Raven omens reveal hidden opportunities and sudden reversals of fortune."
+    },
+    "EAGLE": {
+      "id": "EAGLE",
+      "name": "Eagle",
+      "haida_name": "Ts'áak",
+      "color_primary": "#F0E8D8",
+      "color_secondary": "#D8C8A0",
+      "color_accent": "#C8A868",
+      "description": "The Eagle moiety — keen-sighted, commanding, powerful. Eagle sees from the highest point and leads with clarity and authority.",
+      "gameplay_bonuses": {
+        "keen_sight": {
+          "description": "Better scouting range and early warning detection",
+          "scouting_bonus": 0.15,
+          "early_warning_bonus": 0.10
+        },
+        "commanding_presence": {
+          "description": "Bonus to intimidation and potlatch prestige displays",
+          "intimidation_bonus": 0.10,
+          "potlatch_presence_bonus": 0.05
+        },
+        "wind_favor": {
+          "description": "Sailing speed bonus in favorable conditions",
+          "favorable_speed_bonus": 0.10
+        }
+      },
+      "available_crests": ["eagle", "killer_whale", "wolf", "shark", "thunderbird", "halibut", "hummingbird"],
+      "omen_type": "CLARITY",
+      "omen_description": "Eagle omens reveal clear paths, leadership insight, and strategic advantage."
+    }
+  },
+
+  "crests": [
+    {
+      "id": "eagle",
+      "name": "Eagle",
+      "moiety": "EAGLE",
+      "description": "Sight, leadership, wind mastery. The eagle sees what others cannot.",
+      "pole_figure_sprite": "pole_eagle",
+      "pole_position_preference": "TOP",
+      "pole_width_extension": true,
+      "symbolic_meanings": ["leadership", "vision", "sky_power", "wind"],
+      "gameplay_associations": {
+        "scouting_bonus": 0.1,
+        "navigation_clarity": 0.1
+      },
+      "animation_type": "wings_spread"
+    },
+    {
+      "id": "raven",
+      "name": "Raven",
+      "moiety": "RAVEN",
+      "description": "Transformation, trickery, creation. Raven brought light and never stops finding the angle.",
+      "pole_figure_sprite": "pole_raven",
+      "pole_position_preference": "TOP",
+      "pole_width_extension": false,
+      "symbolic_meanings": ["creation", "transformation", "cleverness", "light"],
+      "gameplay_associations": {
+        "luck_bonus": 0.05,
+        "event_reversal_chance": 0.05
+      },
+      "animation_type": "beak_prominent"
+    },
+    {
+      "id": "killer_whale",
+      "name": "Killer Whale",
+      "moiety": "EAGLE",
+      "description": "Ocean mastery, protection, power. The supreme being of the sea.",
+      "pole_figure_sprite": "pole_orca",
+      "pole_position_preference": "MIDDLE",
+      "pole_width_extension": true,
+      "symbolic_meanings": ["ocean_power", "protection", "family", "strength"],
+      "gameplay_associations": {
+        "sea_protection": 0.15,
+        "intimidation_bonus": 0.1
+      },
+      "animation_type": "dorsal_fin"
+    },
+    {
+      "id": "bear",
+      "name": "Bear",
+      "moiety": "RAVEN",
+      "description": "Strength, endurance, guardianship. The bear protects and provides.",
+      "pole_figure_sprite": "pole_bear",
+      "pole_position_preference": "MIDDLE",
+      "pole_width_extension": false,
+      "symbolic_meanings": ["strength", "protection", "motherhood", "endurance"],
+      "gameplay_associations": {
+        "defense_bonus": 0.1,
+        "gathering_bonus": 0.05
+      },
+      "animation_type": "seated_paws"
+    },
+    {
+      "id": "frog",
+      "name": "Frog",
+      "moiety": "RAVEN",
+      "description": "Transition, voice, abundance. Frog marks the threshold between worlds.",
+      "pole_figure_sprite": "pole_frog",
+      "pole_position_preference": "BOTTOM",
+      "pole_width_extension": false,
+      "symbolic_meanings": ["transition", "abundance", "communication", "rain"],
+      "gameplay_associations": {
+        "food_bonus": 0.05,
+        "diplomacy_bonus": 0.05
+      },
+      "animation_type": "crouching"
+    },
+    {
+      "id": "wolf",
+      "name": "Wolf",
+      "moiety": "EAGLE",
+      "description": "Loyalty, family, teamwork. The wolf hunts as one and guards its own.",
+      "pole_figure_sprite": "pole_wolf",
+      "pole_position_preference": "MIDDLE",
+      "pole_width_extension": false,
+      "symbolic_meanings": ["loyalty", "family", "hunting", "teamwork"],
+      "gameplay_associations": {
+        "crew_morale_bonus": 0.05,
+        "alliance_strength": 0.05
+      },
+      "animation_type": "alert_ears"
+    },
+    {
+      "id": "thunderbird",
+      "name": "Thunderbird",
+      "moiety": "EAGLE",
+      "description": "Supreme sky power. Thunderbird commands storms and inspires awe.",
+      "pole_figure_sprite": "pole_thunderbird",
+      "pole_position_preference": "TOP",
+      "pole_width_extension": true,
+      "symbolic_meanings": ["supreme_power", "storms", "awe", "authority"],
+      "gameplay_associations": {
+        "prestige_bonus": 0.15,
+        "intimidation_bonus": 0.1
+      },
+      "animation_type": "grand_wings",
+      "unlock_condition": "era >= 2 AND prestige >= 300"
+    },
+    {
+      "id": "shark",
+      "name": "Shark",
+      "moiety": "EAGLE",
+      "description": "Persistence, ferocity, deep knowledge. Shark knows the ocean's depths.",
+      "pole_figure_sprite": "pole_shark",
+      "pole_position_preference": "MIDDLE",
+      "pole_width_extension": false,
+      "symbolic_meanings": ["persistence", "ocean_knowledge", "ferocity", "depth"],
+      "gameplay_associations": {
+        "fishing_bonus": 0.1,
+        "conflict_bonus": 0.05
+      },
+      "animation_type": "forehead_crest"
+    },
+    {
+      "id": "beaver",
+      "name": "Beaver",
+      "moiety": "RAVEN",
+      "description": "Industry, resourcefulness, building. Beaver shapes the world through steady work.",
+      "pole_figure_sprite": "pole_beaver",
+      "pole_position_preference": "BOTTOM",
+      "pole_width_extension": false,
+      "symbolic_meanings": ["industry", "building", "resourcefulness", "patience"],
+      "gameplay_associations": {
+        "construction_speed": 0.1,
+        "resource_gathering": 0.05
+      },
+      "animation_type": "flat_tail"
+    },
+    {
+      "id": "human_figure",
+      "name": "Ancestor Figure",
+      "moiety": "BOTH",
+      "description": "A human figure representing a chief, ancestor, or important person. Used to personalize memorial and history poles.",
+      "pole_figure_sprite": "pole_human",
+      "pole_position_preference": "ANY",
+      "pole_width_extension": false,
+      "symbolic_meanings": ["lineage", "memory", "authority", "personhood"],
+      "gameplay_associations": {
+        "lineage_prestige": 0.05
+      },
+      "animation_type": "seated_or_standing"
+    }
+  ],
+
+  "pole_types": [
+    {
+      "id": "house_frontal",
+      "name": "House Frontal Pole",
+      "description": "Stands before the chief's longhouse, displaying lineage crests and family identity.",
+      "max_figures": 4,
+      "required_figures": ["human_figure"],
+      "prestige_base": 30,
+      "construction_turns": 8,
+      "cedar_logs_required": 1,
+      "unlock_condition": "era >= 1 AND carving_shed_level >= 1",
+      "ceremony_type": "pole_raising_potlatch",
+      "visual_height": "MEDIUM"
+    },
+    {
+      "id": "memorial",
+      "name": "Memorial Pole",
+      "description": "Honors a deceased chief or important person with their life achievements in crest form.",
+      "max_figures": 5,
+      "required_figures": ["human_figure"],
+      "prestige_base": 40,
+      "construction_turns": 10,
+      "cedar_logs_required": 1,
+      "unlock_condition": "chief_has_died",
+      "ceremony_type": "memorial_potlatch",
+      "visual_height": "TALL",
+      "special_effect": "succession_legitimacy_bonus"
+    },
+    {
+      "id": "history",
+      "name": "History Pole",
+      "description": "Commemorates a major event — battle, voyage, alliance — with narrative crest imagery.",
+      "max_figures": 6,
+      "required_figures": [],
+      "prestige_base": 50,
+      "construction_turns": 12,
+      "cedar_logs_required": 2,
+      "unlock_condition": "era >= 2 AND has_major_achievement",
+      "ceremony_type": "pole_raising_potlatch",
+      "visual_height": "TALL",
+      "special_effect": "permanent_prestige_aura"
+    },
+    {
+      "id": "shame",
+      "name": "Shame Pole",
+      "description": "Erected to publicly shame a rival who failed to honor obligations. A devastating political act.",
+      "max_figures": 3,
+      "required_figures": ["human_figure"],
+      "prestige_base": 20,
+      "construction_turns": 4,
+      "cedar_logs_required": 1,
+      "unlock_condition": "has_unresolved_slight AND era >= 2",
+      "ceremony_type": "none",
+      "visual_height": "SHORT",
+      "special_effect": "target_prestige_damage",
+      "risk": "diplomatic_backlash"
+    },
+    {
+      "id": "welcome",
+      "name": "Welcome Pole",
+      "description": "Stands at the beach landing, identifying the village and chief to approaching visitors.",
+      "max_figures": 3,
+      "required_figures": [],
+      "prestige_base": 15,
+      "construction_turns": 6,
+      "cedar_logs_required": 1,
+      "unlock_condition": "era >= 1",
+      "ceremony_type": "feast_potlatch",
+      "visual_height": "MEDIUM",
+      "special_effect": "diplomacy_first_impression_bonus"
+    }
+  ]
+}

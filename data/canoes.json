@@ -1,0 +1,268 @@
+{
+  "canoe_types": [
+    {
+      "id": "fishing_canoe",
+      "name": "Fishing Canoe",
+      "description": "A nimble, shallow-draft canoe built for daily harvest runs to nearby fishing grounds. Quick to build, quick to launch.",
+      "class": "SMALL",
+      "crew_min": 2,
+      "crew_max": 4,
+      "cargo_capacity": 40,
+      "base_speed": 6,
+      "seaworthiness": 5,
+      "maneuverability": 9,
+      "intimidation": 0,
+      "prestige_value": 2,
+      "construction": {
+        "cedar_logs": 1,
+        "labor_turns": 4,
+        "skill_required": "BASIC",
+        "specialist_required": false
+      },
+      "sprite": {
+        "atlas": "atlas_canoes",
+        "width": 32,
+        "height": 12,
+        "paddle_frames": 6,
+        "idle_frames": 2
+      },
+      "upgrades_available": [
+        "reinforced_hull",
+        "fish_hold"
+      ],
+      "notes": "The workhorse. Every village needs several. Cannot undertake open-water crossings safely."
+    },
+    {
+      "id": "travel_canoe",
+      "name": "Travel Canoe",
+      "description": "The backbone of coastal travel. Balanced for speed, cargo, and ocean safety. Suitable for multi-day voyages along protected channels.",
+      "class": "MEDIUM",
+      "crew_min": 6,
+      "crew_max": 10,
+      "cargo_capacity": 80,
+      "base_speed": 8,
+      "seaworthiness": 7,
+      "maneuverability": 7,
+      "intimidation": 1,
+      "prestige_value": 8,
+      "construction": {
+        "cedar_logs": 2,
+        "labor_turns": 8,
+        "skill_required": "SKILLED",
+        "specialist_required": false
+      },
+      "sprite": {
+        "atlas": "atlas_canoes",
+        "width": 48,
+        "height": 16,
+        "paddle_frames": 8,
+        "idle_frames": 2
+      },
+      "upgrades_available": [
+        "reinforced_hull",
+        "streamlined_prow",
+        "crest_prow",
+        "extended_gunwales",
+        "blessed_hull"
+      ],
+      "notes": "The first canoe type in the MVP. Can handle moderate open water with experienced crew."
+    },
+    {
+      "id": "trade_canoe",
+      "name": "Trade Canoe",
+      "description": "Wide-beamed and deep-hulled, built to carry maximum cargo across long trade routes. Slower but immensely practical.",
+      "class": "LARGE",
+      "crew_min": 8,
+      "crew_max": 14,
+      "cargo_capacity": 200,
+      "base_speed": 5,
+      "seaworthiness": 8,
+      "maneuverability": 4,
+      "intimidation": 1,
+      "prestige_value": 12,
+      "construction": {
+        "cedar_logs": 3,
+        "labor_turns": 12,
+        "skill_required": "SKILLED",
+        "specialist_required": true
+      },
+      "sprite": {
+        "atlas": "atlas_canoes",
+        "width": 56,
+        "height": 18,
+        "paddle_frames": 8,
+        "idle_frames": 2
+      },
+      "upgrades_available": [
+        "reinforced_hull",
+        "extended_gunwales",
+        "crest_prow",
+        "blessed_hull",
+        "trade_banner"
+      ],
+      "notes": "Essential for large-scale trade and potlatch accumulation. Vulnerable to raiders due to slow speed."
+    },
+    {
+      "id": "war_canoe",
+      "name": "War Canoe",
+      "description": "Long, fast, and terrifying. Built for speed and crew capacity, with an intimidating carved prow. The sight of one on the horizon changes everything.",
+      "class": "LARGE",
+      "crew_min": 12,
+      "crew_max": 20,
+      "cargo_capacity": 30,
+      "base_speed": 9,
+      "seaworthiness": 8,
+      "maneuverability": 6,
+      "intimidation": 8,
+      "prestige_value": 20,
+      "construction": {
+        "cedar_logs": 3,
+        "labor_turns": 16,
+        "skill_required": "MASTER",
+        "specialist_required": true
+      },
+      "sprite": {
+        "atlas": "atlas_canoes",
+        "width": 64,
+        "height": 20,
+        "paddle_frames": 8,
+        "idle_frames": 3
+      },
+      "upgrades_available": [
+        "reinforced_hull",
+        "streamlined_prow",
+        "crest_prow",
+        "war_shields",
+        "blessed_hull",
+        "intimidation_paint"
+      ],
+      "notes": "Unlocked in Era 2. The premier military vessel. Doubles as a prestige display even in peacetime."
+    },
+    {
+      "id": "prestige_canoe",
+      "name": "Prestige Canoe",
+      "description": "The greatest canoe a village can build. Magnificently carved from prow to stern, painted in full formline design. Arriving in this canoe announces your village's power before a word is spoken.",
+      "class": "GRAND",
+      "crew_min": 16,
+      "crew_max": 24,
+      "cargo_capacity": 100,
+      "base_speed": 7,
+      "seaworthiness": 9,
+      "maneuverability": 5,
+      "intimidation": 6,
+      "prestige_value": 40,
+      "construction": {
+        "cedar_logs": 4,
+        "cedar_bark": 10,
+        "carved_objects": 4,
+        "labor_turns": 24,
+        "skill_required": "MASTER",
+        "specialist_required": true,
+        "requires_blessing": true
+      },
+      "sprite": {
+        "atlas": "atlas_canoes",
+        "width": 72,
+        "height": 24,
+        "paddle_frames": 8,
+        "idle_frames": 4
+      },
+      "upgrades_available": [
+        "reinforced_hull",
+        "crest_prow",
+        "crest_stern",
+        "blessed_hull",
+        "full_formline_paint",
+        "ceremonial_canopy"
+      ],
+      "notes": "Unlocked in Era 3. Building one is a prestige act in itself. Arriving at a potlatch in a prestige canoe adds a significant bonus."
+    }
+  ],
+
+  "canoe_upgrades": [
+    {
+      "id": "reinforced_hull",
+      "name": "Reinforced Hull",
+      "description": "Additional cedar planking and waterproofing strengthens the hull against heavy seas.",
+      "effects": { "seaworthiness": 2 },
+      "cost": { "cedar_logs": 1, "labor_turns": 2 }
+    },
+    {
+      "id": "streamlined_prow",
+      "name": "Streamlined Prow",
+      "description": "A carefully shaped prow cuts through water more efficiently.",
+      "effects": { "speed": 1, "maneuverability": 1 },
+      "cost": { "labor_turns": 3, "skill_required": "SKILLED" }
+    },
+    {
+      "id": "crest_prow",
+      "name": "Crest Prow Carving",
+      "description": "A carved crest figure adorns the prow, declaring identity and lineage to all who see it.",
+      "effects": { "prestige_value": 5, "intimidation": 2 },
+      "cost": { "labor_turns": 4, "skill_required": "MASTER" }
+    },
+    {
+      "id": "extended_gunwales",
+      "name": "Extended Gunwales",
+      "description": "Raised sides increase cargo capacity and wave protection.",
+      "effects": { "cargo_capacity": 40, "seaworthiness": 1 },
+      "cost": { "cedar_logs": 1, "labor_turns": 3 }
+    },
+    {
+      "id": "blessed_hull",
+      "name": "Blessed Hull",
+      "description": "Ceremonial blessing applied to the hull. Provides spiritual protection on voyages.",
+      "effects": { "spiritual_protection": 1, "crew_morale_bonus": 5 },
+      "cost": { "labor_turns": 1, "requires_ceremonial_specialist": true }
+    },
+    {
+      "id": "war_shields",
+      "name": "War Shields",
+      "description": "Painted shields mounted along the gunwales. Protection and intimidation.",
+      "effects": { "intimidation": 3, "crew_defense": 1 },
+      "cost": { "labor_turns": 2, "carved_objects": 2 }
+    },
+    {
+      "id": "intimidation_paint",
+      "name": "Intimidation War Paint",
+      "description": "Bold formline painting on the hull and prow in fierce designs.",
+      "effects": { "intimidation": 2, "prestige_value": 3 },
+      "cost": { "labor_turns": 2, "skill_required": "SKILLED" }
+    },
+    {
+      "id": "fish_hold",
+      "name": "Fish Hold",
+      "description": "Specially lined cargo area keeps fish fresh longer during harvest runs.",
+      "effects": { "fishing_efficiency": 1.25 },
+      "cost": { "cedar_bark": 5, "labor_turns": 2 }
+    },
+    {
+      "id": "trade_banner",
+      "name": "Trade Banner",
+      "description": "A distinctive banner identifying the canoe as a trade vessel. Reduces hostile encounters.",
+      "effects": { "trade_bonus": 1.1, "hostile_encounter_reduction": 0.2 },
+      "cost": { "woven_blankets": 2, "labor_turns": 1 }
+    },
+    {
+      "id": "full_formline_paint",
+      "name": "Full Formline Painting",
+      "description": "The entire hull painted in masterwork formline design. A floating work of art.",
+      "effects": { "prestige_value": 15, "intimidation": 2 },
+      "cost": { "labor_turns": 6, "skill_required": "MASTER" }
+    },
+    {
+      "id": "crest_stern",
+      "name": "Crest Stern Carving",
+      "description": "A matching carved figure at the stern. Combined with crest prow, creates a complete vessel.",
+      "effects": { "prestige_value": 5 },
+      "cost": { "labor_turns": 4, "skill_required": "MASTER" }
+    },
+    {
+      "id": "ceremonial_canopy",
+      "name": "Ceremonial Canopy",
+      "description": "A decorated canopy for the chief's position. Used during ceremonial arrivals.",
+      "effects": { "prestige_value": 8, "potlatch_arrival_bonus": 1.15 },
+      "cost": { "cedar_bark": 8, "woven_blankets": 4, "labor_turns": 3 }
+    }
+  ]
+}

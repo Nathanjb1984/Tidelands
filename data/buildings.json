@@ -1,0 +1,329 @@
+{
+  "buildings": [
+    {
+      "id": "chief_longhouse",
+      "name": "Chief's Longhouse",
+      "description": "The great house of the chief and their immediate family. Center of village authority, ceremony hosting, and feasting. The largest and most impressive structure.",
+      "category": "CORE",
+      "max_level": 3,
+      "levels": [
+        {
+          "level": 1,
+          "name": "Longhouse",
+          "population_capacity": 20,
+          "prestige_bonus": 5,
+          "feast_capacity": 30,
+          "cost": { "cedar_logs": 4, "labor_turns": 8 },
+          "sprite_variant": "longhouse_basic"
+        },
+        {
+          "level": 2,
+          "name": "Great Longhouse",
+          "population_capacity": 35,
+          "prestige_bonus": 12,
+          "feast_capacity": 60,
+          "upgrade_cost": { "cedar_logs": 3, "carved_objects": 2, "labor_turns": 6 },
+          "sprite_variant": "longhouse_great",
+          "visual_notes": "Painted front facade, larger doorway, smoke from multiple fires"
+        },
+        {
+          "level": 3,
+          "name": "Grand Longhouse",
+          "population_capacity": 50,
+          "prestige_bonus": 25,
+          "feast_capacity": 100,
+          "upgrade_cost": { "cedar_logs": 4, "carved_objects": 6, "woven_blankets": 4, "labor_turns": 10 },
+          "sprite_variant": "longhouse_grand",
+          "visual_notes": "Full formline painted front, interior house posts visible through doorway, imposing scale"
+        }
+      ],
+      "placement": "CENTER",
+      "unlocked_era": 1,
+      "notes": "Always present. Starting building. Upgrades are major prestige acts."
+    },
+    {
+      "id": "secondary_longhouse",
+      "name": "Longhouse",
+      "description": "A family longhouse sheltering an extended family group. Each house has its own fire, storage, and family identity.",
+      "category": "HOUSING",
+      "max_level": 2,
+      "levels": [
+        {
+          "level": 1,
+          "population_capacity": 15,
+          "prestige_bonus": 2,
+          "cost": { "cedar_logs": 3, "labor_turns": 6 },
+          "sprite_variant": "house_basic"
+        },
+        {
+          "level": 2,
+          "population_capacity": 25,
+          "prestige_bonus": 5,
+          "upgrade_cost": { "cedar_logs": 2, "labor_turns": 4 },
+          "sprite_variant": "house_improved"
+        }
+      ],
+      "max_count": 8,
+      "placement": "ROW",
+      "unlocked_era": 1,
+      "notes": "Multiple can be built. Each houses a family. Village grows by adding more houses."
+    },
+    {
+      "id": "canoe_house",
+      "name": "Canoe House",
+      "description": "A large open-sided shelter for canoe construction and storage. The beating heart of the village's maritime capability.",
+      "category": "PRODUCTION",
+      "max_level": 3,
+      "levels": [
+        {
+          "level": 1,
+          "canoe_construction_slots": 1,
+          "canoe_storage": 3,
+          "construction_speed_bonus": 1.0,
+          "cost": { "cedar_logs": 3, "labor_turns": 6 },
+          "sprite_variant": "canoe_house_basic"
+        },
+        {
+          "level": 2,
+          "canoe_construction_slots": 2,
+          "canoe_storage": 5,
+          "construction_speed_bonus": 1.15,
+          "upgrade_cost": { "cedar_logs": 2, "labor_turns": 4 },
+          "sprite_variant": "canoe_house_large"
+        },
+        {
+          "level": 3,
+          "canoe_construction_slots": 2,
+          "canoe_storage": 8,
+          "construction_speed_bonus": 1.30,
+          "upgrade_cost": { "cedar_logs": 3, "carved_objects": 2, "labor_turns": 6 },
+          "sprite_variant": "canoe_house_master",
+          "visual_notes": "Master-quality tools visible, decorated entrance, active work scenes"
+        }
+      ],
+      "placement": "BEACH",
+      "unlocked_era": 1,
+      "notes": "Essential. Without this, canoe construction is slower and exposed to weather."
+    },
+    {
+      "id": "smoke_house",
+      "name": "Smoke House",
+      "description": "Where fish and meat are preserved through smoking. Critical for winter survival and potlatch food stores.",
+      "category": "PRODUCTION",
+      "max_level": 3,
+      "levels": [
+        {
+          "level": 1,
+          "preservation_rate": 20,
+          "storage_capacity": 200,
+          "cost": { "cedar_logs": 2, "labor_turns": 4 },
+          "sprite_variant": "smokehouse_basic",
+          "visual_notes": "Constant smoke emission, hanging fish visible"
+        },
+        {
+          "level": 2,
+          "preservation_rate": 35,
+          "storage_capacity": 400,
+          "upgrade_cost": { "cedar_logs": 2, "labor_turns": 3 },
+          "sprite_variant": "smokehouse_large"
+        },
+        {
+          "level": 3,
+          "preservation_rate": 50,
+          "storage_capacity": 600,
+          "upgrade_cost": { "cedar_logs": 2, "labor_turns": 4 },
+          "sprite_variant": "smokehouse_grand"
+        }
+      ],
+      "max_count": 2,
+      "placement": "VILLAGE",
+      "unlocked_era": 1,
+      "notes": "Food preservation bottleneck. Under-investing here leads to winter famine."
+    },
+    {
+      "id": "carving_shed",
+      "name": "Carving Shed",
+      "description": "Where master carvers create poles, masks, boxes, and ceremonial objects. The artistic heart of the village.",
+      "category": "PRODUCTION",
+      "max_level": 3,
+      "levels": [
+        {
+          "level": 1,
+          "carving_slots": 1,
+          "carving_speed_bonus": 1.0,
+          "quality_bonus": 0,
+          "cost": { "cedar_logs": 2, "labor_turns": 4 },
+          "sprite_variant": "carving_shed_basic"
+        },
+        {
+          "level": 2,
+          "carving_slots": 2,
+          "carving_speed_bonus": 1.15,
+          "quality_bonus": 5,
+          "upgrade_cost": { "cedar_logs": 2, "carved_objects": 1, "labor_turns": 4 },
+          "sprite_variant": "carving_shed_improved",
+          "visual_notes": "Better tools, more space, work-in-progress pole visible"
+        },
+        {
+          "level": 3,
+          "carving_slots": 2,
+          "carving_speed_bonus": 1.30,
+          "quality_bonus": 15,
+          "upgrade_cost": { "cedar_logs": 3, "carved_objects": 3, "labor_turns": 6 },
+          "sprite_variant": "carving_shed_master",
+          "visual_notes": "Master workshop. Display of completed works. Apprentices visible."
+        }
+      ],
+      "placement": "VILLAGE",
+      "unlocked_era": 1,
+      "notes": "Required for pole creation and high-quality carved goods. Master carver NPC works here."
+    },
+    {
+      "id": "weaving_house",
+      "name": "Weaving House",
+      "description": "Where cedar bark is processed into rope, mats, and blankets. A steady source of trade goods and ceremonial items.",
+      "category": "PRODUCTION",
+      "max_level": 2,
+      "levels": [
+        {
+          "level": 1,
+          "production_rate": 2,
+          "cost": { "cedar_logs": 1, "cedar_bark": 5, "labor_turns": 3 },
+          "sprite_variant": "weaving_house_basic"
+        },
+        {
+          "level": 2,
+          "production_rate": 4,
+          "upgrade_cost": { "cedar_logs": 1, "labor_turns": 3 },
+          "sprite_variant": "weaving_house_improved"
+        }
+      ],
+      "placement": "VILLAGE",
+      "unlocked_era": 1,
+      "notes": "Produces woven_blankets each season. Important for trade goods and potlatch gifts."
+    },
+    {
+      "id": "food_cache",
+      "name": "Food Cache",
+      "description": "Raised storage platform keeping preserved food safe from animals and moisture. A full cache means a secure village.",
+      "category": "STORAGE",
+      "max_level": 3,
+      "levels": [
+        {
+          "level": 1,
+          "storage_capacity": 300,
+          "spoilage_reduction": 0.05,
+          "cost": { "cedar_logs": 2, "labor_turns": 3 },
+          "sprite_variant": "cache_basic"
+        },
+        {
+          "level": 2,
+          "storage_capacity": 600,
+          "spoilage_reduction": 0.10,
+          "upgrade_cost": { "cedar_logs": 2, "labor_turns": 3 },
+          "sprite_variant": "cache_large"
+        },
+        {
+          "level": 3,
+          "storage_capacity": 1000,
+          "spoilage_reduction": 0.15,
+          "upgrade_cost": { "cedar_logs": 3, "labor_turns": 4 },
+          "sprite_variant": "cache_grand"
+        }
+      ],
+      "max_count": 3,
+      "placement": "VILLAGE",
+      "unlocked_era": 1,
+      "events": ["food_cache_fire"],
+      "notes": "Can be raided. Fire risk event. Essential for potlatch accumulation."
+    },
+    {
+      "id": "watchtower",
+      "name": "Watchtower",
+      "description": "A raised lookout post at the beach edge, providing early warning of approaching canoes.",
+      "category": "DEFENSE",
+      "max_level": 2,
+      "levels": [
+        {
+          "level": 1,
+          "warning_range": 2,
+          "defense_bonus": 5,
+          "cost": { "cedar_logs": 2, "labor_turns": 3 },
+          "sprite_variant": "watchtower_basic"
+        },
+        {
+          "level": 2,
+          "warning_range": 4,
+          "defense_bonus": 10,
+          "upgrade_cost": { "cedar_logs": 1, "labor_turns": 3 },
+          "sprite_variant": "watchtower_improved"
+        }
+      ],
+      "placement": "BEACH",
+      "unlocked_era": 1,
+      "requires_assigned_worker": true,
+      "notes": "Requires a lookout assigned. Without it, raids can catch the village by surprise."
+    },
+    {
+      "id": "beach_fortification",
+      "name": "Beach Fortification",
+      "description": "Log barriers and sharpened stakes along the beach landing, slowing any hostile landing attempt.",
+      "category": "DEFENSE",
+      "max_level": 2,
+      "levels": [
+        {
+          "level": 1,
+          "defense_bonus": 10,
+          "landing_delay": 1,
+          "cost": { "cedar_logs": 3, "labor_turns": 4 },
+          "sprite_variant": "fortification_basic"
+        },
+        {
+          "level": 2,
+          "defense_bonus": 20,
+          "landing_delay": 2,
+          "upgrade_cost": { "cedar_logs": 2, "labor_turns": 4 },
+          "sprite_variant": "fortification_strong"
+        }
+      ],
+      "placement": "BEACH",
+      "unlocked_era": 2,
+      "notes": "Passive defense. Does not require assigned workers. Visible on beach."
+    },
+    {
+      "id": "ceremonial_ground",
+      "name": "Ceremonial Ground",
+      "description": "The open area before the chief's house where potlatches, pole-raisings, and ceremonies take place. The stage of village identity.",
+      "category": "CEREMONY",
+      "max_level": 3,
+      "levels": [
+        {
+          "level": 1,
+          "ceremony_capacity": 40,
+          "prestige_bonus": 3,
+          "cost": { "labor_turns": 4 },
+          "sprite_variant": "ceremony_ground_basic"
+        },
+        {
+          "level": 2,
+          "ceremony_capacity": 80,
+          "prestige_bonus": 8,
+          "upgrade_cost": { "cedar_logs": 2, "carved_objects": 2, "labor_turns": 4 },
+          "sprite_variant": "ceremony_ground_improved",
+          "visual_notes": "Cleared, leveled, fire pit installed, seating areas"
+        },
+        {
+          "level": 3,
+          "ceremony_capacity": 150,
+          "prestige_bonus": 18,
+          "upgrade_cost": { "cedar_logs": 3, "carved_objects": 4, "woven_blankets": 4, "labor_turns": 6 },
+          "sprite_variant": "ceremony_ground_grand",
+          "visual_notes": "Decorated, permanent fire pit, carved welcome posts, impressive staging area"
+        }
+      ],
+      "placement": "CENTER_FRONT",
+      "unlocked_era": 1,
+      "notes": "Required for potlatch and pole-raising. Level affects ceremony prestige multiplier. Poles stand here."
+    }
+  ]
+}

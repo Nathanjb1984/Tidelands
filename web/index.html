@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIDELINES — Cedar, Sea &amp; Legacy</title>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   TIDELINES Vertical-Slice  —  SNES-palette CSS
+   ═══════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --bg:        #0a0a1a;
+  --panel:     #12122a;
+  --panel-hi:  #1a1a3a;
+  --border:    #2a2a4a;
+  --gold:      #c4a000;
+  --cedar:     #8c2600;
+  --teal:      #1a3a3a;
+  --teal-hi:   #245050;
+  --text:      #e8dcc8;
+  --dim:       #807868;
+  --green:     #40c030;
+  --red:       #cc3318;
+  --blue:      #3088cc;
+  --pixel:     'Press Start 2P', monospace;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--pixel);
+  font-size: 10px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── Layout ─────────────────────────────────────── */
+#app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px;
+}
+
+.header {
+  text-align: center;
+  padding: 12px 0 6px;
+  border-bottom: 2px solid var(--gold);
+  margin-bottom: 8px;
+}
+.header h1 { font-size: 14px; color: var(--gold); letter-spacing: 2px; }
+.header .sub { font-size: 8px; color: var(--dim); margin-top: 4px; }
+
+/* ── Stat Bars ──────────────────────────────────── */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.stat-box {
+  flex: 1 1 120px;
+  background: var(--panel-hi);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  min-width: 100px;
+}
+.stat-box .stat-label { font-size: 7px; color: var(--dim); text-transform: uppercase; }
+.stat-box .stat-value { font-size: 11px; margin-top: 2px; }
+.stat-bar {
+  height: 6px;
+  background: #1a1a2a;
+  border-radius: 3px;
+  margin-top: 3px;
+  overflow: hidden;
+}
+.stat-bar .fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.fill-green  { background: var(--green); }
+.fill-red    { background: var(--red); }
+.fill-blue   { background: var(--blue); }
+.fill-gold   { background: var(--gold); }
+.fill-cedar  { background: var(--cedar); }
+.fill-teal   { background: var(--teal-hi); }
+
+/* ── Panels ─────────────────────────────────────── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.panel-title {
+  font-size: 10px;
+  color: var(--gold);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+/* ── Narrative ──────────────────────────────────── */
+#narrative-log {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 6px;
+  background: #08081a;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  font-family: var(--pixel);
+  font-size: 9px;
+  line-height: 1.7;
+}
+#narrative-log::-webkit-scrollbar { width: 6px; }
+#narrative-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.narr-line { margin-bottom: 4px; }
+.narr-gold { color: var(--gold); }
+.narr-dim  { color: var(--dim); }
+.narr-red  { color: var(--red); }
+.narr-green{ color: var(--green); }
+
+/* ── Choices ────────────────────────────────────── */
+#choices-area { margin-bottom: 8px; }
+.choice-prompt { font-size: 9px; color: var(--dim); margin-bottom: 6px; }
+.choice-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--teal);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  font-family: var(--pixel);
+  font-size: 9px;
+  cursor: pointer;
+  transition: background 0.15s;
+  line-height: 1.5;
+}
+.choice-btn:hover { background: var(--teal-hi); border-color: var(--gold); }
+.choice-btn .btn-label { color: var(--text); }
+.choice-btn .btn-desc  { font-size: 7px; color: var(--dim); margin-top: 3px; }
+.choice-btn .btn-risk  { font-size: 7px; color: var(--red); margin-top: 2px; }
+
+.action-btn {
+  display: inline-block;
+  background: var(--cedar);
+  color: var(--text);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  padding: 8px 18px;
+  font-family: var(--pixel);
+  font-size: 10px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.15s;
+}
+.action-btn:hover { background: #aa3200; }
+
+/* ── Phase indicator ────────────────────────────── */
+.phase-indicator {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.phase-pip {
+  flex: 1;
+  height: 6px;
+  background: var(--panel-hi);
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+.phase-pip.done     { background: var(--green); }
+.phase-pip.active   { background: var(--gold); }
+.phase-pip.upcoming { background: var(--panel-hi); }
+
+.phase-labels {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 4px;
+  font-size: 6px;
+  color: var(--dim);
+}
+.phase-labels span { flex: 1; text-align: center; }
+
+/* ── Debug panel ────────────────────────────────── */
+#debug-panel {
+  background: #060612;
+  border: 1px solid #1a3a1a;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 8px;
+  color: var(--green);
+  display: none;
+  max-height: 220px;
+  overflow-y: auto;
+}
+#debug-panel .dh { color: var(--gold); }
+
+/* ── Legacy Log ─────────────────────────────────── */
+#legacy-panel {
+  background: #0a0610;
+  border: 1px solid #3a2a10;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 8px;
+  color: var(--text);
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+/* ── Pixel art containers ───────────────────────── */
+.pixel-scene {
+  height: 80px;
+  background: #06061a;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.pixel-scene .water {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 20px;
+  background: linear-gradient(180deg, #0a2040 0%, #061830 100%);
+}
+.pixel-scene .land {
+  position: absolute;
+  bottom: 18px; right: 0;
+  width: 40%;
+  height: 30px;
+  background: #1a3a18;
+  border-radius: 8px 8px 0 0;
+}
+.canoe-icon {
+  position: relative; z-index: 2;
+  width: 60px; height: 16px;
+  background: var(--cedar);
+  border-radius: 0 8px 4px 0;
+  border: 1px solid #5a1a00;
+}
+.canoe-icon::before {
+  content: '⟐';
+  position: absolute;
+  left: -4px; top: -2px;
+  font-size: 14px;
+  color: var(--gold);
+}
+.village-icon {
+  position: relative; z-index: 2;
+  width: 30px; height: 30px;
+  background: #3a2a18;
+  border: 1px solid #5a3a18;
+  border-radius: 2px;
+}
+.village-icon::after {
+  content: '▲';
+  position: absolute;
+  top: -10px; left: 6px;
+  font-size: 14px;
+  color: #5a3a18;
+}
+
+/* ── Animations ─────────────────────────────────── */
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+.canoe-bob { animation: bob 2s ease-in-out infinite; }
+
+/* ── Encounter grid ─────────────────────────────── */
+.encounter-grid {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.force-box {
+  background: var(--panel-hi);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 6px;
+  font-size: 8px;
+}
+.force-box .force-title { color: var(--gold); font-size: 9px; margin-bottom: 4px; }
+.vs-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--cedar);
+}
+
+/* ── Round display ──────────────────────────────── */
+.round-box {
+  background: var(--panel-hi);
+  border-left: 3px solid var(--gold);
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+.round-box .round-title { color: var(--gold); margin-bottom: 3px; }
+.round-box .scores { color: var(--green); }
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 640px) {
+  .stat-box { flex: 1 1 80px; min-width: 80px; }
+  .encounter-grid { grid-template-columns: 1fr; }
+  .vs-box { padding: 4px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div class="header">
+    <h1>⛵ TIDELINES ⛵</h1>
+    <div class="sub">Cedar, Sea &amp; Legacy — Vertical Slice</div>
+  </div>
+
+  <!-- Phase Indicator -->
+  <div class="phase-labels" id="phase-labels"></div>
+  <div class="phase-indicator" id="phase-pips"></div>
+
+  <!-- Stat Bars -->
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- Pixel Scene -->
+  <div class="pixel-scene" id="pixel-scene"></div>
+
+  <!-- Narrative Log -->
+  <div id="narrative-log"></div>
+
+  <!-- Choices Area -->
+  <div id="choices-area"></div>
+
+  <!-- Debug Toggle -->
+  <div style="text-align:right; margin-bottom:4px;">
+    <span style="font-size:7px;color:var(--dim);cursor:pointer;" onclick="toggleDebug()">☰ DEBUG</span>
+  </div>
+  <div id="debug-panel"></div>
+
+  <!-- Legacy Log -->
+  <div class="panel-title" style="font-size:8px;">📜 LEGACY LOG</div>
+  <div id="legacy-panel"><span style="color:var(--dim);">No entries yet. Complete a raid to record history.</span></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   TIDELINES — Browser Vertical Slice
+   Complete game engine in one file.
+   ═══════════════════════════════════════════════════════════ */
+
+// ────────────────────────────────────────────────────────
+// GAME STATE
+// ────────────────────────────────────────────────────────
+const PHASES = ['Village','Travel','Encounter','Resolution','Withdrawal','Aftermath'];
+
+const STATE = {
+  phase: -1,          // index into PHASES
+  morale: 65,
+  fear: 0,            // fear of the enemy (0–100)
+  canoeCondition: 100,
+  cargo: 0,           // cargo units carried home
+  cargoCapacity: 40,
+  prestige: 200,
+  feudEscalation: 8,  // ACTIVE_FEUD baseline
+  crewSize: 15,
+  crewQuality: 55,
+  crewAlive: 15,
+  crewWounded: 0,
+  crewKilled: 0,
+  captivesTaken: 0,
+
+  // Modifiers accumulated across phases
+  intelQuality: 'NONE', // NONE, VAGUE, ACCURATE
+  surpriseBonus: 0,
+  stealthBonus: 0,
+  intimidationBonus: 0,
+  approachTime: 'dawn',
+  formation: 'single',
+  attackerTactic: 'measured_push',
+
+  // Engagement results
+  intimScore: 0,
+  resolveScore: 0,
+  intimDelta: 0,
+  intimResult: '',
+  defenderFled: false,
+  rounds: [],
+  outcome: '',
+  outcomeRatio: 0,
+  atkTotal: 0,
+  defTotal: 0,
+  turningPoint: null,
+  prestigeChange: 0,
+
+  // Target force
+  defender: {
+    name: 'Cedar Creek',
+    crewSize: 12,
+    morale: 55,
+    quality: 45,
+    canoeCombat: 40,
+    communitySize: 35,
+    leadership: 40,
+    fortification: 0,
+    alliance: 5,
+  },
+
+  // Named crew
+  namedCrew: [
+    { id:'gwaay', name:'Gwaay', traits:['veteran'], alive:true, wounded:false },
+    { id:'kaahl', name:'Kaahl', traits:['war_singer'], alive:true, wounded:false },
+    { id:'naang', name:'Naang', traits:[], alive:true, wounded:false },
+  ],
+
+  // Legacy entries
+  legacyEntries: [],
+  traitsEarned: [],
+
+  // Spoils
+  spoils: [],
+};
+
+// ────────────────────────────────────────────────────────
+// INTIMIDATION ENGINE
+// ────────────────────────────────────────────────────────
+function calcIntimidation() {
+  let score = 0;
+  score += Math.min(14, 14);  // war_canoe_rating
+  score += Math.min(12, 30);  // conflict_reputation
+  score += 8;                 // battle_tested trait
+  score += Math.min(7, 10);   // crest_display
+  score += Math.min(Math.floor(STATE.prestige / 100), 10);
+  // recent victory bonus
+  score += 5; // war song
+  score += STATE.intimidationBonus;
+  return score;
+}
+
+function calcResolve() {
+  const d = STATE.defender;
+  let score = 0;
+  score += Math.max(20, Math.min(d.communitySize, 60));
+  score += Math.min(d.leadership, 15);
+  // not defending home (we are attacking)
+  score += Math.min(d.alliance, 15);
+  score += Math.min(d.fortification * 5, 15);
+  return score;
+}
+
+function runIntimidation() {
+  STATE.intimScore = calcIntimidation();
+  STATE.resolveScore = calcResolve();
+  STATE.intimDelta = STATE.intimScore - STATE.resolveScore;
+
+  if (STATE.intimDelta >= 50) {
+    STATE.intimResult = 'OVERWHELMING';
+    STATE.defenderFled = true;
+    STATE.defender.morale -= 30;
+  } else if (STATE.intimDelta >= 30) {
+    STATE.intimResult = 'DOMINANT';
+    STATE.defender.morale -= 20;
+  } else if (STATE.intimDelta >= 15) {
+    STATE.intimResult = 'STRONG';
+    STATE.defender.morale -= randInt(15, 25);
+  } else if (STATE.intimDelta >= 1) {
+    STATE.intimResult = 'SLIGHT';
+    STATE.defender.morale -= randInt(5, 10);
+  } else if (STATE.intimDelta <= -15) {
+    STATE.intimResult = 'REVERSED';
+    STATE.morale -= randInt(5, 15);
+  } else {
+    STATE.intimResult = 'NEUTRAL';
+  }
+  STATE.defender.morale = clamp(STATE.defender.morale, 5, 100);
+  STATE.morale = clamp(STATE.morale, 5, 100);
+}
+
+// ────────────────────────────────────────────────────────
+// ENGAGEMENT ENGINE
+// ────────────────────────────────────────────────────────
+const TACTIC_MODS = {
+  overwhelming_assault: { atk: 1.30, loss: 1.50 },
+  measured_push:        { atk: 1.10, loss: 1.00 },
+  feint_and_probe:      { atk: 0.80, loss: 0.60 },
+  negotiation_under_arms: { atk: 0.40, loss: 0.10 },
+};
+
+const TURNING_POINTS = [
+  { id:'warrior_falls', text:'A named warrior falls in the fighting.', atkB:-5, defB:10 },
+  { id:'chief_rallies', text:'Your chief rallies the crew with a battle cry!', atkB:15, defB:0 },
+  { id:'canoe_captured', text:'A canoe is seized in the chaos!', atkB:12, defB:-8 },
+  { id:'fire_breaks_out', text:'Fire erupts — smoke and confusion.', atkB:-5, defB:-5 },
+  { id:'war_song', text:'Kaahl the War Singer lifts the ancient battle song!', atkB:10, defB:0 },
+  { id:'fog_rolls_in', text:'Sudden fog. Both sides lose cohesion.', atkB:-8, defB:-3 },
+  { id:'champion_duel', text:'Two warriors face each other between the lines.', atkB:8, defB:8 },
+];
+
+function roundScore(force, roundType, isAtk, tacticMod) {
+  let s = 0;
+  const m = force.morale || 50;
+  const q = force.quality || force.crewQuality || 50;
+  const sz = force.crewSize || 10;
+  const cc = force.canoeCombat || force.canoeCondition || 50;
+  const lead = force.leadership || 50;
+  const stam = force.stamina || 65;
+
+  switch (roundType) {
+    case 'opening':
+      s += m * 0.40;
+      s += q * 0.20;
+      s += (sz / 20) * 100 * 0.20;
+      s += cc * 0.10;
+      break;
+    case 'sustained':
+      s += q * 0.35;
+      s += (sz / 20) * 100 * 0.25;
+      s += (stam || 60) * 0.20;
+      s += lead * 0.15;
+      s += cc * 0.05;
+      break;
+    case 'turning':
+      s += m * 0.35;
+      s += q * 0.25;
+      s += lead * 0.20;
+      s *= randFloat(0.80, 1.20);
+      break;
+  }
+  s *= tacticMod;
+
+  // Trait bonuses for attacker
+  if (isAtk) {
+    s += 3; // veteran (Gwaay)
+    if (roundType === 'turning') s += 5; // war_singer (Kaahl)
+    else s += 2;
+  }
+  return s;
+}
+
+function resolveEngagement() {
+  const tacMod = TACTIC_MODS[STATE.attackerTactic] || TACTIC_MODS.measured_push;
+  const atkForce = {
+    morale: STATE.morale,
+    quality: STATE.crewQuality,
+    crewSize: STATE.crewAlive,
+    canoeCombat: STATE.canoeCondition * 0.6,
+    leadership: 55,
+    stamina: 70,
+  };
+  const defForce = {
+    morale: STATE.defender.morale,
+    quality: STATE.defender.quality,
+    crewSize: STATE.defender.crewSize,
+    canoeCombat: STATE.defender.canoeCombat,
+    leadership: STATE.defender.leadership,
+    stamina: 60,
+  };
+
+  // Round 1 — Opening Clash
+  let r1a = roundScore(atkForce, 'opening', true, tacMod.atk);
+  let r1d = roundScore(defForce, 'opening', false, 1.0);
+  if (STATE.surpriseBonus > 10) r1a *= 1 + STATE.surpriseBonus / 100;
+
+  // Round 2 — Sustained
+  let r2a = roundScore(atkForce, 'sustained', true, tacMod.atk);
+  let r2d = roundScore(defForce, 'sustained', false, 1.0);
+
+  // Round 3 — Turning Point
+  const tp = TURNING_POINTS[Math.floor(Math.random() * TURNING_POINTS.length)];
+  let r3a = roundScore(atkForce, 'turning', true, tacMod.atk);
+  let r3d = roundScore(defForce, 'turning', false, 1.0);
+  r3a += tp.atkB;
+  r3d += tp.defB;
+
+  STATE.turningPoint = tp;
+  STATE.rounds = [
+    { name: 'Opening Clash', atk: r1a, def: r1d },
+    { name: 'Sustained Engagement', atk: r2a, def: r2d },
+    { name: 'Turning Point', atk: r3a, def: r3d, event: tp },
+  ];
+
+  let totalAtk = (r1a + r2a + r3a) * randFloat(0.88, 1.12);
+  let totalDef = (r1d + r2d + r3d) * randFloat(0.88, 1.12);
+  STATE.atkTotal = totalAtk;
+  STATE.defTotal = totalDef;
+  STATE.outcomeRatio = totalAtk / Math.max(totalDef, 1);
+
+  if (STATE.outcomeRatio > 1.8) STATE.outcome = 'DECISIVE_VICTORY';
+  else if (STATE.outcomeRatio > 1.3) STATE.outcome = 'VICTORY';
+  else if (STATE.outcomeRatio > 0.85) STATE.outcome = 'STALEMATE';
+  else if (STATE.outcomeRatio > 0.55) STATE.outcome = 'DEFEAT';
+  else STATE.outcome = 'DEVASTATING_DEFEAT';
+
+  STATE.prestigeChange = { DECISIVE_VICTORY:30, VICTORY:15, STALEMATE:0, DEFEAT:-15, DEVASTATING_DEFEAT:-30 }[STATE.outcome] || 0;
+}
+
+// ────────────────────────────────────────────────────────
+// CASUALTY / AFTERMATH ENGINE
+// ────────────────────────────────────────────────────────
+function calculateCasualties() {
+  const isWin = STATE.outcome === 'DECISIVE_VICTORY' || STATE.outcome === 'VICTORY';
+  const tacMod = TACTIC_MODS[STATE.attackerTactic] || TACTIC_MODS.measured_push;
+  let baseLoss = 0;
+  switch (STATE.outcome) {
+    case 'DECISIVE_VICTORY': baseLoss = 0.05; break;
+    case 'VICTORY': baseLoss = 0.12; break;
+    case 'STALEMATE': baseLoss = 0.10; break;
+    case 'DEFEAT': baseLoss = 0.25; break;
+    case 'DEVASTATING_DEFEAT': baseLoss = 0.45; break;
+  }
+  baseLoss *= tacMod.loss;
+  baseLoss *= randFloat(0.7, 1.3);
+  baseLoss = clamp(baseLoss, 0, 0.60);
+
+  const totalHit = Math.floor(STATE.crewAlive * baseLoss);
+  const killed = Math.floor(totalHit * randFloat(0.2, 0.4));
+  const wounded = totalHit - killed;
+
+  STATE.crewKilled = killed;
+  STATE.crewWounded = wounded;
+  STATE.crewAlive = Math.max(STATE.crewAlive - killed, 1);
+
+  // Named crew casualties
+  let casualtyPool = [...STATE.namedCrew.filter(c => c.alive)];
+  for (let i = 0; i < killed && casualtyPool.length > 0; i++) {
+    const idx = Math.floor(Math.random() * casualtyPool.length);
+    casualtyPool[idx].alive = false;
+    casualtyPool.splice(idx, 1);
+  }
+  for (let i = 0; i < wounded && casualtyPool.length > 0; i++) {
+    const idx = Math.floor(Math.random() * casualtyPool.length);
+    casualtyPool[idx].wounded = true;
+    casualtyPool.splice(idx, 1);
+  }
+
+  // Canoe damage
+  if (STATE.outcome === 'DEVASTATING_DEFEAT') STATE.canoeCondition -= randInt(30, 70);
+  else if (STATE.outcome === 'DEFEAT') STATE.canoeCondition -= randInt(10, 30);
+  else STATE.canoeCondition -= randInt(0, 15);
+  STATE.canoeCondition = clamp(STATE.canoeCondition, 5, 100);
+
+  // Spoils
+  STATE.spoils = [];
+  if (isWin) {
+    if (STATE.outcome === 'DECISIVE_VICTORY') {
+      STATE.spoils = [{r:'Dried Fish', n:25},{r:'Cedar Bark', n:10},{r:'Dentalium', n:8}];
+      STATE.cargo = 40;
+    } else {
+      STATE.spoils = [{r:'Dried Fish', n:15},{r:'Cedar Bark', n:5}];
+      STATE.cargo = 20;
+    }
+  }
+
+  // Morale shift
+  if (isWin) STATE.morale += STATE.outcome === 'DECISIVE_VICTORY' ? 20 : 10;
+  else STATE.morale -= STATE.outcome === 'DEVASTATING_DEFEAT' ? 25 : 15;
+  STATE.morale = clamp(STATE.morale, 0, 100);
+
+  // Prestige
+  STATE.prestige += STATE.prestigeChange;
+
+  // Feud
+  STATE.feudEscalation += isWin ? 3 : 1;
+}
+
+// ────────────────────────────────────────────────────────
+// PHASE LOGIC
+// ────────────────────────────────────────────────────────
+function nextPhase() {
+  STATE.phase++;
+  updatePhaseUI();
+  updateStats();
+  switch (STATE.phase) {
+    case 0: phaseVillage(); break;
+    case 1: phaseTravel();  break;
+    case 2: phaseEncounter(); break;
+    case 3: phaseResolution(); break;
+    case 4: phaseWithdrawal(); break;
+    case 5: phaseAftermath(); break;
+    default: break;
+  }
+  updateDebug();
+}
+
+// ── Phase 0: Village Preparation ──
+function phaseVillage() {
+  setScene('village');
+  narrate('═══ THE VILLAGE ═══', 'gold');
+  narrate('The decision has been made. Cedar Creek will answer for what they have taken.');
+  narrate('Before the war canoe is loaded, you must learn what awaits.');
+  narrate('');
+
+  showChoices('How will you gather intelligence?', [
+    {
+      id: 'scouts',
+      label: '🔭 Send Scouts',
+      desc: 'Best intel quality. Costs time, risks detection.',
+      risk: '15% detection chance',
+      fn: () => {
+        STATE.intelQuality = 'ACCURATE';
+        STATE.surpriseBonus += 5;
+        if (Math.random() < 0.15) {
+          STATE.defender.morale += 5;
+          narrate('⚠ Your scouts may have been spotted!', 'red');
+        }
+        narrate('Your scouts return — they counted three canoes, twelve warriors, no fortifications. The chief does not expect trouble.', '');
+        narrate('Intel: ACCURATE — crew ~12, defenses: none, alert: unaware.', 'green');
+        STATE.morale += 3;
+        updateStats();
+        villageCrewPrep();
+      }
+    },
+    {
+      id: 'traders',
+      label: '🗣 Ask Traders',
+      desc: 'Free information but may be outdated.',
+      fn: () => {
+        STATE.intelQuality = 'VAGUE';
+        narrate('"A modest village," the eldest trader says. "Their chief talks big but their canoes are old. There was talk of a marriage with the Skidegate people."');
+        narrate('Intel: VAGUE — moderate force, possible alliance.', 'dim');
+        updateStats();
+        villageCrewPrep();
+      }
+    },
+    {
+      id: 'omens',
+      label: '🔮 Read the Omens',
+      desc: 'Mystical insight. Unpredictable quality.',
+      fn: () => {
+        STATE.intelQuality = 'VAGUE';
+        STATE.morale += 5;
+        narrate('"I see water between two fires. The wind will be with you, but the tide will not wait."');
+        narrate('Intel: VAGUE — omen suggests favorable weather but narrow timing.', 'dim');
+        updateStats();
+        villageCrewPrep();
+      }
+    },
+  ]);
+}
+
+function villageCrewPrep() {
+  narrate('');
+  narrate('Your war canoe is loaded. Fifteen warriors sit at the paddles.', '');
+  showChoices('Final preparations:', [
+    {
+      id: 'war_paint',
+      label: '🎨 Full War Paint & Crest Display',
+      desc: '+10 intimidation, +5 morale. The enemy will see who is coming.',
+      fn: () => {
+        STATE.intimidationBonus += 10;
+        STATE.morale += 5;
+        narrate('Eagle and Killer Whale crests shine on every shield. Your crew is ready.');
+        STATE.morale = clamp(STATE.morale, 0, 100);
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'extra_supplies',
+      label: '🧺 Load Extra Supplies',
+      desc: 'More cargo space and +10 canoe condition for the journey.',
+      fn: () => {
+        STATE.cargoCapacity += 10;
+        STATE.canoeCondition = Math.min(100, STATE.canoeCondition + 10);
+        narrate('The canoe sits deeper in the water — well provisioned for the crossing.');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'blessing',
+      label: '🙏 Seek Spiritual Blessing',
+      desc: '+8 morale, +5 surprise. The spirits guide your paddles.',
+      fn: () => {
+        STATE.morale += 8;
+        STATE.surpriseBonus += 5;
+        narrate('The spiritual advisor places cedar on the fire. "The spirits walk with you."');
+        STATE.morale = clamp(STATE.morale, 0, 100);
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+  ]);
+}
+
+// ── Phase 1: Canoe Travel ──
+function phaseTravel() {
+  setScene('travel');
+  narrate('');
+  narrate('═══ THE CROSSING ═══', 'gold');
+  narrate('The morning fog clings to the water as you push off. Cedar Creek lies half a day\'s paddle to the north. Every stroke takes you closer to the moment where words end and actions begin.');
+
+  showChoices('When will you arrive?', [
+    {
+      id: 'dawn',
+      label: '🌅 Dawn Arrival',
+      desc: '+15 surprise. Good visibility. Strike as the village wakes.',
+      fn: () => {
+        STATE.approachTime = 'dawn';
+        STATE.surpriseBonus += 15;
+        narrate('You paddle through the night. As the first grey light touches the sky, Cedar Creek appears — smoke rising, a dog barking. No one is on the beach.');
+        updateStats();
+        travelFormation();
+      }
+    },
+    {
+      id: 'night',
+      label: '🌙 Night Approach',
+      desc: '+25 surprise but high navigation risk. Maximum stealth.',
+      risk: '20% chance of canoe scrape',
+      fn: () => {
+        STATE.approachTime = 'night';
+        STATE.surpriseBonus += 25;
+        if (Math.random() < 0.20) {
+          STATE.canoeCondition -= 10;
+          narrate('A rock scrapes the hull — hearts stop — but the canoe holds.', 'red');
+        }
+        narrate('The darkness is total except for phosphorescence. You reach the shallows in absolute silence.');
+        updateStats();
+        travelFormation();
+      }
+    },
+    {
+      id: 'fog',
+      label: '🌫 Use the Morning Fog',
+      desc: '+20 surprise, medium risk. Slide through like spirits.',
+      fn: () => {
+        STATE.approachTime = 'fog';
+        STATE.surpriseBonus += 20;
+        STATE.stealthBonus += 5;
+        narrate('The fog is a gift. Your canoe slides through it like a spirit. You hear Cedar Creek before you see it.');
+        updateStats();
+        travelFormation();
+      }
+    },
+  ]);
+}
+
+function travelFormation() {
+  narrate('');
+  showChoices('How does your force approach?', [
+    {
+      id: 'stealth',
+      label: '🤫 Single Canoe, Tight and Quiet',
+      desc: '+10 stealth. One canoe, one chance.',
+      fn: () => {
+        STATE.formation = 'stealth';
+        STATE.stealthBonus += 10;
+        STATE.intimidationBonus -= 5;
+        narrate('One canoe. One chance. Every paddle dips in unison, silent as breathing.');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'intimidating',
+      label: '⚔ Spread Formation — Maximum Intimidation',
+      desc: '+15 intimidation but -10 stealth. They will see an invasion.',
+      fn: () => {
+        STATE.formation = 'intimidating';
+        STATE.intimidationBonus += 15;
+        STATE.stealthBonus -= 10;
+        narrate('Your canoe fans out, war crests visible. Anyone watching will see not a raid but an invasion.');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+  ]);
+}
+
+// ── Phase 2: Encounter ──
+function phaseEncounter() {
+  setScene('encounter');
+  narrate('');
+  narrate('═══ THE BEACH AT CEDAR CREEK ═══', 'gold');
+
+  // Intimidation check
+  runIntimidation();
+  narrate(`Intimidation: ${STATE.intimScore}  vs  Resolve: ${STATE.resolveScore}  (Δ ${STATE.intimDelta >= 0 ? '+' : ''}${STATE.intimDelta})`, 'green');
+  narrate(`Result: ${STATE.intimResult}`, STATE.intimDelta > 0 ? 'green' : 'red');
+
+  if (STATE.defenderFled) {
+    narrate('Before you beach the canoe, Cedar Creek\'s chief appears with arms raised. "We will talk! Come ashore as guests, not enemies!"', '');
+    narrate('Your reputation has done the work. Cedar Creek capitulates.', 'green');
+    STATE.outcome = 'DECISIVE_VICTORY';
+    STATE.prestigeChange = 30;
+    STATE.spoils = [{r:'Dried Fish', n:25},{r:'Cedar Bark', n:10},{r:'Dentalium', n:8}];
+    STATE.cargo = 40;
+    STATE.prestige += 30;
+    STATE.feudEscalation += 3;
+    updateStats();
+    showContinue(() => { STATE.phase = 3; nextPhase(); }); // skip to withdrawal
+    return;
+  }
+
+  narrate('Warriors spill from the longhouse. Not many — but they are armed, and they are moving to the beach.', '');
+  narrate('');
+  narrate('The bow of your war canoe grinds into the gravel. Your warriors leap into the shallow water. This is the moment.', '');
+
+  showChoices('Choose your tactic:', [
+    {
+      id: 'overwhelming',
+      label: '⚔ Overwhelming Assault',
+      desc: 'Maximum force. ATK ×1.3 but losses ×1.5.',
+      risk: 'Very high casualties if you lose',
+      fn: () => {
+        STATE.attackerTactic = 'overwhelming_assault';
+        narrate('You raise your weapon and shout the war cry. Your warriors surge forward!');
+        STATE.morale += 5;
+        STATE.fear = Math.max(STATE.fear - 10, 0);
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'measured',
+      label: '🛡 Measured Push',
+      desc: 'Balanced risk. ATK ×1.1, losses ×1.0.',
+      fn: () => {
+        STATE.attackerTactic = 'measured_push';
+        narrate('Your warriors form a line across the beach, moving steadily forward with disciplined silence.');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'feint',
+      label: '👁 Feint & Probe',
+      desc: 'Low risk. ATK ×0.8 but losses only ×0.6.',
+      fn: () => {
+        STATE.attackerTactic = 'feint_and_probe';
+        narrate('Three warriors rush forward — clash briefly — then fall back. You watch. There. That\'s where the line is thin.');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'negotiate',
+      label: '🕊 Negotiate Under Arms',
+      desc: 'Minimal combat. ATK ×0.4 but losses only ×0.1.',
+      fn: () => {
+        STATE.attackerTactic = 'negotiation_under_arms';
+        narrate('"We did not come for your lives," you say. "We came for what is owed. Return it, and we leave."');
+        STATE.feudEscalation -= 1;
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+  ]);
+}
+
+// ── Phase 3: Resolution ──
+function phaseResolution() {
+  setScene('battle');
+  narrate('');
+  narrate('═══ THE CLASH ═══', 'gold');
+
+  if (STATE.outcome === 'DECISIVE_VICTORY') {
+    // Already resolved by intimidation
+    narrate('Cedar Creek surrendered before battle was joined.', 'green');
+    showContinue(nextPhase);
+    return;
+  }
+
+  resolveEngagement();
+
+  // Show rounds
+  const roundNarrs = [
+    'Your warriors hit Cedar Creek\'s line like a wave against a seawall. The defenders stagger — your surprise and momentum carry the first moments.',
+    'Cedar Creek\'s chief rallies his people. The fighting becomes close and grinding. Your veteran Gwaay holds the center with terrible calm.',
+    '',
+  ];
+
+  STATE.rounds.forEach((r, i) => {
+    narrate(`⚔ ${r.name}`, 'gold');
+    if (i < 2) narrate(roundNarrs[i], '');
+    if (r.event) narrate(`✦ ${r.event.text}`, 'red');
+    narrate(`  ATK: ${r.atk.toFixed(1)}  DEF: ${r.def.toFixed(1)}`, 'green');
+    narrate('');
+  });
+
+  // Outcome
+  const outcomeCol = STATE.outcome.includes('VICTORY') ? 'green' : (STATE.outcome.includes('DEFEAT') ? 'red' : 'gold');
+  narrate('════════════════════════════', outcomeCol);
+  narrate(`  OUTCOME: ${STATE.outcome}`, outcomeCol);
+  narrate('════════════════════════════', outcomeCol);
+  narrate(`  Ratio: ${STATE.outcomeRatio.toFixed(2)}  |  ATK Total: ${STATE.atkTotal.toFixed(0)}  DEF Total: ${STATE.defTotal.toFixed(0)}`, 'green');
+
+  if (STATE.outcome === 'VICTORY' || STATE.outcome === 'DECISIVE_VICTORY') {
+    narrate('Cedar Creek\'s line breaks. The beach belongs to you.', '');
+  } else if (STATE.outcome === 'STALEMATE') {
+    narrate('Neither side can press the advantage. Both withdraw to lick their wounds.', '');
+  } else {
+    narrate('Your crew is pushed back. The assault has failed.', 'red');
+  }
+
+  // Calculate casualties now
+  calculateCasualties();
+  updateStats();
+  showContinue(nextPhase);
+}
+
+// ── Phase 4: Withdrawal ──
+function phaseWithdrawal() {
+  setScene('travel');
+  narrate('');
+  narrate('═══ LOADING AND LEAVING ═══', 'gold');
+
+  const isWin = STATE.outcome === 'DECISIVE_VICTORY' || STATE.outcome === 'VICTORY';
+
+  if (!isWin) {
+    narrate('Your crew falls back to the canoe. There are no spoils — only the bitter taste of retreat.', '');
+    showContinue(nextPhase);
+    return;
+  }
+
+  narrate('The fighting is over. Cedar Creek\'s warriors watch from the tree line. Your crew must work fast — load the spoils, tend the wounded, and get back to sea.', '');
+
+  showChoices('How will you withdraw?', [
+    {
+      id: 'quick',
+      label: '💨 Quick Load & Go',
+      desc: 'Safest. Take 60% of spoils. No pursuit risk.',
+      fn: () => {
+        STATE.cargo = Math.floor(STATE.cargo * 0.6);
+        narrate('Speed over greed. Your crew loads what they can in armfuls. Within minutes, you are pushing off.');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'thorough',
+      label: '📦 Take Everything',
+      desc: 'Max spoils but 30% pursuit risk. Lingering is dangerous.',
+      risk: '30% counterattack chance',
+      fn: () => {
+        narrate('You strip the fish racks clean. Cedar bark. Dentalium shells.', '');
+        if (Math.random() < 0.30) {
+          narrate('⚠ Cedar Creek reorganizes and charges! A brief skirmish costs you.', 'red');
+          STATE.crewAlive = Math.max(STATE.crewAlive - 1, 1);
+          STATE.morale -= 5;
+        }
+        narrate('The canoe is loaded deep and pushing through the surf.');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+    {
+      id: 'mark',
+      label: '🦅 Take Spoils & Plant Your Crest',
+      desc: '+10 prestige, +3 feud escalation. Maximum humiliation.',
+      fn: () => {
+        STATE.cargo = Math.floor(STATE.cargo * 0.8);
+        STATE.prestige += 10;
+        STATE.feudEscalation += 3;
+        narrate('Before leaving, you drive a carved Eagle post into the gravel of Cedar Creek\'s beach. Your crest, facing their longhouse. Every morning, their chief will wake and see it.', '');
+        narrate('+10 Prestige. Feud deepened.', 'gold');
+        updateStats();
+        showContinue(nextPhase);
+      }
+    },
+  ]);
+}
+
+// ── Phase 5: Aftermath ──
+function phaseAftermath() {
+  setScene('village');
+  narrate('');
+  narrate('═══ THE RETURN AND THE RECKONING ═══', 'gold');
+  narrate('Your canoe rounds the headland and your village comes into view. People are already gathering on the beach.', '');
+
+  // Casualties report
+  narrate('— Casualty Report —', 'gold');
+  narrate(`  ☠ Killed: ${STATE.crewKilled}   ⚔ Wounded: ${STATE.crewWounded}   Crew alive: ${STATE.crewAlive}`, STATE.crewKilled > 0 ? 'red' : '');
+
+  STATE.namedCrew.forEach(c => {
+    if (!c.alive) narrate(`  ☠ ${c.name} — fell in the fighting.`, 'red');
+    else if (c.wounded) narrate(`  ⚔ ${c.name} — wounded, will recover.`, 'dim');
+  });
+
+  // Spoils
+  if (STATE.spoils.length > 0) {
+    narrate('— Spoils —', 'gold');
+    STATE.spoils.forEach(s => narrate(`  ${s.r}: ×${s.n}`, 'green'));
+    narrate(`  Cargo: ${STATE.cargo}/${STATE.cargoCapacity}`, '');
+  }
+
+  // Stats
+  narrate('— Status Changes —', 'gold');
+  narrate(`  Prestige: ${STATE.prestigeChange >= 0 ? '+' : ''}${STATE.prestigeChange} (now ${STATE.prestige})`, '');
+  narrate(`  Feud Escalation: ${STATE.feudEscalation} — ${feudStateName(STATE.feudEscalation)}`, '');
+  narrate(`  Canoe Condition: ${STATE.canoeCondition}%`, STATE.canoeCondition < 50 ? 'red' : '');
+
+  // Canoe damage
+  if (STATE.canoeCondition < 50) {
+    narrate('  🛶 Your canoe took serious damage. Repairs needed.', 'red');
+  }
+
+  // Traits
+  STATE.traitsEarned = [];
+  if (STATE.crewKilled > 0) { STATE.traitsEarned.push('grief_hardened'); }
+  if (STATE.outcome === 'DECISIVE_VICTORY') { STATE.traitsEarned.push('battle_tested'); }
+  if (STATE.traitsEarned.length > 0) {
+    narrate(`  Traits earned: ${STATE.traitsEarned.join(', ')}`, 'gold');
+  }
+
+  // Long-term effects
+  narrate('');
+  narrate('— Long-Term Effects —', 'gold');
+
+  const feudState = feudStateName(STATE.feudEscalation);
+  narrate(`The feud with Cedar Creek: ${feudState}. ${feudState === 'BLOOD_FEUD' ? 'There is no trade, no communication, no peace.' : 'Tensions remain high.'}`, '');
+
+  const retTurns = STATE.outcome.includes('VICTORY') ? (STATE.outcome === 'DECISIVE_VICTORY' ? 6 : 4) : 0;
+  if (retTurns > 0) narrate(`⏳ Expect retaliation from Cedar Creek in ~${retTurns} turns.`, 'red');
+
+  if (STATE.outcome === 'DECISIVE_VICTORY') {
+    narrate('♫ A battle song is composed — "The Beach at Cedar Creek."', 'gold');
+    narrate('🏔 Your master carver offers to begin a war history pole.', 'gold');
+  }
+
+  // Build legacy entry
+  const tone = { DECISIVE_VICTORY:'A great victory.', VICTORY:'The crew returned with honor.', STALEMATE:'Neither side could claim victory.', DEFEAT:'A bitter retreat.', DEVASTATING_DEFEAT:'Many did not return.' }[STATE.outcome] || '';
+  const dead = STATE.namedCrew.filter(c => !c.alive).map(c => c.name);
+  let legacy = `The village raided Cedar Creek. ${tone}`;
+  if (dead.length > 0) legacy += ` Lost: ${dead.join(', ')}.`;
+  if (STATE.traitsEarned.length > 0) legacy += ` Traits: ${STATE.traitsEarned.join(', ')}.`;
+  STATE.legacyEntries.push(legacy);
+  updateLegacy();
+
+  narrate('');
+  updateStats();
+  updateDebug();
+
+  showChoices('What now?', [
+    {
+      id: 'play_again',
+      label: '🔄 Raid Again',
+      desc: 'Reset and launch another expedition.',
+      fn: resetGame,
+    },
+  ]);
+}
+
+// ────────────────────────────────────────────────────────
+// FEUD HELPER
+// ────────────────────────────────────────────────────────
+function feudStateName(esc) {
+  if (esc <= 0)  return 'RESOLVED';
+  if (esc <= 3)  return 'SMOULDERING';
+  if (esc <= 5)  return 'GRIEVANCE';
+  if (esc <= 12) return 'ACTIVE_FEUD';
+  return 'BLOOD_FEUD';
+}
+
+// ────────────────────────────────────────────────────────
+// UI RENDERING
+// ────────────────────────────────────────────────────────
+function updatePhaseUI() {
+  const labels = document.getElementById('phase-labels');
+  const pips = document.getElementById('phase-pips');
+  labels.innerHTML = PHASES.map(p => `<span>${p}</span>`).join('');
+  pips.innerHTML = PHASES.map((_, i) => {
+    let cls = 'phase-pip';
+    if (i < STATE.phase) cls += ' done';
+    else if (i === STATE.phase) cls += ' active';
+    else cls += ' upcoming';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function updateStats() {
+  const row = document.getElementById('stats-row');
+  const fearVal = clamp(STATE.fear + (STATE.intimDelta < 0 ? -STATE.intimDelta : 0), 0, 100);
+
+  row.innerHTML = [
+    statBox('♥ Morale', STATE.morale, 100, 'fill-green'),
+    statBox('😨 Fear', fearVal, 100, 'fill-red'),
+    statBox('🛶 Canoe', STATE.canoeCondition, 100, 'fill-blue'),
+    statBox('📦 Cargo', STATE.cargo, STATE.cargoCapacity, 'fill-gold'),
+    statBox('⭐ Prestige', STATE.prestige, 500, 'fill-gold'),
+    statBox('🔥 Feud', STATE.feudEscalation, 20, 'fill-cedar'),
+    statBox('⚔ Crew', `${STATE.crewAlive}/${STATE.crewSize}`, -1, 'fill-teal'),
+  ].join('');
+}
+
+function statBox(label, value, max, fillClass) {
+  const display = typeof value === 'string' ? value : value;
+  const barHtml = max > 0 ? `<div class="stat-bar"><div class="fill ${fillClass}" style="width:${clamp((typeof value === 'number' ? value : 0) / max * 100, 0, 100)}%"></div></div>` : '';
+  return `<div class="stat-box">
+    <div class="stat-label">${label}</div>
+    <div class="stat-value">${display}</div>
+    ${barHtml}
+  </div>`;
+}
+
+function narrate(text, cls) {
+  const log = document.getElementById('narrative-log');
+  const div = document.createElement('div');
+  div.className = 'narr-line' + (cls ? ` narr-${cls}` : '');
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function showChoices(prompt, choices) {
+  const area = document.getElementById('choices-area');
+  let html = `<div class="choice-prompt">${prompt}</div>`;
+  choices.forEach(c => {
+    const riskHtml = c.risk ? `<div class="btn-risk">⚠ ${c.risk}</div>` : '';
+    const descHtml = c.desc ? `<div class="btn-desc">${c.desc}</div>` : '';
+    html += `<button class="choice-btn" data-id="${c.id}">
+      <div class="btn-label">${c.label}</div>
+      ${descHtml}${riskHtml}
+    </button>`;
+  });
+  area.innerHTML = html;
+  area.querySelectorAll('.choice-btn').forEach(btn => {
+    const choice = choices.find(c => c.id === btn.dataset.id);
+    btn.addEventListener('click', () => {
+      area.innerHTML = '';
+      if (choice && choice.fn) choice.fn();
+    });
+  });
+}
+
+function showContinue(fn) {
+  const area = document.getElementById('choices-area');
+  area.innerHTML = `<button class="action-btn" id="continue-btn">▸ Continue</button>`;
+  document.getElementById('continue-btn').addEventListener('click', () => {
+    area.innerHTML = '';
+    fn();
+  });
+}
+
+function setScene(type) {
+  const scene = document.getElementById('pixel-scene');
+  switch (type) {
+    case 'village':
+      scene.innerHTML = `
+        <div class="water"></div>
+        <div class="land" style="width:60%;bottom:18px;left:20%;right:20%;"></div>
+        <div class="village-icon" style="position:relative;z-index:2;"></div>
+        <div class="village-icon" style="position:relative;z-index:2;margin-left:10px;height:24px;"></div>
+        <div class="village-icon" style="position:relative;z-index:2;margin-left:10px;height:20px;width:22px;"></div>
+      `;
+      break;
+    case 'travel':
+      scene.innerHTML = `
+        <div class="water"></div>
+        <div class="canoe-icon canoe-bob" style="position:relative;z-index:2;"></div>
+      `;
+      break;
+    case 'encounter':
+      scene.innerHTML = `
+        <div class="water"></div>
+        <div class="land"></div>
+        <div class="canoe-icon canoe-bob" style="position:relative;z-index:2;margin-right:40px;"></div>
+        <div class="village-icon" style="position:relative;z-index:2;"></div>
+      `;
+      break;
+    case 'battle':
+      scene.innerHTML = `
+        <div class="water"></div>
+        <div class="land" style="width:70%;bottom:18px;left:15%;right:15%;"></div>
+        <div style="position:relative;z-index:2;font-size:20px;">⚔</div>
+      `;
+      break;
+  }
+}
+
+function toggleDebug() {
+  const d = document.getElementById('debug-panel');
+  d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateDebug() {
+  const d = document.getElementById('debug-panel');
+  d.innerHTML = `
+    <span class="dh">Phase:</span> ${PHASES[STATE.phase] || '—'}<br>
+    <span class="dh">── Forces ──</span><br>
+    ATK morale: ${STATE.morale}  DEF morale: ${STATE.defender.morale}<br>
+    Crew alive: ${STATE.crewAlive}/${STATE.crewSize}  DEF crew: ${STATE.defender.crewSize}<br>
+    <span class="dh">── Modifiers ──</span><br>
+    Intel: ${STATE.intelQuality}  Surprise: ${STATE.surpriseBonus}  Stealth: ${STATE.stealthBonus}<br>
+    Intimidation bonus: ${STATE.intimidationBonus}  Approach: ${STATE.approachTime}  Formation: ${STATE.formation}<br>
+    <span class="dh">── Intimidation ──</span><br>
+    Score: ${STATE.intimScore}  Resolve: ${STATE.resolveScore}  Δ: ${STATE.intimDelta}  Result: ${STATE.intimResult}<br>
+    <span class="dh">── Engagement ──</span><br>
+    Tactic: ${STATE.attackerTactic}  Outcome: ${STATE.outcome}<br>
+    ATK total: ${STATE.atkTotal.toFixed(1)}  DEF total: ${STATE.defTotal.toFixed(1)}  Ratio: ${STATE.outcomeRatio.toFixed(2)}<br>
+    ${STATE.rounds.map((r, i) => `R${i + 1}: ATK ${r.atk.toFixed(1)} DEF ${r.def.toFixed(1)}${r.event ? ' ✦' + r.event.id : ''}`).join('<br>')}
+    <br><span class="dh">── Aftermath ──</span><br>
+    Killed: ${STATE.crewKilled}  Wounded: ${STATE.crewWounded}  Cargo: ${STATE.cargo}<br>
+    Prestige Δ: ${STATE.prestigeChange}  Feud: ${STATE.feudEscalation} (${feudStateName(STATE.feudEscalation)})<br>
+    Traits: ${STATE.traitsEarned.join(', ') || '—'}<br>
+    Canoe: ${STATE.canoeCondition}%  Turning point: ${STATE.turningPoint ? STATE.turningPoint.id : '—'}
+  `;
+}
+
+function updateLegacy() {
+  const lp = document.getElementById('legacy-panel');
+  if (STATE.legacyEntries.length === 0) {
+    lp.innerHTML = '<span style="color:var(--dim);">No entries yet.</span>';
+    return;
+  }
+  lp.innerHTML = STATE.legacyEntries.map((e, i) =>
+    `<div style="margin-bottom:6px;"><span style="color:var(--gold);">Entry ${i + 1}:</span><br>${e}</div>`
+  ).join('');
+}
+
+// ────────────────────────────────────────────────────────
+// UTILITIES
+// ────────────────────────────────────────────────────────
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randFloat(min, max) { return Math.random() * (max - min) + min; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// ────────────────────────────────────────────────────────
+// GAME INIT / RESET
+// ────────────────────────────────────────────────────────
+function resetGame() {
+  const savedLegacy = [...STATE.legacyEntries];
+  Object.assign(STATE, {
+    phase: -1,
+    morale: 65,
+    fear: 0,
+    canoeCondition: 100,
+    cargo: 0,
+    cargoCapacity: 40,
+    prestige: STATE.prestige, // carry over
+    feudEscalation: STATE.feudEscalation, // carry over
+    crewSize: 15,
+    crewQuality: 55,
+    crewAlive: 15,
+    crewWounded: 0,
+    crewKilled: 0,
+    captivesTaken: 0,
+    intelQuality: 'NONE',
+    surpriseBonus: 0,
+    stealthBonus: 0,
+    intimidationBonus: 0,
+    approachTime: 'dawn',
+    formation: 'single',
+    attackerTactic: 'measured_push',
+    intimScore: 0,
+    resolveScore: 0,
+    intimDelta: 0,
+    intimResult: '',
+    defenderFled: false,
+    rounds: [],
+    outcome: '',
+    outcomeRatio: 0,
+    atkTotal: 0,
+    defTotal: 0,
+    turningPoint: null,
+    prestigeChange: 0,
+    spoils: [],
+    traitsEarned: [],
+    legacyEntries: savedLegacy,
+    namedCrew: [
+      { id:'gwaay', name:'Gwaay', traits:['veteran'], alive:true, wounded:false },
+      { id:'kaahl', name:'Kaahl', traits:['war_singer'], alive:true, wounded:false },
+      { id:'naang', name:'Naang', traits:[], alive:true, wounded:false },
+    ],
+    defender: {
+      name: 'Cedar Creek',
+      crewSize: 12,
+      morale: 55,
+      quality: 45,
+      canoeCombat: 40,
+      communitySize: 35,
+      leadership: 40,
+      fortification: 0,
+      alliance: 5,
+    },
+  });
+  document.getElementById('narrative-log').innerHTML = '';
+  document.getElementById('choices-area').innerHTML = '';
+  nextPhase();
+}
+
+// ── Start ──
+document.addEventListener('DOMContentLoaded', () => {
+  nextPhase();
+});
+</script>
+</body>
+</html>

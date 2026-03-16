@@ -1,0 +1,628 @@
+{
+  "events": [
+    {
+      "id": "fog_bank_approach",
+      "category": "exploration",
+      "title": "Fog Bank Approaches",
+      "description": "A wall of grey rolls across the water ahead, swallowing the coastline. Within minutes, the world beyond your canoe's length will disappear.",
+      "portrait": "scene_fog",
+      "music_override": "fog_navigation",
+      "conditions": {
+        "context": "NAVIGATION",
+        "weather_not": ["STORM", "GALE"],
+        "season": ["SPRING", "AUTUMN"],
+        "probability": 0.15
+      },
+      "choices": [
+        {
+          "text": "Navigate by landmarks and memory.",
+          "tooltip": "Skill check. Easier with Navigator trait or known route.",
+          "checks": [{
+            "type": "SKILL_CHECK",
+            "skill": "navigation",
+            "difficulty": 12,
+            "success": {
+              "effects": [{ "type": "PRESTIGE", "amount": 2, "reason": "Masterful fog navigation" }, { "type": "CREW_MORALE", "amount": 5 }],
+              "narrative": "Your knowledge of the coastline guides you true. The crew's confidence swells as you emerge from the grey into clear water."
+            },
+            "failure": {
+              "effects": [{ "type": "DELAY_VOYAGE", "turns": 1 }, { "type": "CREW_MORALE", "amount": -10 }, { "type": "CANOE_DAMAGE", "amount": 5, "chance": 0.3 }],
+              "narrative": "The landmarks vanish in grey. You push forward but the canoe scrapes stone. Hours are lost before you find your bearings."
+            }
+          }]
+        },
+        {
+          "text": "Stop and wait for it to lift.",
+          "tooltip": "Safe but costs time.",
+          "effects": [{ "type": "DELAY_VOYAGE", "turns": 1 }, { "type": "CREW_MORALE", "amount": -3 }],
+          "narrative": "You beach in a sheltered spot and wait. The fog clings for hours. When it lifts, you've lost a day."
+        },
+        {
+          "text": "Turn back to the last safe point.",
+          "tooltip": "Safest. Significant delay.",
+          "effects": [{ "type": "RETURN_TO_LAST_LOCATION" }, { "type": "PRESTIGE", "amount": -1 }],
+          "narrative": "Wisdom or cowardice? The crew's faces are unreadable as you order the turn."
+        }
+      ],
+      "tags": ["fog", "navigation", "risk"],
+      "era_availability": [1, 2, 3, 4],
+      "cooldown_seasons": 4
+    },
+    {
+      "id": "killer_whale_escort",
+      "category": "spiritual",
+      "title": "Killer Whale Pod",
+      "description": "Black fins surface alongside the canoe — a pod of killer whales, keeping pace. Their breath mists in the air. The crew falls silent, watching.",
+      "portrait": "scene_orca",
+      "conditions": {
+        "context": "NAVIGATION",
+        "min_distance_from_shore": 3,
+        "probability": 0.08
+      },
+      "choices": [
+        {
+          "text": "Watch them in reverent silence.",
+          "tooltip": "Morale boost. Possible omen.",
+          "effects": [{ "type": "CREW_MORALE", "amount": 15 }, { "type": "OMEN", "omen_id": "whale_protection" }],
+          "narrative": "The pod stays with you for what feels like an hour, then dives as one, leaving the water impossibly smooth in their wake. Something protective lingers."
+        },
+        {
+          "text": "Follow their course.",
+          "tooltip": "They may lead somewhere interesting.",
+          "effects": [{ "type": "ROUTE_MODIFIER", "direction": "whale_heading" }, { "type": "CREW_MORALE", "amount": 10 }],
+          "narrative": "You adjust course to follow the pod. They lead you along a current you hadn't noticed — faster, smoother water. And ahead, a sheltered cove you've never seen.",
+          "bonus_effects": [{ "type": "DISCOVER_LOCATION", "chance": 0.4 }]
+        }
+      ],
+      "tags": ["spiritual", "ocean", "omen", "whale"],
+      "era_availability": [1, 2, 3, 4, 5],
+      "cooldown_seasons": 6
+    },
+    {
+      "id": "eagle_dawn_sighting",
+      "category": "spiritual",
+      "title": "Eagle at Dawn",
+      "description": "As your canoe rounds the headland at first light, a bald eagle launches from a dead snag directly ahead, climbing into the golden sky. Its cry echoes across the water.",
+      "portrait": "scene_eagle_dawn",
+      "conditions": {
+        "context": "NAVIGATION",
+        "time_of_day": "DAWN",
+        "moiety_bonus": "EAGLE",
+        "probability": 0.12
+      },
+      "choices": [
+        {
+          "text": "Take it as a sign of clarity. Press forward with confidence.",
+          "effects": [{ "type": "OMEN", "omen_id": "eagle_clarity" }, { "type": "CREW_MORALE", "amount": 8 }],
+          "narrative": "The eagle's path traces the direction you need. The morning light sharpens. Everything ahead seems clearer now."
+        },
+        {
+          "text": "Note it quietly and continue.",
+          "effects": [{ "type": "CREW_MORALE", "amount": 3 }],
+          "narrative": "The crew murmurs respectfully. A good sign, they agree, but you keep your counsel."
+        }
+      ],
+      "tags": ["spiritual", "omen", "eagle", "dawn"],
+      "era_availability": [1, 2, 3, 4, 5],
+      "cooldown_seasons": 3
+    },
+    {
+      "id": "sudden_squall",
+      "category": "weather",
+      "title": "Sudden Squall",
+      "description": "The sky darkens without warning. Wind snaps from nowhere, turning calm water into chaos. Rain hammers down. Your canoe lurches.",
+      "portrait": "scene_storm",
+      "music_override": "storm_navigation",
+      "conditions": {
+        "context": "NAVIGATION",
+        "weather": ["OVERCAST", "RAIN"],
+        "season": ["AUTUMN", "WINTER", "SPRING"],
+        "probability": 0.10
+      },
+      "choices": [
+        {
+          "text": "Ride it out on open water.",
+          "tooltip": "Requires high seaworthiness. Dangerous.",
+          "checks": [{
+            "type": "SKILL_CHECK",
+            "skill": "seaworthiness",
+            "difficulty": 14,
+            "success": {
+              "effects": [{ "type": "PRESTIGE", "amount": 3 }, { "type": "CREW_MORALE", "amount": 5 }],
+              "narrative": "The canoe rides the swells like a living thing. Your crew's paddles bite water in unison. When the squall passes, you are soaked but unbroken."
+            },
+            "failure": {
+              "effects": [{ "type": "CANOE_DAMAGE", "amount": 15 }, { "type": "CARGO_LOSS", "percent": 0.2 }, { "type": "CREW_MORALE", "amount": -15 }],
+              "narrative": "A wave catches the beam and the canoe rolls sickeningly. Cargo shifts. Water pours over the gunwale. By the time you right the vessel, goods are lost and the hull groans."
+            }
+          }]
+        },
+        {
+          "text": "Beach immediately at the nearest shore.",
+          "tooltip": "Safer if shore is close. Rocky shore risks canoe damage.",
+          "conditions": { "near_shore": true },
+          "checks": [{
+            "type": "SKILL_CHECK",
+            "skill": "beaching",
+            "difficulty": 10,
+            "success": {
+              "effects": [{ "type": "DELAY_VOYAGE", "turns": 1 }],
+              "narrative": "You drive the canoe onto a gravel beach just as the worst hits. The crew hauls the vessel above the tideline. You wait, shivering but alive."
+            },
+            "failure": {
+              "effects": [{ "type": "CANOE_DAMAGE", "amount": 10 }, { "type": "DELAY_VOYAGE", "turns": 1 }],
+              "narrative": "The surf catches you broadside. The canoe grinds against rock as you fight to beach it. The hull is scraped but holds. A close thing."
+            }
+          }]
+        }
+      ],
+      "tags": ["weather", "danger", "navigation", "storm"],
+      "era_availability": [1, 2, 3, 4],
+      "cooldown_seasons": 2
+    },
+    {
+      "id": "trading_opportunity",
+      "category": "diplomacy",
+      "title": "Trader's Canoe",
+      "description": "A loaded trade canoe approaches with a peace banner raised. The crew identifies them as Tsimshian traders. They signal to meet at the nearest beach.",
+      "portrait": "portrait_trader",
+      "conditions": {
+        "context": "NAVIGATION",
+        "has_trade_goods": true,
+        "era": [1, 2, 3],
+        "probability": 0.12
+      },
+      "choices": [
+        {
+          "text": "Meet them and trade.",
+          "tooltip": "Exchange goods. Rates depend on diplomacy skill.",
+          "effects": [{ "type": "TRADE_ENCOUNTER", "partner": "tsimshian", "rate_modifier": 1.0 }],
+          "narrative": "You beach alongside the traders. Goods are laid out on cedar mats — eulachon oil, obsidian blades, mountain goat wool. Negotiations begin."
+        },
+        {
+          "text": "Approach cautiously. Verify their intentions.",
+          "tooltip": "Slower but safer. Avoids potential ambush.",
+          "checks": [{
+            "type": "SKILL_CHECK",
+            "skill": "scouting",
+            "difficulty": 8,
+            "success": {
+              "effects": [{ "type": "TRADE_ENCOUNTER", "partner": "tsimshian", "rate_modifier": 1.05 }],
+              "narrative": "Your scouts confirm — genuine traders with no hidden warriors. Reassured, you approach. They respect your caution, and negotiations begin on good terms."
+            },
+            "failure": {
+              "effects": [{ "type": "TRADE_ENCOUNTER", "partner": "tsimshian", "rate_modifier": 0.95 }],
+              "narrative": "Your hesitation seems to offend them slightly. Still, they trade. But the rates are less favorable."
+            }
+          }]
+        },
+        {
+          "text": "Signal politely and continue your voyage.",
+          "tooltip": "No risk, no reward. May miss good deal.",
+          "effects": [],
+          "narrative": "You wave acknowledgment but press on. The traders watch you go. Perhaps next time."
+        }
+      ],
+      "tags": ["trade", "diplomacy", "encounter"],
+      "era_availability": [1, 2, 3],
+      "cooldown_seasons": 2
+    },
+    {
+      "id": "bountiful_salmon_run",
+      "category": "village",
+      "title": "The Great Run",
+      "description": "The salmon are coming — more than anyone remembers. The stream is silver with fish, so thick the water itself seems to boil. Every canoe, every net, every hand is needed.",
+      "portrait": "scene_salmon_run",
+      "conditions": {
+        "context": "VILLAGE",
+        "season": "SUMMER",
+        "probability": 0.10,
+        "cooldown_years": 3
+      },
+      "choices": [
+        {
+          "text": "All hands to the harvest. Maximum effort.",
+          "tooltip": "Huge food surplus, but workers are exhausted afterward.",
+          "effects": [
+            { "type": "RESOURCE", "resource": "salmon_preserved", "amount": 200 },
+            { "type": "CREW_MORALE", "amount": -10 },
+            { "type": "LABOR_UNAVAILABLE_NEXT_TURN", "roles": ["fishers", "builders"] }
+          ],
+          "narrative": "For three days and nights, the village works without rest. The smoke houses overflow. The caches fill. When it's over, your people collapse by the fire — exhausted, but wealthy in food."
+        },
+        {
+          "text": "Harvest at a sustainable pace.",
+          "tooltip": "Good surplus without exhausting the workers.",
+          "effects": [
+            { "type": "RESOURCE", "resource": "salmon_preserved", "amount": 100 },
+            { "type": "CREW_MORALE", "amount": 5 }
+          ],
+          "narrative": "You manage the harvest wisely — enough to fill the caches well beyond normal, but your people are still standing at the end of it. A good season."
+        },
+        {
+          "text": "Share the bounty with allied villages.",
+          "tooltip": "Less food kept, but major prestige and alliance boost.",
+          "effects": [
+            { "type": "RESOURCE", "resource": "salmon_preserved", "amount": 60 },
+            { "type": "PRESTIGE", "amount": 8, "reason": "Generosity during abundance" },
+            { "type": "RELATIONSHIP_CHANGE", "target": "all_allies", "amount": 10 }
+          ],
+          "narrative": "You send canoe-loads of fresh salmon to neighboring villages with your compliments. The gesture is remembered. When your name is spoken at their fires, it is spoken well."
+        }
+      ],
+      "tags": ["food", "abundance", "village", "choice"],
+      "era_availability": [1, 2, 3],
+      "cooldown_seasons": 12
+    },
+    {
+      "id": "master_carver_vision",
+      "category": "spiritual",
+      "title": "The Carver's Dream",
+      "description": "Your master carver approaches at dawn, visibly shaken. They dreamed of the pole — but in the dream, an additional figure appeared that was not in the original design. They believe the figure must be added.",
+      "portrait": "portrait_carver_npc",
+      "conditions": {
+        "context": "VILLAGE",
+        "has_active_pole_project": true,
+        "has_master_carver": true,
+        "probability": 0.20
+      },
+      "choices": [
+        {
+          "text": "Allow the carver to follow their vision.",
+          "tooltip": "Adds unique bonus figure but extends carving time.",
+          "effects": [
+            { "type": "POLE_MODIFY", "action": "add_vision_figure" },
+            { "type": "POLE_DELAY", "turns": 2 },
+            { "type": "POLE_PRESTIGE_BONUS", "amount": 15 }
+          ],
+          "narrative": "The carver's eyes brighten. They return to the cedar with renewed purpose, and what emerges over the following weeks is something unexpected — a figure that tells a truth about your lineage that no one quite knew how to express until now."
+        },
+        {
+          "text": "Thank them but keep to the original design.",
+          "tooltip": "No delay, no bonus. Safe.",
+          "effects": [],
+          "narrative": "The carver nods, accepting your decision. The work continues as planned. Perhaps the dream meant something else."
+        }
+      ],
+      "tags": ["spiritual", "carving", "pole", "dream"],
+      "era_availability": [1, 2, 3, 4],
+      "cooldown_seasons": 8
+    },
+    {
+      "id": "raiders_spotted",
+      "category": "conflict",
+      "title": "War Canoes on the Horizon",
+      "description": "The lookout's call cuts through the morning air. Three — no, four — canoes approaching from the south. War canoes. Moving fast. Painted for battle.",
+      "portrait": "scene_war_canoes",
+      "music_override": "conflict_approach",
+      "conditions": {
+        "context": "VILLAGE",
+        "has_watchtower": true,
+        "era": [2, 3, 4],
+        "probability": 0.08,
+        "min_prestige": 50
+      },
+      "choices": [
+        {
+          "text": "Launch our war canoe to meet them at sea.",
+          "tooltip": "Aggressive. Requires war canoe and trained crew.",
+          "conditions": { "has_canoe_type": "war_canoe", "min_warriors": 12 },
+          "effects": [{ "type": "TRIGGER_CONFLICT", "conflict_type": "sea_battle", "advantage": "initiative" }],
+          "narrative": "Your war canoe hits the water before the raiders expect it. The crew paddles hard, singing. You will meet them where the ocean decides, not on your beach."
+        },
+        {
+          "text": "Prepare beach defenses and stand ready.",
+          "tooltip": "Defensive. Fortification bonuses apply.",
+          "effects": [{ "type": "TRIGGER_CONFLICT", "conflict_type": "beach_defense", "advantage": "fortification" }],
+          "narrative": "Women and children move to the longhouses. Warriors take positions among the beach logs. You watch the canoes grow larger on the water."
+        },
+        {
+          "text": "Send a fast canoe to parley under peace signs.",
+          "tooltip": "Risky. May prevent combat or may fail.",
+          "checks": [{
+            "type": "SKILL_CHECK",
+            "skill": "diplomacy",
+            "difficulty": 15,
+            "success": {
+              "effects": [{ "type": "DIPLOMATIC_ENCOUNTER", "tension": "HIGH" }],
+              "narrative": "The peace sign slows them. Their lead canoe veers toward yours. Tense moments on the water — but words, not weapons, are exchanged. They have demands. Now you must decide."
+            },
+            "failure": {
+              "effects": [{ "type": "TRIGGER_CONFLICT", "conflict_type": "beach_defense", "advantage": "none" }],
+              "narrative": "Your peace canoe is ignored. The raiders surge past it toward the beach. You've lost time you needed to prepare."
+            }
+          }]
+        }
+      ],
+      "tags": ["conflict", "defense", "village", "urgent"],
+      "era_availability": [2, 3, 4],
+      "cooldown_seasons": 6
+    },
+    {
+      "id": "the_sickness_arrives",
+      "category": "historical",
+      "title": "The Sickness",
+      "description": "It begins quietly. A trading partner's village falls silent. Then word comes from the south — a new sickness, one your healers do not recognize. People fall ill with terrible speed. And it is coming north.",
+      "portrait": "scene_village_somber",
+      "music_override": "era4_grief",
+      "conditions": {
+        "context": "VILLAGE",
+        "era": [4],
+        "is_era_trigger": true,
+        "once_per_campaign": true
+      },
+      "choices": [
+        {
+          "text": "Close the village. No visitors, no trade, no travel.",
+          "tooltip": "May reduce impact. Economic cost is severe.",
+          "effects": [
+            { "type": "POPULATION_LOSS", "percent": 0.15, "over_turns": 4 },
+            { "type": "TRADE_SUSPENDED", "turns": 6 },
+            { "type": "SET_FLAG", "flag": "quarantine_attempted" }
+          ],
+          "narrative": "You close the inlet. Canoes are beached. Visitors turned away. The silence is deafening. But the sickness comes anyway — carried perhaps on the wind, or by birds, or by fate. Your losses are terrible. But others lose more."
+        },
+        {
+          "text": "Seek spiritual guidance and healing.",
+          "tooltip": "Cultural response. May help morale even if sickness still comes.",
+          "effects": [
+            { "type": "POPULATION_LOSS", "percent": 0.25, "over_turns": 4 },
+            { "type": "CREW_MORALE", "amount": -20 },
+            { "type": "SPIRITUAL_EVENT", "subtype": "healing_ceremony" },
+            { "type": "SET_FLAG", "flag": "spiritual_response" }
+          ],
+          "narrative": "Ceremonies are held. The spiritual advisor works without rest. But the sickness does not listen to the old ways. It takes who it takes. The village mourns as it has never mourned."
+        },
+        {
+          "text": "Consolidate with allied villages for mutual support.",
+          "tooltip": "Strength in numbers, but concentration increases spread.",
+          "effects": [
+            { "type": "POPULATION_LOSS", "percent": 0.30, "over_turns": 4 },
+            { "type": "ALLIANCE_STRENGTH", "target": "all_allies", "amount": 15 },
+            { "type": "POPULATION_GAIN", "amount": 20, "reason": "refugee_absorption" },
+            { "type": "SET_FLAG", "flag": "consolidation_response" }
+          ],
+          "narrative": "Families flow together from smaller villages. Longhouses fill with relatives from distant inlets. The sickness moves through this dense community like fire through dry cedar. But those who survive are bonded unbreakably."
+        }
+      ],
+      "tags": ["historical", "epidemic", "era_transition", "emotional"],
+      "era_availability": [4],
+      "cooldown_seasons": -1,
+      "emotional_note": "Handle with extreme care. This represents real historical trauma. Player should feel the weight without exploitation."
+    },
+    {
+      "id": "ancestors_dream",
+      "category": "spiritual",
+      "title": "Dream of the Ancestor",
+      "description": "In the deep of winter night, you dream. An ancestor — someone whose face you know from the pole but have never met — stands on a shore you've never seen. They point across the water and speak words you almost understand.",
+      "portrait": "scene_dream",
+      "music_override": "dream_theme",
+      "conditions": {
+        "context": "VILLAGE",
+        "season": "WINTER",
+        "probability": 0.15,
+        "has_pole": true
+      },
+      "choices": [
+        {
+          "text": "Follow their gaze. What lies across that water?",
+          "tooltip": "May reveal a new location or opportunity.",
+          "effects": [
+            { "type": "DISCOVER_LOCATION", "chance": 0.6, "location_type": "significant" },
+            { "type": "OMEN", "omen_id": "ancestor_guidance" }
+          ],
+          "narrative": "You wake with a direction burned into your mind — northwest, past the outer islands. Something is there. The ancestor knew. Now you know."
+        },
+        {
+          "text": "Try to hear their words more clearly.",
+          "tooltip": "Spiritual insight. Advisor helps interpretation.",
+          "conditions": { "has_spiritual_advisor": true },
+          "effects": [
+            { "type": "EVENT_PREVIEW", "turns_ahead": 3 },
+            { "type": "SPIRITUAL_PRESTIGE", "amount": 3 }
+          ],
+          "narrative": "The advisor listens to your account, asks careful questions. 'They warn of a change,' they say finally. 'Prepare. What comes need not destroy — if we are ready.'"
+        },
+        {
+          "text": "Remember the dream but take no immediate action.",
+          "effects": [{ "type": "SET_FLAG", "flag": "ancestor_dream_unresolved" }],
+          "narrative": "You carry the dream through the next days. It colors everything — the way you look at the water, the faces on the pole. Perhaps its meaning will become clear in time."
+        }
+      ],
+      "tags": ["spiritual", "dream", "ancestor", "winter", "guidance"],
+      "era_availability": [1, 2, 3, 4, 5],
+      "cooldown_seasons": 8
+    },
+
+    {
+      "id": "feud_reignites",
+      "title": "Old Wounds Reopen",
+      "type": "CONFLICT_EVENT",
+      "subtype": "feud_escalation",
+      "description": "A trader from {rival_community} is found dead near your fishing grounds. His canoe was swamped in rough water — an accident, by all evidence. But his family does not see it that way. Word reaches you that their chief has declared your village responsible. The old feud, smouldering for years, threatens to flare again.",
+      "conditions": [
+        { "type": "FEUD_STATE", "target": "any", "value": "SMOULDERING" },
+        { "type": "MIN_ERA", "value": 2 }
+      ],
+      "choices": [
+        {
+          "text": "Send a delegation with gifts and your account of events.",
+          "tooltip": "Diplomacy attempt. Costs resources but may prevent escalation.",
+          "requirements": [{ "type": "RESOURCE_MIN", "resource": "trade_goods", "amount": 10 }],
+          "effects": [
+            { "type": "RESOURCE", "resource": "trade_goods", "amount": -10 },
+            { "type": "FEUD_DEESCALATION", "action": "pay_reparations" },
+            { "type": "PRESTIGE", "amount": 5 }
+          ],
+          "narrative": "You send your most trusted speaker with cedar boxes of dried halibut and dentalium shells. The gesture is noted. The dead man's family accepts your account — reluctantly. The feud remains, but it does not deepen."
+        },
+        {
+          "text": "Ignore their accusations. You owe them nothing.",
+          "tooltip": "No cost, but the feud will escalate. Raid likely within 2 seasons.",
+          "effects": [
+            { "type": "FEUD_ESCALATION", "action": "refuse_reparations", "value": 2 },
+            { "type": "SET_FLAG", "flag": "feud_escalated_recently" },
+            { "type": "RETALIATION_CLOCK", "turns": 6 }
+          ],
+          "narrative": "You let the silence speak. If they want to believe a storm is your doing, let them. But your watchtower guards are told to keep sharper eyes on the water."
+        },
+        {
+          "text": "Propose a joint potlatch to settle this and all old grievances.",
+          "tooltip": "Expensive and time-consuming, but could resolve the feud entirely.",
+          "requirements": [
+            { "type": "RESOURCE_MIN", "resource": "food", "amount": 30 },
+            { "type": "PRESTIGE_MIN", "value": 200 }
+          ],
+          "effects": [
+            { "type": "TRIGGER_EVENT", "event_id": "peace_potlatch_preparation" },
+            { "type": "FEUD_DEESCALATION", "action": "joint_potlatch" },
+            { "type": "PRESTIGE", "amount": 15 }
+          ],
+          "narrative": "You send word not of denial, but of invitation. A feast. A reckoning of all that lies between your villages — the old raid, the dead fisher, the years of cold silence. Let it end at a fire, not on a beach."
+        }
+      ],
+      "tags": ["conflict", "feud", "diplomacy", "escalation"],
+      "era_availability": [2, 3, 4],
+      "cooldown_seasons": 12
+    },
+
+    {
+      "id": "war_trait_moment",
+      "title": "The Veteran's Counsel",
+      "type": "CONFLICT_EVENT",
+      "subtype": "war_trait",
+      "description": "Your eldest warrior, {veteran_name}, approaches you at the fire. The scars on their arms catch the light. 'I have seen what you are planning,' they say quietly. 'The raid on {target_village}. I have been there before — years ago, under your uncle's command. Let me tell you what I remember.'",
+      "conditions": [
+        { "type": "HAS_CREW_TRAIT", "trait": "veteran" },
+        { "type": "FLAG_SET", "flag": "raid_planned" }
+      ],
+      "choices": [
+        {
+          "text": "Listen carefully and adjust your plans.",
+          "tooltip": "Intelligence quality improved. Veteran shares knowledge of target.",
+          "effects": [
+            { "type": "INTELLIGENCE_BOOST", "quality_increase": 1 },
+            { "type": "CREW_MORALE", "amount": 5 },
+            { "type": "SET_FLAG", "flag": "veteran_counsel_taken" }
+          ],
+          "narrative": "The old warrior speaks for a long time. Beach approaches. The sound the gravel makes. Where the longhouses sit relative to the tree line. What the tides do at dawn. When they finish, you know that place as if you had walked it yourself."
+        },
+        {
+          "text": "Thank them but trust your own plan.",
+          "tooltip": "No intelligence bonus, but maintains your authority.",
+          "effects": [
+            { "type": "PRESTIGE", "amount": 2 }
+          ],
+          "narrative": "You nod respectfully but do not change your plans. This is your raid, your name on the line. The veteran watches you go with unreadable eyes."
+        }
+      ],
+      "tags": ["conflict", "war_trait", "veteran", "intelligence", "pre_raid"],
+      "era_availability": [2, 3, 4],
+      "cooldown_seasons": 6
+    },
+
+    {
+      "id": "aftermath_captive_decision",
+      "title": "The Captive's Fate",
+      "type": "CONFLICT_EVENT",
+      "subtype": "aftermath",
+      "description": "The raid is over. Among those taken is {captive_name}, a person of some standing in {enemy_village}. They sit in your longhouse, watching everything with wary eyes. Your people look to you. What is done with this person will echo far beyond this season.",
+      "conditions": [
+        { "type": "FLAG_SET", "flag": "has_captives" },
+        { "type": "POST_CONFLICT", "turns_since": 1 }
+      ],
+      "choices": [
+        {
+          "text": "Send word to their village. Name your ransom price.",
+          "tooltip": "Material reward. Moderate prestige. Feud slightly de-escalated.",
+          "effects": [
+            { "type": "CAPTIVE_ACTION", "action": "ransom" },
+            { "type": "RESOURCE", "resource": "trade_goods", "amount": 20 },
+            { "type": "PRESTIGE", "amount": 5 },
+            { "type": "FEUD_DEESCALATION", "action": "return_captives" }
+          ],
+          "narrative": "The ransom is paid in copper and cedar bark. The captive returns home, thinner and quieter. Their village will remember both the taking and the price — but the exchange itself is a thread of normalcy in the hostility."
+        },
+        {
+          "text": "Offer them a place in your community.",
+          "tooltip": "High prestige. Strong feud de-escalation. Gain a crew member over time.",
+          "requirements": [{ "type": "RESOURCE_MIN", "resource": "food", "amount": 15 }],
+          "effects": [
+            { "type": "CAPTIVE_ACTION", "action": "adopt" },
+            { "type": "PRESTIGE", "amount": 10 },
+            { "type": "FEUD_DEESCALATION", "action": "return_captives" },
+            { "type": "CREW_GAIN", "delay_seasons": 4 }
+          ],
+          "narrative": "It takes time. Seasons of watchfulness on both sides. But eventually, {captive_name} begins to work alongside your people. Not as a prisoner. As someone finding a new place. Their knowledge of the enemy village is invaluable — and their presence here is its own kind of message."
+        },
+        {
+          "text": "Release them freely, with gifts for their family.",
+          "tooltip": "Maximum prestige. Strongest de-escalation. Intimidation bonus (power gesture).",
+          "requirements": [{ "type": "RESOURCE_MIN", "resource": "trade_goods", "amount": 8 }],
+          "effects": [
+            { "type": "CAPTIVE_ACTION", "action": "release" },
+            { "type": "RESOURCE", "resource": "trade_goods", "amount": -8 },
+            { "type": "PRESTIGE", "amount": 15 },
+            { "type": "FEUD_DEESCALATION", "action": "return_captives" },
+            { "type": "INTIMIDATION_BONUS", "amount": 5 }
+          ],
+          "narrative": "You give {captive_name} a cedar box with smoked fish and a new blanket. 'Tell your chief what you saw here,' you say. 'Not a people who need to hold others to feel strong.' The gesture will be spoken of up and down the coast. Some will call it foolish. Others will understand exactly what it means."
+        }
+      ],
+      "tags": ["conflict", "aftermath", "captive", "diplomacy", "moral_choice"],
+      "era_availability": [1, 2, 3, 4],
+      "cooldown_seasons": 0
+    },
+
+    {
+      "id": "retaliation_pressure",
+      "title": "The Village Demands Vengeance",
+      "type": "CONFLICT_EVENT",
+      "subtype": "retaliation",
+      "description": "Three moons have passed since the raid on your village. The burned fish racks have been rebuilt, but the memory has not cooled. Warriors sharpen weapons openly. Mothers hold their children tighter when canoes appear on the horizon. Your sister's husband, a respected elder, comes to you. 'How long will you wait?' he asks. The whole village is listening for your answer.",
+      "conditions": [
+        { "type": "FLAG_SET", "flag": "village_was_raided" },
+        { "type": "TURNS_SINCE_FLAG", "flag": "village_was_raided", "min_turns": 6 },
+        { "type": "FLAG_NOT_SET", "flag": "retaliation_launched" }
+      ],
+      "choices": [
+        {
+          "text": "Begin planning the retaliation raid immediately.",
+          "tooltip": "High morale boost. Crew eager. But enemy may be prepared.",
+          "effects": [
+            { "type": "CREW_MORALE", "amount": 20 },
+            { "type": "SET_FLAG", "flag": "retaliation_launched" },
+            { "type": "TRIGGER_EVENT", "event_id": "raid_planning_phase" },
+            { "type": "PRESTIGE", "amount": 10 }
+          ],
+          "narrative": "The word spreads through the village like fire through dry grass. Warriors volunteer. The war canoe is dragged to the water's edge and inspected. Songs are sung — old songs, from before your time. Your people are ready."
+        },
+        {
+          "text": "Counsel patience. We strike when the time is right.",
+          "tooltip": "Moderate morale loss now, but allows better preparation.",
+          "effects": [
+            { "type": "CREW_MORALE", "amount": -10 },
+            { "type": "PRESTIGE", "amount": -5 },
+            { "type": "SET_FLAG", "flag": "retaliation_delayed" }
+          ],
+          "narrative": "You speak of tides and seasons. Of striking when the enemy sleeps, not when they stand with spears ready. Some warriors nod. Others spit and walk away. You will need to act before too long, or this patience will look like cowardice."
+        },
+        {
+          "text": "We will seek peace through other means.",
+          "tooltip": "Major prestige risk. Warriors will be angry. But opens diplomatic path.",
+          "requirements": [{ "type": "PRESTIGE_MIN", "value": 150 }],
+          "effects": [
+            { "type": "CREW_MORALE", "amount": -15 },
+            { "type": "PRESTIGE", "amount": -15 },
+            { "type": "SET_FLAG", "flag": "chose_peace_over_retaliation" },
+            { "type": "UNLOCK_OPTION", "option": "peace_negotiation_with_raiders" }
+          ],
+          "narrative": "The silence that follows your words is heavier than any storm. You have chosen a path that some will never forgive. But you have also opened a door that violence keeps shut. Whether anything good comes through it depends on what you do next."
+        }
+      ],
+      "tags": ["conflict", "retaliation", "morale", "leadership", "moral_choice"],
+      "era_availability": [1, 2, 3, 4],
+      "cooldown_seasons": 0
+    }
+  ]
+}

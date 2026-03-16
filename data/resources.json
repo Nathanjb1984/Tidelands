@@ -1,0 +1,156 @@
+{
+  "resources": [
+    {
+      "id": "salmon_preserved",
+      "name": "Preserved Salmon",
+      "category": "FOOD",
+      "description": "Smoked and dried salmon. The foundation of the food economy. Essential for winter survival and potlatch feasting.",
+      "icon": "icon_salmon",
+      "spoilage_rate": 0.02,
+      "trade_value": 1,
+      "potlatch_value": 1,
+      "production": {
+        "source": "fishing",
+        "requires_preservation": true,
+        "seasonal_availability": { "spring": 0.5, "summer": 1.0, "autumn": 0.7, "winter": 0.1 }
+      }
+    },
+    {
+      "id": "halibut_preserved",
+      "name": "Preserved Halibut",
+      "category": "FOOD",
+      "description": "Dried halibut. A high-value food requiring deep-water fishing skill. Prized as a trade good and feast component.",
+      "icon": "icon_halibut",
+      "spoilage_rate": 0.02,
+      "trade_value": 2,
+      "potlatch_value": 2,
+      "production": {
+        "source": "deep_fishing",
+        "requires_preservation": true,
+        "seasonal_availability": { "spring": 0.6, "summer": 0.8, "autumn": 0.5, "winter": 0.2 }
+      }
+    },
+    {
+      "id": "eulachon_oil",
+      "name": "Eulachon Oil",
+      "category": "FOOD",
+      "description": "Rendered oil from the eulachon (candlefish). The most important trade good on the coast. Preservative, condiment, and currency.",
+      "icon": "icon_oil",
+      "spoilage_rate": 0.01,
+      "trade_value": 5,
+      "potlatch_value": 3,
+      "production": {
+        "source": "seasonal_harvest",
+        "requires_preservation": true,
+        "seasonal_availability": { "spring": 1.0, "summer": 0.0, "autumn": 0.0, "winter": 0.0 },
+        "notes": "Only available during spring eulachon runs. Extremely valuable."
+      }
+    },
+    {
+      "id": "berries",
+      "name": "Berries",
+      "category": "FOOD",
+      "description": "Gathered berries — salmonberries, huckleberries, blueberries. Supplemental food and medicine ingredient.",
+      "icon": "icon_berries",
+      "spoilage_rate": 0.10,
+      "trade_value": 0.5,
+      "potlatch_value": 0.5,
+      "production": {
+        "source": "gathering",
+        "requires_preservation": false,
+        "seasonal_availability": { "spring": 0.3, "summer": 1.0, "autumn": 0.5, "winter": 0.0 }
+      }
+    },
+    {
+      "id": "shellfish",
+      "name": "Shellfish",
+      "category": "FOOD",
+      "description": "Clams, mussels, and other shellfish from tidal areas. Reliable low-effort food source. Does not preserve well.",
+      "icon": "icon_shellfish",
+      "spoilage_rate": 0.20,
+      "trade_value": 0.3,
+      "potlatch_value": 0.3,
+      "production": {
+        "source": "tidal_gathering",
+        "requires_preservation": false,
+        "seasonal_availability": { "spring": 0.8, "summer": 1.0, "autumn": 0.8, "winter": 0.5 }
+      }
+    },
+    {
+      "id": "cedar_logs",
+      "name": "Cedar Logs",
+      "category": "MATERIAL",
+      "description": "Large red cedar logs. The supreme building material — canoes, longhouses, poles. Increasingly scarce in later eras.",
+      "icon": "icon_cedar_log",
+      "spoilage_rate": 0.005,
+      "trade_value": 8,
+      "potlatch_value": 0,
+      "production": {
+        "source": "forest_harvesting",
+        "requires_preservation": false,
+        "seasonal_availability": { "spring": 0.8, "summer": 1.0, "autumn": 0.6, "winter": 0.2 },
+        "notes": "Harvesting requires labor + access to old-growth cedar stands. Availability decreases each era."
+      }
+    },
+    {
+      "id": "cedar_bark",
+      "name": "Cedar Bark",
+      "category": "MATERIAL",
+      "description": "Stripped cedar bark for weaving, rope-making, and clothing. Harvested without killing the tree.",
+      "icon": "icon_cedar_bark",
+      "spoilage_rate": 0.01,
+      "trade_value": 1,
+      "potlatch_value": 0,
+      "production": {
+        "source": "bark_stripping",
+        "requires_preservation": false,
+        "seasonal_availability": { "spring": 1.0, "summer": 0.5, "autumn": 0.0, "winter": 0.0 },
+        "notes": "Best harvested in spring when bark peels easily."
+      }
+    },
+    {
+      "id": "woven_blankets",
+      "name": "Woven Blankets",
+      "category": "CRAFTED",
+      "description": "Woven cedar bark or mountain goat wool blankets. Important trade goods, potlatch gifts, and ceremonial items.",
+      "icon": "icon_blanket",
+      "spoilage_rate": 0.005,
+      "trade_value": 4,
+      "potlatch_value": 5,
+      "production": {
+        "source": "weaving_house",
+        "requires": ["cedar_bark"],
+        "production_rate": "2 per season per weaver"
+      }
+    },
+    {
+      "id": "carved_objects",
+      "name": "Carved Objects",
+      "category": "CRAFTED",
+      "description": "Carved cedar boxes, bowls, masks, and decorative items. High-value trade goods and prestige gifts.",
+      "icon": "icon_carved_box",
+      "spoilage_rate": 0.002,
+      "trade_value": 6,
+      "potlatch_value": 8,
+      "production": {
+        "source": "carving_shed",
+        "requires": ["cedar_logs"],
+        "production_rate": "1 per season per carver"
+      }
+    },
+    {
+      "id": "coppers",
+      "name": "Copper",
+      "category": "PRESTIGE",
+      "description": "A shield-shaped copper — the supreme prestige object. Named, valued, and traded at enormous cost. Breaking a copper at a potlatch is the ultimate display of wealth.",
+      "icon": "icon_copper",
+      "spoilage_rate": 0.0,
+      "trade_value": 100,
+      "potlatch_value": 100,
+      "production": {
+        "source": "trade_only",
+        "notes": "Cannot be produced. Must be acquired through distant trade or as gifts from high-prestige allies. Extremely rare."
+      }
+    }
+  ]
+}

@@ -1,0 +1,659 @@
+{
+  "_meta": {
+    "description": "Two complete sample raid flows demonstrating the multi-phase conflict system. One offensive raid expedition and one defensive village raid.",
+    "version": "1.0",
+    "game": "TIDELINES: Cedar, Sea & Legacy",
+    "usage": "These are full narrative event chains that show how the conflict system plays out turn-by-turn with branching choices at every phase."
+  },
+
+  "offensive_raid_flow": {
+    "id": "sample_offensive_raid_cedar_creek",
+    "title": "The Raid on Cedar Creek",
+    "summary": "The player's village plans and executes an offensive raid on a rival community called Cedar Creek, which has been overfishing in contested waters. This flow demonstrates all six phases of the offensive raid system.",
+    "context": {
+      "player_village": "Tllaal Naay (Sea House)",
+      "target_village": "Cedar Creek",
+      "era": 2,
+      "season": "summer",
+      "feud_state": "ACTIVE_FEUD",
+      "primary_objective": "resource_seizure",
+      "secondary_objective": "plant_crest_marker",
+      "trigger": "Cedar Creek has raided the player's fishing grounds twice. The village demands action."
+    },
+
+    "phases": [
+      {
+        "phase": "1_intelligence",
+        "title": "Gathering Knowledge",
+        "turn": "Summer, Turn 1",
+        "narrative_intro": "The decision has been made. Cedar Creek will answer for what they have taken. But a wise chief does not paddle blindly into the dark. Before the war canoe is loaded, you must learn what awaits you.",
+        "choices": [
+          {
+            "id": "send_scouts",
+            "text": "Send two young paddlers in a fishing canoe to observe Cedar Creek.",
+            "tooltip": "Best intelligence quality, but costs 1 turn and risks detection.",
+            "effects": [
+              { "type": "INTELLIGENCE_METHOD", "method": "scouts" },
+              { "type": "TURN_COST", "turns": 1 },
+              { "type": "DETECTION_RISK", "chance": 0.15 }
+            ],
+            "outcome_narrative": "Your scouts return after two days. They paddled past Cedar Creek at dusk, pretending to check crab traps. They counted three canoes on the beach — two fishing canoes and one larger vessel. The village has perhaps twelve warriors. They saw no fortifications on the beach, but the longhouse sits back from the waterline, sheltered by a ridge. The chief was seen working on a canoe — he does not seem to expect trouble.",
+            "intel_result": {
+              "crew_strength": "~12 warriors",
+              "defenses": "none_seen",
+              "canoe_count": "3 (2 fishing, 1 transport)",
+              "alert_level": "unaware",
+              "quality": "ACCURATE"
+            }
+          },
+          {
+            "id": "consult_traders",
+            "text": "Ask the Ninstints traders who visited Cedar Creek last month.",
+            "tooltip": "Free information, but may be outdated. No turn cost.",
+            "effects": [
+              { "type": "INTELLIGENCE_METHOD", "method": "traders" }
+            ],
+            "outcome_narrative": "The traders remember Cedar Creek well — they traded there during the spring salmon run. 'A modest village,' the eldest trader says. 'Their chief talks big but their canoes are old. They had many fish drying on the racks, though. And there was talk of a marriage with the Skidegate people. If that alliance holds, they may have more friends than you think.'",
+            "intel_result": {
+              "crew_strength": "moderate force",
+              "defenses": "unknown",
+              "canoe_count": "several",
+              "alert_level": "unknown",
+              "quality": "VAGUE",
+              "bonus_info": "Possible alliance with Skidegate"
+            }
+          },
+          {
+            "id": "read_omens",
+            "text": "Ask the spiritual advisor to seek guidance through ceremony.",
+            "tooltip": "Mystical insight. Unpredictable quality but may reveal hidden dangers.",
+            "requirements": [{ "type": "HAS_SPIRITUAL_ADVISOR", "value": true }],
+            "effects": [
+              { "type": "INTELLIGENCE_METHOD", "method": "omens" },
+              { "type": "RESOURCE", "resource": "ceremonial_goods", "amount": -2 }
+            ],
+            "outcome_narrative": "The spiritual advisor burns cedar bark and sits in the smoke for a long time. When they speak, their voice is distant. 'I see water between two fires. One fire is yours. The other is not yet lit.' They pause. 'The wind will be with you, but the tide will not wait.' You interpret this as favorable conditions but a narrow window of opportunity.",
+            "intel_result": {
+              "crew_strength": "unknown",
+              "defenses": "unknown",
+              "canoe_count": "unknown",
+              "alert_level": "unknown",
+              "quality": "VAGUE",
+              "omen_bonus": "weather_advantage_likely",
+              "omen_warning": "timing_critical"
+            }
+          }
+        ]
+      },
+
+      {
+        "phase": "2_approach",
+        "title": "The Crossing",
+        "turn": "Summer, Turn 2",
+        "narrative_intro": "The war canoe is loaded. Fifteen warriors sit at the paddles, their faces painted with your crest — Eagle and Killer Whale. The morning fog clings to the water as you push off from the beach. Cedar Creek lies half a day's paddle to the north, through the channel between the islands. Every stroke takes you closer to the moment where words end and actions begin.",
+        "sub_choices": {
+          "time_of_day": {
+            "prompt": "When will you arrive at Cedar Creek?",
+            "options": [
+              {
+                "id": "dawn_arrival",
+                "text": "Time the approach for dawn. Strike as the village wakes.",
+                "effects": { "surprise_bonus": 15, "visibility": "good", "navigation_risk": "low" },
+                "narrative": "You paddle through the night, the stars your guide. The crew is tired but focused. As the first grey light touches the eastern sky, Cedar Creek appears — smoke rising from the longhouse, a dog barking somewhere. No one is on the beach."
+              },
+              {
+                "id": "night_arrival",
+                "text": "Approach under darkness. Maximum surprise.",
+                "effects": { "surprise_bonus": 25, "visibility": "poor", "navigation_risk": "high" },
+                "narrative": "The darkness is total except for the phosphorescence in each paddle stroke. Your navigator guides by memory and star position. A rock scrapes the hull — hearts stop — but the canoe holds. You reach the shallows off Cedar Creek in absolute silence. No lights. No movement."
+              },
+              {
+                "id": "fog_approach",
+                "text": "Use the morning fog as cover.",
+                "effects": { "surprise_bonus": 20, "visibility": "low", "navigation_risk": "medium" },
+                "narrative": "The fog is a gift. Your canoe slides through it like a spirit. The world shrinks to twenty paces in every direction. You hear Cedar Creek before you see it — the slap of water against beached canoes, a child's voice calling for breakfast. Then the fog thins, and there it is."
+              }
+            ]
+          },
+          "formation": {
+            "prompt": "How does your force approach?",
+            "options": [
+              {
+                "id": "single_canoe_stealth",
+                "text": "Single canoe, tight and quiet.",
+                "effects": { "stealth_bonus": 10, "intimidation_penalty": -5 },
+                "narrative": "One canoe. One chance. Every paddle dips in unison, silent as breathing."
+              },
+              {
+                "id": "spread_intimidating",
+                "text": "If you have multiple canoes — spread formation for maximum intimidation.",
+                "requirements": [{ "type": "MIN_CANOES", "value": 2 }],
+                "effects": { "stealth_bonus": -10, "intimidation_bonus": 15 },
+                "narrative": "Your canoes fan out across the approach, war crests visible, paddles rising and falling in practiced rhythm. Anyone watching from shore will see not a raid but an invasion."
+              }
+            ]
+          }
+        },
+        "intimidation_check": {
+          "narrative": "As your canoe nears the beach, an old man carrying a water bucket sees you. His bucket drops. He runs toward the longhouse, shouting.",
+          "if_intimidation_succeeds": {
+            "threshold": "dominant",
+            "narrative": "Before you even beach the canoe, a figure appears at the longhouse door — Cedar Creek's chief, wrapped hastily in a blanket, arms raised. 'We will talk!' he calls. 'Come ashore as guests, not as enemies!' Your war canoe, your painted crests, your reputation — they have done the work.",
+            "unlocks": "negotiation_under_arms"
+          },
+          "if_intimidation_fails": {
+            "narrative": "Warriors spill from the longhouse. Not many — but they are armed, and they are moving to the beach. Cedar Creek means to fight.",
+            "continues_to": "engagement"
+          }
+        }
+      },
+
+      {
+        "phase": "3_engagement",
+        "title": "The Beach at Cedar Creek",
+        "turn": "Summer, Turn 2 (continued)",
+        "narrative_intro": "The bow of your war canoe grinds into the gravel of Cedar Creek's beach. Your warriors leap into the shallow water. Across the beach, Cedar Creek's defenders form a ragged line in front of their longhouse. The air smells of salt, smoke, and cedar. Somewhere behind the line, women and children are moving toward the forest. This is the moment.",
+        "choices": [
+          {
+            "id": "overwhelming_assault",
+            "text": "Full assault. Strike hard, strike fast. End this.",
+            "tooltip": "Highest reward if you win. Highest losses if you don't.",
+            "effects": [
+              { "type": "TACTIC", "tactic": "overwhelming_assault" },
+              { "type": "ATTACK_MODIFIER", "value": 1.30 },
+              { "type": "LOSS_MODIFIER", "value": 1.50 }
+            ],
+            "narrative": "You raise your weapon and shout the war cry. Your warriors surge forward across the wet gravel, crests flashing. Cedar Creek's line wavers — then holds. The clash is furious and brief."
+          },
+          {
+            "id": "measured_push",
+            "text": "Advance in good order. Maintain formation.",
+            "tooltip": "Balanced risk. Leave room to adapt.",
+            "effects": [
+              { "type": "TACTIC", "tactic": "measured_push" },
+              { "type": "ATTACK_MODIFIER", "value": 1.10 },
+              { "type": "LOSS_MODIFIER", "value": 1.00 }
+            ],
+            "narrative": "Your warriors form a line across the beach, shields overlapping, moving steadily forward. Cedar Creek's defenders shout challenges. Your crew answers with disciplined silence. Step by step, the distance closes."
+          },
+          {
+            "id": "feint_and_probe",
+            "text": "Test their defenses. Don't commit until you see a weakness.",
+            "tooltip": "Low risk. May reveal an opportunity. Lower reward.",
+            "effects": [
+              { "type": "TACTIC", "tactic": "feint_and_probe" },
+              { "type": "ATTACK_MODIFIER", "value": 0.80 },
+              { "type": "LOSS_MODIFIER", "value": 0.60 }
+            ],
+            "narrative": "You send three warriors forward in a rush — they clash briefly with Cedar Creek's right flank, then fall back. You watch. The defenders on the left shifted to help. There. That's where the line is thin."
+          },
+          {
+            "id": "negotiation_under_arms",
+            "text": "Approach with weapons ready, but call for terms.",
+            "tooltip": "You came for resources, not blood. Let them choose.",
+            "effects": [
+              { "type": "TACTIC", "tactic": "negotiation_under_arms" },
+              { "type": "ATTACK_MODIFIER", "value": 0.0 },
+              { "type": "DIPLOMACY_CHECK", "modifier": 15 }
+            ],
+            "narrative": "You step forward between the lines and drive your paddle-staff into the gravel. 'We did not come for your lives,' you say. 'We came for what is owed. Your chief knows what was taken from our waters. Return it, and we leave. Refuse, and my warriors finish what they started.'"
+          }
+        ]
+      },
+
+      {
+        "phase": "4_resolution",
+        "title": "The Clash",
+        "turn": "Summer, Turn 2 (continued)",
+        "narrative_intro": "This phase is resolved by the EngagementResolver system in multiple rounds. Below are sample narrative outputs for each round.",
+        "sample_resolution": {
+          "round_1_opening_clash": {
+            "narrative": "Your warriors hit Cedar Creek's line like a wave against a seawall. The defenders stagger — your surprise and momentum carry the first moments. Two of Cedar Creek's warriors fall back, one clutching a shoulder. Your crew pushes past the tide line, boots on dry gravel now."
+          },
+          "round_2_sustained_engagement": {
+            "narrative": "Cedar Creek's chief rallies his people from behind the fish drying racks. The fighting becomes close and grinding. Your veteran, Gwaay, holds the center with terrible calm — his experience shows. But Cedar Creek's warriors know this ground, and they fight with the fury of people defending their home."
+          },
+          "round_3_turning_point": {
+            "event": "war_song",
+            "narrative": "From the back of your line, a voice rises — Kaahl, the War Singer, survivor of three raids. The song is ancient, older than anyone alive. It speaks of Eagle descending, of enemies scattering like sandpipers. Your warriors' eyes harden. Their arms find new strength. Cedar Creek's defenders hear the song too, and something in their resolve cracks."
+          },
+          "round_4_resolution": {
+            "outcome": "VICTORY",
+            "narrative": "Cedar Creek's line breaks. Not all at once — first the left flank, then the center, then finally the right as their chief orders withdrawal toward the forest. Your warriors do not pursue past the longhouse. The beach belongs to you. The fish racks, heavy with dried salmon, are yours to take."
+          }
+        }
+      },
+
+      {
+        "phase": "5_withdrawal",
+        "title": "Loading and Leaving",
+        "turn": "Summer, Turn 2 (continued)",
+        "narrative_intro": "The fighting is over, but the operation is not. Cedar Creek's warriors have retreated to the tree line. They watch. Your crew must work fast — load the spoils, tend the wounded, and get back to sea before reinforcements arrive or the tide turns against you.",
+        "choices": [
+          {
+            "id": "quick_load_and_go",
+            "text": "Take what you can carry quickly. Back to the canoe. Now.",
+            "tooltip": "Safest withdrawal. Moderate spoils. No pursuit risk.",
+            "effects": [
+              { "type": "SPOILS_MODIFIER", "value": 0.6 },
+              { "type": "PURSUIT_RISK", "value": 0.05 },
+              { "type": "TIME_ON_BEACH", "turns": 0 }
+            ],
+            "narrative": "Speed over greed. Your crew loads dried fish and cedar bark in armfuls, throwing it into the canoe. Within minutes, you are pushing off. Cedar Creek watches from the trees. You are gone before they can react."
+          },
+          {
+            "id": "thorough_loading",
+            "text": "Take everything of value. We earned this.",
+            "tooltip": "Maximum spoils, but lingering increases pursuit and counterattack risk.",
+            "effects": [
+              { "type": "SPOILS_MODIFIER", "value": 1.0 },
+              { "type": "PURSUIT_RISK", "value": 0.30 },
+              { "type": "TIME_ON_BEACH", "turns": 1 }
+            ],
+            "narrative": "You strip the fish racks clean. The cedar stores. A cache of dentalium shells. Even a fine paddle carved with killer whale designs. It takes time — too much time. You hear shouting from the tree line. Movement. But by the time Cedar Creek reorganizes, your canoe is loaded deep and pushing through the surf."
+          },
+          {
+            "id": "load_and_mark",
+            "text": "Take the spoils AND plant your crest marker on their beach.",
+            "tooltip": "Maximum spoils plus territorial claim. High humiliation. Feud will deepen.",
+            "effects": [
+              { "type": "SPOILS_MODIFIER", "value": 0.8 },
+              { "type": "SECONDARY_OBJECTIVE", "objective": "plant_crest_marker" },
+              { "type": "FEUD_ESCALATION", "value": 3 },
+              { "type": "PRESTIGE", "amount": 10 },
+              { "type": "PURSUIT_RISK", "value": 0.20 }
+            ],
+            "narrative": "Before leaving, you drive a carved Eagle post into the gravel of Cedar Creek's beach. Your crest, facing their longhouse. Every morning, their chief will wake and see it. The message is clear: this beach was taken, and the one who took it wants you to remember. Your crew loads the canoe with grim satisfaction."
+          }
+        ]
+      },
+
+      {
+        "phase": "6_aftermath",
+        "title": "The Return and the Reckoning",
+        "turn": "Summer, Turn 3",
+        "narrative_intro": "Your canoe rounds the headland and your village comes into view. People are already gathering on the beach — they saw you coming. The canoe sits heavy in the water with the weight of Cedar Creek's stores. As the hull grinds onto home gravel, the questions begin. What happened? Who is hurt? What did you bring?",
+        "immediate_aftermath": {
+          "casualty_report": {
+            "killed": [],
+            "wounded": [
+              {
+                "name": "Naang",
+                "severity": "moderate",
+                "description": "Took a blow to the arm during the beach assault. Will recover in 2 seasons but cannot paddle effectively until then.",
+                "mechanical_effect": { "type": "CREW_WOUNDED", "character": "naang", "recovery_seasons": 2, "stat_penalty": "paddle_speed -20%" }
+              }
+            ],
+            "captured": []
+          },
+          "spoils_catalogued": {
+            "resources_gained": [
+              { "resource": "dried_fish", "amount": 25 },
+              { "resource": "cedar_bark", "amount": 10 },
+              { "resource": "dentalium", "amount": 8 }
+            ],
+            "narrative": "The spoils are laid out on the beach for the village to see. Dried fish enough to feed your people through most of autumn. Cedar bark for weaving. And the dentalium — gleaming shell-money that speaks louder than any war cry."
+          }
+        },
+        "short_term_effects": {
+          "morale": {
+            "value": 15,
+            "narrative": "The village is elated. Children run between the fish racks. Warriors retell the beach assault with growing embellishment. For now, the fear of Cedar Creek's fishing incursions is replaced by pride."
+          },
+          "reputation_spread": {
+            "narrative": "Within days, traders carry the story north and south. Tllaal Naay raided Cedar Creek and took everything on their racks. The story grows in the telling. Your intimidation score increases. Other villages take note.",
+            "communities_reached": 4,
+            "intimidation_change": 8
+          },
+          "retaliation_clock": {
+            "turns_until_likely": 5,
+            "narrative": "Cedar Creek will not forget. They cannot — your crest marker stares them in the face every morning. It is not a question of whether they will retaliate, but when."
+          }
+        },
+        "long_term_effects": {
+          "feud_update": {
+            "new_state": "ACTIVE_FEUD",
+            "escalation_change": 4,
+            "narrative": "The feud with Cedar Creek has deepened. There is no trade, no communication, no possibility of marriage between your people. The crest marker you planted will ensure that this feud is remembered."
+          },
+          "pole_opportunity": {
+            "type": "history_pole",
+            "narrative": "Your master carver approaches. 'This victory should be remembered in cedar,' they say. 'An Eagle descending on a fish — your crest taking what is rightfully yours. Shall I begin?'",
+            "unlocks": "commission_war_history_pole"
+          },
+          "legacy_entry": "In the second summer of Chief {player_chief}'s rule, a raid was launched against Cedar Creek in answer for their theft of fish from our waters. The war canoe returned laden with stores, and an Eagle crest was planted on their beach."
+        }
+      }
+    ]
+  },
+
+  "defensive_raid_flow": {
+    "id": "sample_defensive_raid_dawn_attack",
+    "title": "The Dawn Attack",
+    "summary": "The player's village is attacked at dawn by raiders from a rival community called Copper Bay, seeking to capture canoes and avenge a perceived insult at a potlatch. This flow demonstrates the defensive raid experience from warning through aftermath.",
+    "context": {
+      "player_village": "Tllaal Naay (Sea House)",
+      "attacker_village": "Copper Bay",
+      "era": 3,
+      "season": "autumn",
+      "feud_state": "GRIEVANCE",
+      "attacker_objective": "canoe_capture",
+      "attacker_secondary": "prestige_raid",
+      "trigger": "At a recent potlatch, the player's chief publicly outshone Copper Bay's chief with a larger gift distribution. Copper Bay's chief, humiliated, has decided to strike."
+    },
+
+    "phases": [
+      {
+        "phase": "1_warning",
+        "title": "Smoke on the Water",
+        "turn": "Autumn, Turn 2 — Pre-Dawn",
+        "narrative_intro": "The watchtower guard wakes you before first light. Their voice is steady but urgent. 'Sails. Three — no, four canoes. Coming from the south, through the channel. War formation.' Your heart hammers as you pull on your cloak and climb the watchtower ladder. In the grey predawn light, you see them — dark shapes moving fast across the water. War canoes. Painted crests you cannot make out yet. They will be here before the sun clears the ridge.",
+        "warning_level": {
+          "watchtower": true,
+          "warning_turns": 2,
+          "narrative": "The watchtower gives you precious time. Without it, the raiders would have been on the beach before anyone woke."
+        },
+        "choices": [
+          {
+            "id": "sound_alarm_full",
+            "text": "Sound the full alarm. Wake every warrior. Prepare for battle.",
+            "tooltip": "Maximum preparation time. Entire village mobilizes.",
+            "effects": [
+              { "type": "ALARM_LEVEL", "level": "full" },
+              { "type": "PREPARATION_TURNS", "value": 2 },
+              { "type": "DEFENDER_MORALE", "value": 10 },
+              { "type": "SURPRISE_NEGATED", "value": true }
+            ],
+            "narrative": "The alarm drum sounds — three rapid beats, repeated. The village erupts. Warriors grab weapons from their sleeping places. Women begin moving children and elders toward the forest escape route. Fish drying racks are being pulled back from the beach. Your people have practiced this. They are afraid, but they are moving."
+          },
+          {
+            "id": "quiet_preparation",
+            "text": "Quiet preparation. Don't let them know we've seen them.",
+            "tooltip": "Raiders think they have surprise. You can set an ambush.",
+            "requirements": [{ "type": "HAS_BUILDING", "building": "beach_ambush_positions" }],
+            "effects": [
+              { "type": "ALARM_LEVEL", "level": "quiet" },
+              { "type": "AMBUSH_ENABLED", "value": true },
+              { "type": "SURPRISE_REVERSED", "value": true },
+              { "type": "CIVILIAN_RISK", "value": "moderate" }
+            ],
+            "narrative": "You whisper the orders. No drum. Wake the warriors silently, one by one. Move them to the ambush positions behind the driftwood on the beach. Let the raiders think the village sleeps. Let them beach their canoes. Let them step onto the gravel thinking themselves wolves among sleeping dogs. Then show them what a prepared beach looks like."
+          },
+          {
+            "id": "send_peace_canoe",
+            "text": "Launch a peace canoe to meet them at sea. Try to prevent bloodshed.",
+            "tooltip": "Risky. If they're determined to fight, the peace canoe is in danger.",
+            "effects": [
+              { "type": "DIPLOMACY_ATTEMPT", "value": true },
+              { "type": "PEACE_CANOE_RISK", "value": 0.25 },
+              { "type": "DEFENDER_MORALE", "value": -5 }
+            ],
+            "narrative": "You order a small canoe launched — two paddlers and your best speaker, carrying a white cedar branch. They paddle out into the grey water toward the approaching war canoes. If Copper Bay wants to talk, this gives them the chance. If not... your speaker knows the risk they are taking."
+          }
+        ]
+      },
+
+      {
+        "phase": "2_scramble",
+        "title": "The Minutes Before",
+        "turn": "Autumn, Turn 2 — Dawn",
+        "narrative_intro": "The sun breaks over the ridge as the first raider canoe enters the bay. You can see their crests now — Copper Bay. Bear and Raven. Four war canoes, each carrying eight to ten warriors. Forty fighters, maybe more. Your village has twenty-two warriors, plus eight older men who can still hold a weapon. The beach fortifications are solid. Your war canoe sits in the hidden launch channel. This is your home.",
+        "defender_preparation_choices": [
+          {
+            "id": "assign_beach_defense",
+            "text": "Main force on the beach behind the fortifications.",
+            "tooltip": "Strong defensive position. Use the log barriers you built.",
+            "effects": [
+              { "type": "DEFENSE_TACTIC", "tactic": "hold_the_beach" },
+              { "type": "FORTIFICATION_ACTIVE", "value": true },
+              { "type": "DEFENSE_MODIFIER", "value": 1.25 }
+            ],
+            "narrative": "Your warriors take their positions behind the log barriers. Spears bristle above the driftwood. The fortifications you built last spring feel solid under your hands. This is good ground."
+          },
+          {
+            "id": "launch_counter_at_sea",
+            "text": "Launch the war canoe from the hidden channel. Meet them on the water.",
+            "tooltip": "Aggressive. Splits enemy attention. Requires hidden canoe launch.",
+            "requirements": [{ "type": "HAS_BUILDING", "building": "hidden_canoe_launch" }],
+            "effects": [
+              { "type": "DEFENSE_TACTIC", "tactic": "meet_at_sea" },
+              { "type": "FLANKING_ACTIVE", "value": true },
+              { "type": "DEFENSE_MODIFIER", "value": 1.10 },
+              { "type": "CREW_SPLIT", "beach": 0.6, "canoe": 0.4 }
+            ],
+            "narrative": "You split your force. Half stay behind the beach barriers. The other half runs for the hidden channel where your war canoe waits, already loaded. The plan is simple: let Copper Bay commit to the beach, then hit them from behind. If it works, they'll be caught between your beach defenders and your canoe. If it fails, you've divided your strength."
+          },
+          {
+            "id": "concentrated_longhouse",
+            "text": "Fall back to the longhouse. Defend from the strongest position.",
+            "tooltip": "Strongest defense but concedes the beach. Canoes will be taken.",
+            "effects": [
+              { "type": "DEFENSE_TACTIC", "tactic": "concentrated_defense" },
+              { "type": "DEFENSE_MODIFIER", "value": 1.40 },
+              { "type": "BEACH_CONCEDED", "value": true },
+              { "type": "CANOE_RISK", "value": "high" }
+            ],
+            "narrative": "You make the hardest choice. The beach — and the canoes on it — will be lost. But the longhouse is cedar and stone, and thirty defenders inside it are worth fifty in the open. You order everyone back. The canoes sit on the beach like offerings. If Copper Bay wants them, they can have them. But when they come for your longhouse, they'll find it full of people with nothing left to lose."
+          }
+        ],
+        "civilian_evacuation": {
+          "narrative": "While you prepare, the women, children, and elders move along the forest escape route. Some carry bundles — the most precious things. An old woman clutches a carved box that holds crest regalia. A boy carries his grandfather's paddle. The supply cache in the forest has food for three days. Whatever happens on the beach, these people will survive.",
+          "effects": [{ "type": "CIVILIANS_EVACUATED", "success_rate": 0.95 }]
+        }
+      },
+
+      {
+        "phase": "3_engagement",
+        "title": "The Beach",
+        "turn": "Autumn, Turn 2 — Morning",
+        "narrative_intro": "Copper Bay's canoes hit the gravel. Warriors leap into the shallow water with a roar that shakes the morning air. Their crests — Bear, Raven, painted in red and black — flash as they charge. Behind the log barriers, your people grip their weapons. The world narrows to this beach, this moment, this tide.",
+        "intimidation_check": {
+          "attacker_intimidation": {
+            "war_canoe_fleet": 20,
+            "conflict_reputation": 15,
+            "chief_war_trait": 8,
+            "crest_display": 8,
+            "total": 51
+          },
+          "defender_resolve": {
+            "base_community": 40,
+            "defending_home": 20,
+            "chief_leadership": 10,
+            "fortification": 10,
+            "total": 80
+          },
+          "result": "Defender resolve exceeds intimidation. No morale penalty. Your people hold.",
+          "narrative": "The sight of four war canoes would break lesser villages. But your people are behind their own fortifications, on their own beach, defending their own children. The wall of war crests and shouted challenges bounces off something harder — the resolve of people who have nowhere to retreat."
+        },
+        "engagement_narrative": "The fighting begins at the waterline. Copper Bay's first wave hits the log barriers and is thrown back. They regroup and come again, this time trying to flank around the right side where the fortifications are thinner. Your veterans hold the center. The noise is terrible — wood on wood, shouts, the hiss of the tide pulling at the gravel beneath everyone's feet."
+      },
+
+      {
+        "phase": "4_resolution",
+        "title": "The Turning",
+        "turn": "Autumn, Turn 2 — Morning (continued)",
+        "narrative_intro": "Resolved by the EngagementResolver. Below are sample round narratives for the defensive engagement.",
+        "sample_resolution": {
+          "round_1_opening_clash": {
+            "narrative": "The fortifications hold. Copper Bay's initial charge breaks against the log barriers like water on rock. Three of their warriors are down — not dead, but out of the fight. Your people take heart. First blood is yours."
+          },
+          "round_2_sustained_engagement": {
+            "narrative": "Copper Bay's chief directs his warriors to the flanks. The fighting spreads along the entire beach. Your line is thin — every warrior is engaged. The old men with weapons stand behind, filling gaps when someone stumbles. This cannot last forever. Someone's strength will fail first."
+          },
+          "round_3_turning_point": {
+            "event": "hidden_canoe_flanking",
+            "narrative": "A war cry erupts from the south side of the bay. Your war canoe, launched from the hidden channel, rounds the point at full speed. Fifteen fresh warriors with paddles churning white water. Copper Bay's rear guard sees them and shouts a warning — too late. Your canoe crew hits the attackers from behind. The raiders are caught between the beach and the sea. Copper Bay's formation shatters.",
+            "is_conditional": true,
+            "condition": "Player chose 'launch_counter_at_sea' in Phase 2"
+          },
+          "round_3_turning_point_alternate": {
+            "event": "chief_rallies",
+            "narrative": "Your chief steps onto the top of the log barrier — fully visible, fully exposed. 'THIS IS OUR BEACH!' The shout carries over everything. Your warriors see their chief standing tall against the dawn sky, and something inside them ignites. The line pushes forward. Copper Bay gives ground.",
+            "is_conditional": true,
+            "condition": "Player chose 'hold_the_beach' in Phase 2"
+          },
+          "round_4_resolution": {
+            "outcome": "VICTORY",
+            "narrative": "Copper Bay breaks. Their chief calls the retreat — a sharp, bitter command. Warriors disengage and fall back toward their canoes. Some are limping. One canoe is being abandoned — there aren't enough uninjured paddlers to man it. They push off into the surf, leaving the beach to you. The abandoned canoe sits in the shallows, rocking gently in the waves."
+          }
+        }
+      },
+
+      {
+        "phase": "5_pursuit_decision",
+        "title": "Let Them Go?",
+        "turn": "Autumn, Turn 2 — Late Morning",
+        "narrative_intro": "Copper Bay's three remaining canoes are paddling hard for the open water. Their abandoned fourth canoe sits on your beach like a prize. Your war canoe is at the waterline, crew ready, adrenaline still coursing. You could pursue. Run them down in open water. Make this a victory they never forget. Or you could let them go, tend your wounded, and secure what you have.",
+        "choices": [
+          {
+            "id": "pursue",
+            "text": "Launch the war canoe. Run them down.",
+            "tooltip": "Maximum prestige and intimidation, but risks your crew in open water and extends the engagement.",
+            "effects": [
+              { "type": "PURSUIT", "value": true },
+              { "type": "PRESTIGE", "amount": 10 },
+              { "type": "INTIMIDATION_BONUS", "amount": 8 },
+              { "type": "CREW_FATIGUE", "value": "high" },
+              { "type": "FEUD_ESCALATION", "value": 2 },
+              { "type": "ADDITIONAL_LOSS_RISK", "value": 0.15 }
+            ],
+            "narrative": "Your war canoe leaps forward. The pursuit is fast and savage. Copper Bay's damaged canoes cannot outrun you. You catch the slowest one in the channel — its crew surrenders, throwing down their weapons. The other two escape into open water, but they will carry the memory of being hunted all the way home."
+          },
+          {
+            "id": "let_them_go",
+            "text": "Let them go. We have won enough today.",
+            "tooltip": "Lower prestige gain but preserves crew strength and shows restraint.",
+            "effects": [
+              { "type": "PURSUIT", "value": false },
+              { "type": "PRESTIGE", "amount": 3 },
+              { "type": "CREW_MORALE", "amount": 5 },
+              { "type": "FEUD_DEESCALATION", "value": 1 }
+            ],
+            "narrative": "You watch them go. Some of your warriors shout insults across the water. Others are already kneeling beside the wounded. 'We held,' your veteran says quietly. 'They know it now.' The abandoned canoe rocks in the tide. The beach belongs to you, and so does the morning."
+          },
+          {
+            "id": "capture_wounded",
+            "text": "Secure their wounded left on the beach. They are valuable.",
+            "tooltip": "Captives provide ransom leverage but deepen the feud.",
+            "effects": [
+              { "type": "CAPTIVE_TAKEN", "count": 2 },
+              { "type": "SET_FLAG", "flag": "has_captives" },
+              { "type": "FEUD_ESCALATION", "value": 1 },
+              { "type": "DIPLOMATIC_LEVERAGE", "value": 15 }
+            ],
+            "narrative": "Three of Copper Bay's warriors lie on the gravel, unable to retreat. Your people bind their wounds and lead them, carefully, to the longhouse. They are not mistreated — but they are not free. Their chief will want them back, and that want is something you can use."
+          }
+        ]
+      },
+
+      {
+        "phase": "6_aftermath",
+        "title": "After the Tide",
+        "turn": "Autumn, Turn 3",
+        "narrative_intro": "The battle is over. The beach is scarred — scuffed gravel, splintered log barriers, a broken paddle half-buried in the sand. Your people are returning from the forest escape route. Children run to parents. An old woman touches the longhouse wall and closes her eyes. You stand on the beach where you fought, and the weight of what just happened settles onto your shoulders.",
+        "immediate_aftermath": {
+          "casualty_report": {
+            "killed": [
+              {
+                "name": "Taaydal",
+                "description": "A young warrior, only nineteen. Held the right flank when it nearly broke. Took a blow meant for the elder beside him. He did not die immediately — he spoke his mother's name, and then he was gone.",
+                "mechanical_effect": { "type": "CREW_MEMBER_LOST", "character": "taaydal", "cause": "killed_in_action" },
+                "legacy_effect": { "type": "ANCESTRAL_MEMORY", "heroic": true, "dream_eligible": true }
+              }
+            ],
+            "wounded": [
+              {
+                "name": "Guudangaay",
+                "severity": "light",
+                "description": "Cut on the forearm. Will heal within the season.",
+                "mechanical_effect": { "type": "CREW_WOUNDED", "character": "guudangaay", "recovery_seasons": 1 }
+              },
+              {
+                "name": "Skil",
+                "severity": "severe",
+                "description": "Broken arm from a canoe collision during the flanking maneuver. May never paddle with full strength again.",
+                "mechanical_effect": { "type": "CREW_WOUNDED", "character": "skil", "recovery_seasons": 4, "permanent_penalty": "paddle_strength -15%" }
+              }
+            ],
+            "captured": []
+          },
+          "material_assessment": {
+            "canoe_captured": {
+              "narrative": "Copper Bay's abandoned war canoe is a fine vessel — Bear crest carved into the bow, seats for ten paddlers. It is yours now. A significant addition to your fleet.",
+              "mechanical_effect": { "type": "CANOE_GAINED", "canoe_type": "war_canoe", "quality": "good" }
+            },
+            "village_damage": {
+              "narrative": "The beach fortifications took heavy damage but held. Two of the log barriers need rebuilding. A fish drying rack near the beach was knocked over in the fighting — some dried salmon lost, but most of the stores are untouched.",
+              "mechanical_effect": [
+                { "type": "BUILDING_DAMAGED", "building": "beach_fortifications", "repair_turns": 2 },
+                { "type": "RESOURCE_LOST", "resource": "dried_fish", "amount": 5 }
+              ]
+            }
+          }
+        },
+        "aftermath_choices": [
+          {
+            "id": "honor_the_fallen",
+            "text": "Hold a proper ceremony for Taaydal. He earned it.",
+            "tooltip": "Costs time and resources but restores morale and creates ancestral memory.",
+            "effects": [
+              { "type": "RESOURCE", "resource": "ceremonial_goods", "amount": -3 },
+              { "type": "CREW_MORALE", "amount": 15 },
+              { "type": "SPIRITUAL_PRESTIGE", "amount": 5 },
+              { "type": "ANCESTRAL_MEMORY", "character": "taaydal", "strength": "strong" },
+              { "type": "SET_FLAG", "flag": "fallen_warrior_honored" }
+            ],
+            "narrative": "The village gathers at the shore. Taaydal's mother places his paddle across the cedar platform. The spiritual advisor speaks his name to the sea, the sky, and the ancestors. 'He held the line,' you say, and your voice does not break. 'Remember him.' That night, the fire burns high, and the stories begin — the stories that will outlive everyone here."
+          },
+          {
+            "id": "commission_war_pole",
+            "text": "Commission a war memorial pole for this defense.",
+            "tooltip": "Major prestige. Permanent village landmark commemorating the battle.",
+            "requirements": [{ "type": "HAS_MASTER_CARVER", "value": true }],
+            "effects": [
+              { "type": "POLE_COMMISSION", "pole_type": "war_memorial" },
+              { "type": "PRESTIGE", "amount": 20 },
+              { "type": "SET_FLAG", "flag": "dawn_attack_pole_commissioned" }
+            ],
+            "narrative": "Your master carver listens to the story of the battle, nodding slowly. 'Eagle above, Bear below,' they say, already seeing the pole in their mind. 'Your crest standing over their crest. And at the base — a small figure, holding a shield. For the boy who held the right.' You nod. 'Begin.'"
+          },
+          {
+            "id": "prepare_retaliation",
+            "text": "Begin planning a strike on Copper Bay. They brought this to our beach.",
+            "tooltip": "Offensive raid preparation begins. Community is eager.",
+            "effects": [
+              { "type": "SET_FLAG", "flag": "retaliation_planned_copper_bay" },
+              { "type": "CREW_MORALE", "amount": 10 },
+              { "type": "FEUD_ESCALATION", "value": 1 },
+              { "type": "TRIGGER_EVENT", "event_id": "raid_planning_phase" }
+            ],
+            "narrative": "The anger is fresh and clean, like a blade just sharpened. Your warriors are ready — more than ready. They want to take this fight to Copper Bay's beach, to show them what it costs to attack your home. The war canoe — including your new one, taken from the enemy — needs only a crew and a plan."
+          }
+        ],
+        "long_term_effects": {
+          "feud_update": {
+            "new_state": "ACTIVE_FEUD",
+            "escalation_change": 3,
+            "narrative": "The grievance with Copper Bay has become an active feud. They attacked your village. You repelled them and took their canoe. Blood was shed — young Taaydal's blood. This will not be forgiven quickly."
+          },
+          "reputation_spread": {
+            "narrative": "The story of the Dawn Attack spreads across the islands. Tllaal Naay held against four war canoes. The hidden canoe flanking maneuver becomes a story warriors tell and retell. Your village's defensive reputation grows significantly.",
+            "communities_reached": 5,
+            "intimidation_change": 12,
+            "defensive_reputation_change": 15
+          },
+          "dream_sequence_trigger": {
+            "narrative": "That winter, you dream of Taaydal. He stands on the beach in the dawn light, whole and uninjured, his paddle resting on his shoulder. He says nothing. He just nods — once — and turns to walk into the water. You wake with tears on your face and the absolute certainty that you will build that pole.",
+            "trigger_condition": "next_winter_dream_slot",
+            "requires_flag": "fallen_warrior_honored"
+          },
+          "battle_song": {
+            "narrative": "Within weeks, the War Singer composes a new song — 'The Dawn Beach.' It tells of watchtower drums and hidden canoes and a young man who held the right flank. The song will be sung before every future defense, and every warrior who hears it will fight a little harder.",
+            "mechanical_effect": { "type": "BATTLE_SONG_CREATED", "name": "The Dawn Beach", "morale_bonus": 5, "context": "defensive_engagements" }
+          },
+          "legacy_entry": "In the third autumn of the Golden Age, Copper Bay sent four war canoes against Tllaal Naay at dawn. The village held. A canoe was taken. Young Taaydal fell defending the right flank. A pole was raised in his memory, and a song was sung that outlived everyone who fought that morning."
+        }
+      }
+    ]
+  }
+}

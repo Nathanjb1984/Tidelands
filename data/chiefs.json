@@ -1,0 +1,342 @@
+{
+  "chiefs": [
+    {
+      "id": "navigator",
+      "name": "K'aad Náay",
+      "title": "The Navigator",
+      "moiety": "EAGLE",
+      "description": "Quiet and observant, K'aad Náay reads the ocean the way others read faces. Born to the sea, they navigate by current, star, and instinct. Under their leadership, the village's canoes will reach waters no one has charted.",
+      "portrait": "portrait_navigator",
+      "traits": ["NAVIGATOR", "PATIENT"],
+      "starting_bonuses": {
+        "canoe_quality_bonus": 1,
+        "navigation_skill": 15,
+        "current_reading": true,
+        "starting_canoe": "travel_canoe"
+      },
+      "trait_effects": {
+        "NAVIGATOR": {
+          "fog_navigation_bonus": 0.3,
+          "weather_risk_reduction": 0.15,
+          "route_discovery_speed": 1.25,
+          "open_water_safety": 1.2
+        },
+        "PATIENT": {
+          "construction_quality": 1.1,
+          "diplomacy_bonus": 0.05,
+          "rush_penalty": 0.0
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 150,
+        "cedar_logs": 6,
+        "cedar_bark": 15,
+        "woven_blankets": 4
+      },
+      "starting_village": {
+        "population": 45,
+        "buildings": ["chief_longhouse:1", "secondary_longhouse:1", "canoe_house:1", "smoke_house:1"]
+      },
+      "flavor_text": "\"The sea speaks in currents and colors. Most hear only waves. I hear directions.\"",
+      "playstyle_hint": "Exploration-focused. Master trade routes early. Use canoe superiority to build prestige through discovery and reliable ocean travel.",
+      "recommended_for": "First playthrough — balanced start with navigation advantage"
+    },
+    {
+      "id": "orator",
+      "name": "Skaay",
+      "title": "The Orator",
+      "moiety": "RAVEN",
+      "description": "Words are Skaay's canoes — they carry meaning across distances others cannot bridge. A diplomat, storyteller, and master of the potlatch table, Skaay builds power through generosity and persuasion.",
+      "portrait": "portrait_orator",
+      "traits": ["DIPLOMAT", "GENEROUS"],
+      "starting_bonuses": {
+        "potlatch_prestige_bonus": 0.15,
+        "trade_rate_bonus": 0.10,
+        "diplomacy_skill": 15,
+        "starting_alliances": 1
+      },
+      "trait_effects": {
+        "DIPLOMAT": {
+          "negotiation_bonus": 0.2,
+          "marriage_proposal_success": 1.25,
+          "alliance_maintenance_cost": 0.85,
+          "conflict_avoidance_chance": 0.15
+        },
+        "GENEROUS": {
+          "potlatch_prestige_multiplier": 1.15,
+          "gift_effectiveness": 1.2,
+          "hoarding_penalty_reduction": 0.5
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 120,
+        "cedar_logs": 5,
+        "cedar_bark": 20,
+        "woven_blankets": 8,
+        "carved_objects": 4
+      },
+      "starting_village": {
+        "population": 50,
+        "buildings": ["chief_longhouse:1", "secondary_longhouse:1", "secondary_longhouse:1", "smoke_house:1", "weaving_house:1"]
+      },
+      "flavor_text": "\"What you keep rots. What you give away becomes eternal.\"",
+      "playstyle_hint": "Ceremony-focused. Build wealth to redistribute. Master the potlatch system. Win through alliances and prestige rather than conflict.",
+      "recommended_for": "Players who love diplomatic strategy and ceremony"
+    },
+    {
+      "id": "carver",
+      "name": "Gúud",
+      "title": "The Carver",
+      "moiety": "RAVEN",
+      "description": "Gúud sees the world in cedar — every log contains a story waiting to be freed by the adze. Under their guidance, the village's poles will be the finest on the coast, and their carved goods will be treasured in every longhouse.",
+      "portrait": "portrait_carver",
+      "traits": ["ARTISAN", "VISIONARY"],
+      "starting_bonuses": {
+        "master_carver": true,
+        "carving_speed_bonus": 0.2,
+        "pole_prestige_bonus": 0.25,
+        "starting_building": "carving_shed:2"
+      },
+      "trait_effects": {
+        "ARTISAN": {
+          "carving_quality": 1.3,
+          "carved_goods_production": 1.25,
+          "pole_carving_speed": 1.2,
+          "trade_value_carved": 1.3
+        },
+        "VISIONARY": {
+          "pole_design_options": 2,
+          "dream_frequency": 1.3,
+          "omen_clarity": 1.1
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 100,
+        "cedar_logs": 8,
+        "cedar_bark": 25,
+        "carved_objects": 8
+      },
+      "starting_village": {
+        "population": 42,
+        "buildings": ["chief_longhouse:1", "secondary_longhouse:1", "carving_shed:2", "smoke_house:1"]
+      },
+      "flavor_text": "\"The pole remembers what the mind forgets. I give memory to cedar.\"",
+      "playstyle_hint": "Pole-focused legacy. Rush early poles for permanent prestige. Trade carved goods at premium. Your village will be defined by its poles.",
+      "recommended_for": "Players who love crafting and visual legacy"
+    },
+    {
+      "id": "war_chief",
+      "name": "Kil",
+      "title": "The War Chief",
+      "moiety": "EAGLE",
+      "description": "Kil's presence fills a room — and empties an enemy canoe of its courage. A strategic mind behind a fierce exterior, Kil protects the village and expands its territory through strength, preparation, and the fear that precedes a war canoe's prow.",
+      "portrait": "portrait_war_chief",
+      "traits": ["WARRIOR", "STRATEGIC"],
+      "starting_bonuses": {
+        "war_canoe": true,
+        "crew_morale_bonus": 10,
+        "intimidation_bonus": 0.2,
+        "warrior_training_speed": 1.3
+      },
+      "trait_effects": {
+        "WARRIOR": {
+          "conflict_bonus": 0.2,
+          "intimidation_multiplier": 1.3,
+          "crew_morale_in_conflict": 1.25,
+          "defense_bonus": 0.15
+        },
+        "STRATEGIC": {
+          "scouting_bonus": 1.2,
+          "ambush_chance": 0.15,
+          "retreat_cost_reduction": 0.3,
+          "conflict_outcome_prediction": true
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 130,
+        "cedar_logs": 5,
+        "cedar_bark": 10,
+        "woven_blankets": 3
+      },
+      "starting_village": {
+        "population": 55,
+        "buildings": ["chief_longhouse:1", "secondary_longhouse:1", "secondary_longhouse:1", "canoe_house:1", "smoke_house:1", "watchtower:1"]
+      },
+      "flavor_text": "\"I do not seek the fight. But the fight will find us. And we will be ready.\"",
+      "playstyle_hint": "Military-oriented. Defend territory, raid rivals, build intimidation prestige. The war canoe is your calling card. Win conflicts to build reputation.",
+      "recommended_for": "Players who enjoy tactical challenge and conflict"
+    },
+    {
+      "id": "matriarch",
+      "name": "Jaad",
+      "title": "The Matriarch",
+      "moiety": "RAVEN",
+      "description": "Jaad weaves the village together not with bark but with kinship. Every alliance she forges, every marriage she arranges, every child she names strengthens the web that holds the community across generations. Her power is patience, connection, and the long view.",
+      "portrait": "portrait_matriarch",
+      "traits": ["LINEAGE_MASTER", "PROVIDER"],
+      "starting_bonuses": {
+        "extra_family_connections": 3,
+        "food_production_bonus": 0.15,
+        "marriage_alliance_strength": 1.3,
+        "heir_pool_size": 2
+      },
+      "trait_effects": {
+        "LINEAGE_MASTER": {
+          "marriage_effectiveness": 1.3,
+          "succession_options": 2,
+          "alliance_durability": 1.25,
+          "lineage_prestige_bonus": 1.15
+        },
+        "PROVIDER": {
+          "food_production": 1.15,
+          "gathering_efficiency": 1.2,
+          "winter_preparation_bonus": 1.2,
+          "population_growth_rate": 1.1
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 200,
+        "cedar_logs": 4,
+        "cedar_bark": 30,
+        "woven_blankets": 10,
+        "eulachon_oil": 15
+      },
+      "starting_village": {
+        "population": 60,
+        "buildings": ["chief_longhouse:2", "secondary_longhouse:1", "secondary_longhouse:1", "smoke_house:1", "weaving_house:1", "food_cache:1"]
+      },
+      "flavor_text": "\"A village stands not on its poles but on its people. And people stand on the bonds between them.\"",
+      "playstyle_hint": "Long-term lineage strategy. Forge marriage alliances, grow population, secure succession. Your power compounds across generations.",
+      "recommended_for": "Players who enjoy long-term planning and social strategy"
+    },
+    {
+      "id": "voyager",
+      "name": "Xáadaa",
+      "title": "The Voyager",
+      "moiety": "EAGLE",
+      "description": "Xáadaa has seen coastlines that exist only as rumors to others. Restless, curious, and brave, they push their canoes beyond the known and return with stories, trade goods, and knowledge that changes the village's possibilities.",
+      "portrait": "portrait_voyager",
+      "traits": ["EXPLORER", "STORYTELLER"],
+      "starting_bonuses": {
+        "known_distant_routes": 2,
+        "crew_stamina_bonus": 0.2,
+        "discovery_speed": 1.4,
+        "open_water_bonus": 0.15
+      },
+      "trait_effects": {
+        "EXPLORER": {
+          "location_discovery_range": 1.4,
+          "encounter_variety": 1.25,
+          "map_reveal_bonus": 1.3,
+          "crew_morale_exploration": 1.2
+        },
+        "STORYTELLER": {
+          "prestige_from_voyages": 1.3,
+          "event_narrative_bonus": true,
+          "trade_negotiation_bonus": 0.1,
+          "winter_morale_bonus": 0.15
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 130,
+        "cedar_logs": 5,
+        "cedar_bark": 15,
+        "woven_blankets": 5,
+        "eulachon_oil": 10
+      },
+      "starting_village": {
+        "population": 40,
+        "buildings": ["chief_longhouse:1", "secondary_longhouse:1", "canoe_house:1", "smoke_house:1"]
+      },
+      "flavor_text": "\"The horizon is not an edge. It is an invitation.\"",
+      "playstyle_hint": "Exploration-heavy. Discover routes, find new trade partners, map the unknown. Your prestige comes from going where no one else has dared.",
+      "recommended_for": "Players who love discovery and adventure"
+    },
+    {
+      "id": "spirit_touched",
+      "name": "Sgáan",
+      "title": "The Spirit-Touched",
+      "moiety": "RAVEN",
+      "description": "Sgáan walks between worlds. Dreams come to them unbidden, animals speak in their presence, and the ocean itself seems to whisper guidance. Not a traditional warrior or diplomat, Sgáan leads through insight, ceremony, and a connection to the unseen that makes even rivals pause.",
+      "portrait": "portrait_spirit",
+      "traits": ["SPIRITUAL", "INTUITIVE"],
+      "starting_bonuses": {
+        "spiritual_advisor": true,
+        "omen_accuracy_bonus": 0.3,
+        "dream_frequency": 2.0,
+        "blessing_effectiveness": 1.3
+      },
+      "trait_effects": {
+        "SPIRITUAL": {
+          "omen_clarity": 1.4,
+          "blessing_duration": 1.3,
+          "ceremony_prestige_bonus": 1.2,
+          "spiritual_event_frequency": 1.5
+        },
+        "INTUITIVE": {
+          "danger_sense": 0.2,
+          "weather_prediction_accuracy": 1.3,
+          "event_preview_chance": 0.15,
+          "correct_choice_hint": 0.1
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 110,
+        "cedar_logs": 4,
+        "cedar_bark": 20,
+        "carved_objects": 3
+      },
+      "starting_village": {
+        "population": 38,
+        "buildings": ["chief_longhouse:1", "secondary_longhouse:1", "smoke_house:1", "carving_shed:1"]
+      },
+      "flavor_text": "\"I do not command the spirits. I listen. And what I hear, I share.\"",
+      "playstyle_hint": "Spiritual route. Let omens guide your decisions. Ceremonies and blessings are your greatest tools. The unseen world is your advisor.",
+      "recommended_for": "Players who enjoy narrative and atmospheric guidance"
+    },
+    {
+      "id": "provider",
+      "name": "Ts'aahl",
+      "title": "The Provider",
+      "moiety": "EAGLE",
+      "description": "Ts'aahl's hands know the salmon's return better than the salmon themselves. A tireless harvester, masterful preserver, and generous feeder of the village, Ts'aahl turns the ocean's abundance into community strength with ruthless efficiency.",
+      "portrait": "portrait_provider",
+      "traits": ["HARVESTER", "ABUNDANT"],
+      "starting_bonuses": {
+        "fishing_yield_bonus": 0.25,
+        "starting_food_cache": 1.5,
+        "preservation_efficiency": 1.2,
+        "seasonal_food_bonus": true
+      },
+      "trait_effects": {
+        "HARVESTER": {
+          "fishing_yield": 1.25,
+          "gathering_yield": 1.2,
+          "seasonal_bonus_chance": 0.2,
+          "fish_quality": 1.15
+        },
+        "ABUNDANT": {
+          "food_spoilage_reduction": 0.2,
+          "potlatch_food_bonus": 1.2,
+          "winter_survival_bonus": 1.3,
+          "population_food_efficiency": 1.1
+        }
+      },
+      "starting_resources": {
+        "salmon_preserved": 300,
+        "halibut_preserved": 50,
+        "eulachon_oil": 25,
+        "cedar_logs": 4,
+        "cedar_bark": 15,
+        "woven_blankets": 3
+      },
+      "starting_village": {
+        "population": 48,
+        "buildings": ["chief_longhouse:1", "secondary_longhouse:1", "smoke_house:2", "food_cache:2"]
+      },
+      "flavor_text": "\"The greatest chief is the one whose people never go hungry. Everything else follows from a full cache.\"",
+      "playstyle_hint": "Economy-focused. Dominate the food economy, build massive surpluses, and convert them into potlatch prestige. Your generosity is fueled by abundance.",
+      "recommended_for": "Players who enjoy economic optimization"
+    }
+  ]
+}
