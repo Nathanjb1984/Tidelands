@@ -1585,6 +1585,28 @@ const INJCSS=`
 .tl-mute-btn{transition:all .15s;border-radius:3px;padding:1px 5px;cursor:pointer;user-select:none;font-size:8px}
 .tl-mute-btn:hover{background:${P.dimHi}20}
 
+/* ═══ INFO PANEL OVERLAY ═══ */
+.tl-infopanel-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:180;backdrop-filter:blur(2px);animation:tl-fadein .2s ease-out}
+.tl-infopanel{position:fixed;top:0;left:0;bottom:0;width:380px;max-width:92vw;z-index:185;
+  background:${P.panel};border-right:2px solid ${P.gold}40;
+  transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:8px 0 40px rgba(0,0,0,.5)}
+.tl-infopanel.tl-infopanel-open{transform:translateX(0)}
+.tl-infopanel-tabs{display:flex;gap:0;border-bottom:1px solid ${P.border};background:${P.panelHi};flex-shrink:0}
+.tl-infopanel-tab{flex:1;padding:8px 4px;text-align:center;font-family:${font};font-size:7px;color:${P.dim};
+  cursor:pointer;user-select:none;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;background:transparent;border:none;border-bottom:2px solid transparent}
+.tl-infopanel-tab:hover{color:${P.dimHi};background:${P.panelHi}}
+.tl-infopanel-tab.tl-tab-active{color:${P.gold};border-bottom-color:${P.gold};background:${P.panel}}
+.tl-infopanel-body{flex:1;overflow-y:auto;padding:0}
+.tl-infopanel .tl-worldbar{grid-template-columns:1fr;grid-template-areas:'campaign' 'location' 'chart'}
+.tl-info-btn{transition:all .2s;border-radius:3px;padding:2px 7px;cursor:pointer;user-select:none;
+  border:1px solid ${P.gold}40;background:${P.gold}10;color:${P.gold};font-family:${font};font-size:7px;letter-spacing:.4px}
+.tl-info-btn:hover{background:${P.gold}25;border-color:${P.gold}60;transform:translateY(-1px)}
+.tl-info-btn:active{transform:translateY(0) scale(.97)}
+@media(max-width:520px){
+  .tl-infopanel{width:100%;max-width:100%;border-right:none;border-radius:0}
+}
+
 /* ═══ MOBILE PLAY MODE ═══ */
 
 /* Mobile touch targets & command grid */
@@ -4419,6 +4441,13 @@ function TidelinesApp(){
     setAudioMuted(prev=>{const next=!prev;TL_Audio.setMute(next);if(!next)TL_Audio.sfxToggle();return next;});
   },[]);
 
+  /* ── §12.06  Info Panel state ── */
+  const[infoPanelOpen,setInfoPanelOpen]=useState(false);
+  const[infoTab,setInfoTab]=useState('stats');
+  const toggleInfoPanel=useCallback(()=>{
+    setInfoPanelOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});
+  },[]);
+
   /* Initialize audio context on first user interaction */
   useEffect(()=>{
     const h=()=>{TL_Audio.ensureCtx();TL_Audio.resume();document.removeEventListener('click',h);document.removeEventListener('keydown',h);};
@@ -4563,11 +4592,13 @@ function TidelinesApp(){
         else if(btns.length){e.preventDefault();btns[0].focus();TL_Audio.sfxClick();}
       }else if(e.key==='m'||e.key==='M'){
         if(!e.ctrlKey&&!e.metaKey&&!e.altKey)toggleMute();
+      }else if(e.key==='i'||e.key==='I'){
+        if(!e.ctrlKey&&!e.metaKey&&!e.altKey)toggleInfoPanel();
       }
     };
     document.addEventListener('keydown',h);
     return()=>document.removeEventListener('keydown',h);
-  },[G.impactFrame,toggleMute]);
+  },[G.impactFrame,toggleMute,toggleInfoPanel]);
 
   const phase=phaseIdx(G.step);
   const hasCont=!!CONT[G.step];
@@ -4626,6 +4657,7 @@ function TidelinesApp(){
             <span className="tl-context-chip" title="Current play context">{playContext}</span>
             {G.totalRaids>0&&<span className="tl-mobile-hide" style={{fontSize:6,color:P.dim}}>Raid #{G.totalRaids+1}</span>}
             {G.warTraits.length>0&&<span className="tl-mobile-hide" style={{fontSize:6,color:P.goldDim}}>{G.warTraits.length} trait{G.warTraits.length>1?'s':''}</span>}
+            <button className="tl-info-btn" onClick={toggleInfoPanel} title="Stats & Info (I)">{infoPanelOpen?'✕ CLOSE':'📊 INFO'}</button>
             <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Feedback"/>
             <span onClick={toggleLegacy} style={{fontSize:7,color:P.goldDim,cursor:'pointer',userSelect:'none'}} title="Legacy Log">📜</span>
             <span onClick={toggleDebug} style={{fontSize:6,color:P.dim+'80',cursor:'pointer',userSelect:'none'}} title="Debug">⚙</span>
@@ -4635,71 +4667,181 @@ function TidelinesApp(){
           </div>
         </div>
 
+        {/* ═══ INFO PANEL OVERLAY ═══ */}
+        {infoPanelOpen&&<div className="tl-infopanel-backdrop" onClick={toggleInfoPanel}/>}
+        <div className={`tl-infopanel${infoPanelOpen?' tl-infopanel-open':''}`}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 12px',borderBottom:`1px solid ${P.gold}30`,background:P.panelHi}}>
+            <span style={{fontSize:8,color:P.gold,letterSpacing:1}}>📊 STATS & INFO</span>
+            <span onClick={toggleInfoPanel} style={{fontSize:10,color:P.dim,cursor:'pointer',padding:'0 4px'}}>✕</span>
+          </div>
+          <div className="tl-infopanel-tabs">
+            {[['stats','📊 Stats'],['map','🗺 Map'],['log','📜 Log'],['guide','❓ Guide']].map(([k,lbl])=>(
+              <button key={k} className={`tl-infopanel-tab${infoTab===k?' tl-tab-active':''}`} onClick={()=>setInfoTab(k)}>{lbl}</button>
+            ))}
+          </div>
+          <div className="tl-infopanel-body tl-scroll">
+            {infoTab==='stats'&&<>
+              {/* Phase header */}
+              <div style={{
+                display:'flex',alignItems:'center',gap:8,
+                padding:'8px 12px',
+                background:`linear-gradient(90deg,${accent}15,transparent 35%,transparent 65%,${accent}15)`,
+                borderBottom:`1px solid ${accent}30`,
+              }}>
+                <span style={{fontSize:14}}>{phaseInfo.icon}</span>
+                <div>
+                  <div style={{fontSize:9,color:accent,letterSpacing:1.5}}>{phaseInfo.label.toUpperCase()}</div>
+                  <div style={{fontSize:6,color:P.dim,letterSpacing:.3}}>{phaseInfo.tagline}</div>
+                  <div style={{fontSize:5,color:P.goldDim,letterSpacing:.5,marginTop:1}}>{phaseProgressLabel(phase)} · {BUILD.label}</div>
+                </div>
+              </div>
+              <HudBar G={G} phase={phase} isFirstRaid={isFirstRaid}/>
+              {showBattle&&<div style={{background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+                <div onClick={()=>{setBattleSummaryOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 12px',cursor:'pointer',userSelect:'none'}}>
+                  <div style={{fontSize:7,color:P.dim,letterSpacing:.5}}>⚔ BATTLE SUMMARY</div>
+                  <div style={{fontSize:6,color:battleSummaryOpen?P.gold:P.dim}}>{battleSummaryOpen?'▾ OPEN':'▸ EXPAND'}</div>
+                </div>
+                {battleSummaryOpen&&<div className="tl-scroll" style={{maxHeight:300,overflowY:'auto'}}><BattleBoard G={G}/></div>}
+              </div>}
+              {showAftermath&&<div style={{background:P.panel,borderBottom:`1px solid ${P.border}`}}>
+                <div onClick={()=>{setAftermathSummaryOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 12px',cursor:'pointer',userSelect:'none'}}>
+                  <div style={{fontSize:7,color:P.dim,letterSpacing:.5}}>🏔 AFTERMATH SUMMARY</div>
+                  <div style={{fontSize:6,color:aftermathSummaryOpen?P.gold:P.dim}}>{aftermathSummaryOpen?'▾ OPEN':'▸ EXPAND'}</div>
+                </div>
+                {aftermathSummaryOpen&&<div className="tl-scroll" style={{maxHeight:300,overflowY:'auto'}}><AftermathSummary G={G} feedbackHref={feedbackHref} onFeedback={openFeedback} playContext={playContext}/></div>}
+              </div>}
+              {/* Crew roster */}
+              <div style={{padding:'8px 12px',borderBottom:`1px solid ${P.border}`}}>
+                <div style={{fontSize:6,color:P.dim,letterSpacing:.5,marginBottom:5}}>⚔ WAR PARTY</div>
+                {G.namedCrew.map(c=>(
+                  <div key={c.id} style={{display:'flex',alignItems:'center',gap:5,marginBottom:3,transition:'opacity .3s',opacity:!c.alive?.5:1}}>
+                    <span style={{fontSize:8,width:10,textAlign:'center',color:!c.alive?P.red:c.wounded?P.dim:P.green}}>
+                      {!c.alive?'☠':c.wounded?'⚔':'●'}
+                    </span>
+                    <span style={{fontSize:7,color:!c.alive?P.redDim:P.text,textDecoration:!c.alive?'line-through':'none'}}>{c.name}</span>
+                    <span style={{fontSize:6,color:P.dim}}>{c.role}</span>
+                  </div>
+                ))}
+                <div style={{fontSize:6,color:P.dim,marginTop:3}}>{G.crewAlive} of {G.crewSize} warriors ready</div>
+              </div>
+              {G.warTraits.length>0&&(
+                <div style={{padding:'8px 12px',borderBottom:`1px solid ${P.border}`}}>
+                  <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>🏅 WAR TRAITS</div>
+                  <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+                    {G.warTraits.map(t=>(
+                      <span key={t} title={TRAIT_DESC[t]} style={{fontSize:6,padding:'2px 5px',background:P.panelHi,border:`1px solid ${P.goldDim}30`,borderRadius:3,color:P.gold,cursor:'help'}}>
+                        {t.replace(/_/g,' ')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {phase>=2&&phase<=3&&(
+                <div style={{padding:'8px 12px',borderBottom:`1px solid ${P.border}`}}>
+                  <div style={{fontSize:6,color:P.red,letterSpacing:.5,marginBottom:4}}>🏴 CEDAR CREEK</div>
+                  <div style={{fontSize:7,color:P.dim}}>Warriors: ~{G.defender.crewSize}</div>
+                  <div style={{fontSize:7,color:P.dim}}>Resolve: {G.defender.morale}</div>
+                  {G.intimResult&&<div style={{fontSize:7,color:G.intimDelta>0?P.green:P.red}}>Intimidated: {G.intimResult}</div>}
+                </div>
+              )}
+            </>}
+            {infoTab==='map'&&<>
+              <RouteStrip phase={phase}/>
+              <div style={{padding:'0 6px'}} className="tl-worldbar">
+                <CampaignBanner G={G} phase={phase}/>
+                <LocationCard phase={phase}/>
+                <CoastalChart phase={phase}/>
+              </div>
+              <div style={{padding:'8px 12px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
+                <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>COASTAL CONTEXT</div>
+                <div style={{fontSize:7,color:P.gold,marginBottom:2}}>{campaignSeason(G)}</div>
+                <div style={{fontSize:6,color:P.dim,marginBottom:4}}>{routeStatusText(phase,G)}</div>
+                <div style={{fontSize:6,color:P.dimHi,lineHeight:1.55}}>{coastMemoryLine(G)}</div>
+              </div>
+            </>}
+            {infoTab==='log'&&<>
+              {/* Narrative log — full */}
+              <div style={{padding:'8px 12px',borderBottom:`1px solid ${P.border}`}}>
+                <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:6}}>📖 NARRATIVE LOG</div>
+                {G.log.map((l,i)=><NarrEntry key={i} line={l} isLast={i===G.log.length-1}/>)}
+                {G.log.length===0&&<div style={{fontSize:7,color:P.dim}}>No entries yet.</div>}
+              </div>
+              {/* Legacy log */}
+              <div style={{padding:'8px 12px'}}>
+                <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:6}}>📜 LEGACY LOG</div>
+                {G.legacyEntries.length===0
+                  ?<span style={{color:P.dim,fontSize:7}}>No entries yet. Complete a raid to record history.</span>
+                  :G.legacyEntries.map((e,i)=>(
+                    <div key={i} style={{marginBottom:8,paddingBottom:8,borderBottom:i<G.legacyEntries.length-1?`1px solid ${P.border}20`:'none'}}>
+                      <div style={{color:P.goldDim,fontSize:6,marginBottom:2}}>Expedition {i+1}</div>
+                      <div style={{fontSize:7,lineHeight:1.6,color:P.text}}>{e}</div>
+                    </div>
+                  ))
+                }
+              </div>
+            </>}
+            {infoTab==='guide'&&<>
+              {isFirstRaid&&<FirstRunBriefing phase={phase} playContext={playContext}/>}
+              <div style={{padding:'10px 12px',borderBottom:`1px solid ${P.border}`}}>
+                <div style={{fontSize:7,color:P.gold,letterSpacing:.5,marginBottom:6}}>⚓ HOW TO PLAY</div>
+                <div style={{fontSize:7,color:P.dimHi,lineHeight:1.7}}>
+                  <p style={{marginBottom:6}}><strong style={{color:P.gold}}>Goal:</strong> Lead your Haida war party on coastal expeditions. Build prestige, honor the ancestors, and protect your village.</p>
+                  <p style={{marginBottom:6}}><strong style={{color:P.gold}}>Phases:</strong> Home Waters → Voyage → Landing → Battle → Withdrawal → Legacy. Each phase offers choices that shape your outcome.</p>
+                  <p style={{marginBottom:6}}><strong style={{color:P.gold}}>Controls:</strong> Click command cards below the scene to make choices. Press <span style={{color:P.gold}}>I</span> to toggle this panel, <span style={{color:P.gold}}>M</span> to mute, <span style={{color:P.gold}}>F</span> for play mode.</p>
+                  <p style={{marginBottom:6}}><strong style={{color:P.gold}}>Stats:</strong> Open the <span style={{color:P.gold}}>📊 INFO</span> button and check the <span style={{color:P.gold}}>Stats</span> tab to see morale, crew, food, and combat details.</p>
+                  <p style={{marginBottom:0}}><strong style={{color:P.gold}}>Map:</strong> The <span style={{color:P.gold}}>Map</span> tab shows your route, campaign progress, and coastal chart.</p>
+                </div>
+              </div>
+              <div style={{padding:'10px 12px',borderBottom:`1px solid ${P.border}`}}>
+                <div style={{fontSize:7,color:P.gold,letterSpacing:.5,marginBottom:6}}>🗝 KEY TERMS</div>
+                <div style={{fontSize:7,color:P.dimHi,lineHeight:1.7}}>
+                  {[['Prestige','Your reputation along the coast. Win raids, honor ancestors, trade wisely.'],
+                    ['Morale','Your crew\'s fighting spirit. Low morale means desertion or defeat.'],
+                    ['Feud Escalation','How angry Cedar Creek is. High feud means tougher future raids.'],
+                    ['War Traits','Permanent abilities earned from past victories.'],
+                    ['Memorial Pole','Your legacy carved in cedar. Each expedition adds a chapter.'],
+                  ].map(([term,desc])=>(
+                    <p key={term} style={{marginBottom:5}}><strong style={{color:P.gold}}>{term}:</strong> {desc}</p>
+                  ))}
+                </div>
+              </div>
+              <div style={{padding:'8px 12px'}}>
+                <div style={{fontSize:6,color:P.dim,letterSpacing:.5,marginBottom:4}}>ALPHA BUILD</div>
+                <div style={{fontSize:7,color:P.gold,marginBottom:2}}>{BUILD.label} · {BUILD.version}</div>
+                <div style={{fontSize:6,color:P.dim,marginBottom:4}}>{BUILD.build} · {playContext}</div>
+                <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Send feedback"/>
+              </div>
+            </>}
+          </div>
+        </div>
+
         {/* ═══ MAIN STAGE ═══ */}
         <div className="tl-stage" style={{display:'flex',flexDirection:'column',background:PHASE_BG[phase]||P.bg,minHeight:0}}>
 
-          {/* Phase header */}
-          <div className="tl-phase-head" style={{
-            display:'flex',alignItems:'center',justifyContent:'center',gap:8,
-            padding:'5px 12px',position:'relative',overflow:'hidden',
-            background:`linear-gradient(90deg,${accent}15,transparent 35%,transparent 65%,${accent}15)`,
-            borderBottom:`1px solid ${accent}30`,
+          {/* Compact phase strip */}
+          <div style={{
+            display:'flex',alignItems:'center',gap:6,
+            padding:'3px 12px',
+            background:`linear-gradient(90deg,${accent}10,transparent 40%,transparent 60%,${accent}10)`,
+            borderBottom:`1px solid ${accent}20`,
           }}>
-            <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:accent,transformOrigin:'left',animation:'tl-phase-sweep .6s ease-out',opacity:.4}}/>
-            <span className="tl-phase-icon" style={{fontSize:12}}>{phaseInfo.icon}</span>
-            <div>
-              <div className="tl-phase-title" style={{fontSize:10,color:accent,letterSpacing:1.5}}>{phaseInfo.label.toUpperCase()}</div>
-              <div className="tl-phase-tagline" style={{fontSize:6,color:P.dim,letterSpacing:.3}}>{phaseInfo.tagline}</div>
-              <div className="tl-phase-meta" style={{fontSize:5,color:P.goldDim,letterSpacing:.5,marginTop:1}}>{phaseProgressLabel(phase)} · {BUILD.label}</div>
-            </div>
+            <span style={{fontSize:10}}>{phaseInfo.icon}</span>
+            <span style={{fontSize:8,color:accent,letterSpacing:1}}>{phaseInfo.label.toUpperCase()}</span>
+            <span style={{fontSize:5,color:P.dim,letterSpacing:.3}}>{phaseInfo.tagline}</span>
+            <span style={{marginLeft:'auto',fontSize:5,color:P.goldDim}}>{phaseProgressLabel(phase)}</span>
           </div>
 
-          <RouteStrip phase={phase}/>
-          <HudBar G={G} phase={phase} isFirstRaid={isFirstRaid}/>
-          <div className="tl-worldbar">
-            <CampaignBanner G={G} phase={phase}/>
-            <LocationCard phase={phase}/>
-            <CoastalChart phase={phase}/>
-          </div>
-          {isFirstRaid&&<FirstRunBriefing phase={phase} playContext={playContext}/>} 
-
-          <div style={{flex:'0 0 auto',minHeight:playMode?sceneH:220}}>
-            <Scene type={G.scene} tall={true} G={G} phase={phase} sceneH={playMode?sceneH:220}/>
-          </div>
-
-          {showBattle&&<div style={{background:P.panel,borderBottom:`1px solid ${P.border}`}}>
-            <div onClick={()=>{setBattleSummaryOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 12px',cursor:'pointer',userSelect:'none'}}>
-              <div style={{fontSize:7,color:P.dim,letterSpacing:.5}}>⚔ BATTLE SUMMARY {phase>=4?'— compact so the scene stays visible':''}</div>
-              <div style={{fontSize:6,color:battleSummaryOpen?P.gold:P.dim}}>{battleSummaryOpen?'▾ OPEN':'▸ EXPAND'}</div>
-            </div>
-            {battleSummaryOpen&&<div className="tl-scroll" style={playMode?{maxHeight:180,overflowY:'auto'}:{}}><BattleBoard G={G}/></div>}
-          </div>}
-          {showAftermath&&<div style={{background:P.panel,borderBottom:`1px solid ${P.border}`}}>
-            <div onClick={()=>{setAftermathSummaryOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 12px',cursor:'pointer',userSelect:'none'}}>
-              <div style={{fontSize:7,color:P.dim,letterSpacing:.5}}>🏔 AFTERMATH SUMMARY — compact by default so the homecoming scene stays readable</div>
-              <div style={{fontSize:6,color:aftermathSummaryOpen?P.gold:P.dim}}>{aftermathSummaryOpen?'▾ OPEN':'▸ EXPAND'}</div>
-            </div>
-            {aftermathSummaryOpen&&<div className="tl-scroll" style={playMode?{maxHeight:260,overflowY:'auto'}:{}}><AftermathSummary G={G} feedbackHref={feedbackHref} onFeedback={openFeedback} playContext={playContext}/></div>}
+          {/* Compact last-log line — keeps player oriented */}
+          {G.log.length>0&&<div ref={logRef} style={{
+            padding:'2px 12px',background:P.darkBg+'80',borderBottom:`1px solid ${P.border}40`,
+            fontSize:6,color:P.dimHi,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis',
+          }}>
+            <NarrEntry line={G.log[G.log.length-1]} isLast={true}/>
           </div>}
 
-          {/* Narrative log */}
-          <div className="tl-scroll tl-narrlog" ref={logRef} style={{
-            flex:playMode&&!logExpanded?'0 0 auto':'1 1 80px',
-            minHeight:playMode&&!logExpanded?0:60,
-            maxHeight:playMode&&!logExpanded?50:140,
-            overflowY:'auto',
-            padding:playMode&&!logExpanded?'3px 12px':'6px 12px',
-            background:P.darkBg,borderTop:`1px solid ${P.border}`,
-            position:'relative',
-          }}>
-            {playMode&&!logExpanded
-              ? G.log.slice(-3).map((l,i,a)=><NarrEntry key={G.log.length-3+i} line={l} isLast={i===a.length-1}/>)
-              : G.log.map((l,i)=><NarrEntry key={i} line={l} isLast={i===G.log.length-1}/>)
-            }
-            {playMode&&G.log.length>3&&<div onClick={()=>setLogExpanded(v=>!v)} style={{
-              position:'absolute',top:1,right:6,fontSize:5,color:P.dim,cursor:'pointer',userSelect:'none',
-              background:P.darkBg,padding:'1px 4px',borderRadius:2,zIndex:2,
-            }}>{logExpanded?'▾ less':'▸ '+G.log.length+' lines'}</div>}
+          {/* Scene — expanded to fill */}
+          <div style={{flex:'1 1 auto',minHeight:playMode?sceneH:280}}>
+            <Scene type={G.scene} tall={true} G={G} phase={phase} sceneH={playMode?sceneH:280}/>
           </div>
         </div>
 
@@ -4718,6 +4860,17 @@ function TidelinesApp(){
             </div>
           </>}
 
+          {/* Quick stats summary */}
+          <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
+            <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>QUICK STATUS</div>
+            <div style={{fontSize:7,color:P.dim,lineHeight:1.7}}>
+              <span style={{color:P.gold}}>{phaseInfo.icon} {phaseInfo.label}</span> · {G.crewAlive}/{G.crewSize} crew
+              {G.morale!==undefined&&<span> · Mor {G.morale}</span>}
+              {G.prestige>0&&<span> · ★{G.prestige}</span>}
+            </div>
+            <button className="tl-info-btn" onClick={toggleInfoPanel} style={{marginTop:6,width:'100%'}}>📊 Open Full Stats & Info (I)</button>
+          </div>
+
           {(G.step==='vil_dawn'||G.step==='vil_intel')&&G.lastRun&&(
             <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
               <div style={{color:P.goldDim,fontSize:6,marginBottom:3,letterSpacing:.5}}>LAST EXPEDITION</div>
@@ -4726,89 +4879,6 @@ function TidelinesApp(){
                 {G.lastRun.killed>0&&<span style={{color:P.red}}> · ☠{G.lastRun.killed}</span>}
                 {G.lastRun.wounded>0&&<span style={{color:P.dim}}> · ⚔{G.lastRun.wounded}</span>}
               </div>
-              <div style={{fontSize:6,color:P.dim,marginTop:2}}>{G.lastRun.prestige} prestige · {G.lastRun.feud}</div>
-              {G.lastRun.named_dead?.length>0&&<div style={{fontSize:6,color:P.red,marginTop:2}}>Fallen: {G.lastRun.named_dead.join(', ')}</div>}
-            </div>
-          )}
-
-          {phase===0&&G.step==='vil_dawn'&&(
-            <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
-              <div style={{color:P.goldDim,fontSize:6,marginBottom:3,letterSpacing:.5}}>HOME WATERS</div>
-              <div style={{fontSize:6,color:P.dim,lineHeight:1.5}}>
-                Food: {Math.round(G.foodStores||0)}% · Village: {Math.round(G.villageReadiness||0)}%
-              </div>
-              <div style={{fontSize:6,color:P.dim,lineHeight:1.5}}>
-                Canoe: {Math.round(G.canoeReadiness||0)}% · Pole: {Math.round(G.poleProgress||0)}%
-              </div>
-              <div style={{fontSize:5,color:P.dim+'90',marginTop:3}}>Steady the village before committing the war canoe.</div>
-            </div>
-          )}
-
-          <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
-            <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>COASTAL CONTEXT</div>
-            <div style={{fontSize:7,color:P.gold,marginBottom:2}}>{campaignSeason(G)}</div>
-            <div style={{fontSize:6,color:P.dim,marginBottom:4}}>{routeStatusText(phase,G)}</div>
-            <div style={{fontSize:6,color:P.dimHi,lineHeight:1.55}}>{coastMemoryLine(G)}</div>
-          </div>
-
-          <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
-            <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>ALPHA BUILD</div>
-            <div style={{fontSize:7,color:P.gold,marginBottom:2}}>{BUILD.label} · {BUILD.version}</div>
-            <div style={{fontSize:6,color:P.dim,marginBottom:4}}>{BUILD.build} · {playContext}</div>
-            <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Send feedback"/>
-          </div>
-
-          {/* Crew roster */}
-          <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
-            <div style={{fontSize:6,color:P.dim,letterSpacing:.5,marginBottom:5}}>⚔ WAR PARTY</div>
-            {G.namedCrew.map(c=>(
-              <div key={c.id} style={{display:'flex',alignItems:'center',gap:5,marginBottom:3,transition:'opacity .3s',opacity:!c.alive?.5:1}}>
-                <span style={{fontSize:8,width:10,textAlign:'center',color:!c.alive?P.red:c.wounded?P.dim:P.green}}>
-                  {!c.alive?'☠':c.wounded?'⚔':'●'}
-                </span>
-                <span style={{fontSize:7,color:!c.alive?P.redDim:P.text,textDecoration:!c.alive?'line-through':'none'}}>
-                  {c.name}
-                </span>
-                <span style={{fontSize:6,color:P.dim}}>{c.role}</span>
-              </div>
-            ))}
-            <div style={{fontSize:6,color:P.dim,marginTop:3}}>{G.crewAlive} of {G.crewSize} warriors ready</div>
-          </div>
-
-          {G.warTraits.length>0&&(
-            <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
-              <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>🏅 WAR TRAITS</div>
-              <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
-                {G.warTraits.map(t=>(
-                  <span key={t} title={TRAIT_DESC[t]} style={{fontSize:6,padding:'2px 5px',background:P.panelHi,border:`1px solid ${P.goldDim}30`,borderRadius:3,color:P.gold,cursor:'help'}}>
-                    {t.replace(/_/g,' ')}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {phase>=2&&phase<=3&&(
-            <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`}}>
-              <div style={{fontSize:6,color:P.red,letterSpacing:.5,marginBottom:4}}>🏴 CEDAR CREEK</div>
-              <div style={{fontSize:7,color:P.dim}}>Warriors: ~{G.defender.crewSize}</div>
-              <div style={{fontSize:7,color:P.dim}}>Resolve: {G.defender.morale}</div>
-              {G.intimResult&&<div style={{fontSize:7,color:G.intimDelta>0?P.green:P.red}}>Intimidated: {G.intimResult}</div>}
-            </div>
-          )}
-
-          {G.showLegacy&&(
-            <div style={{flex:'1 1 0',overflowY:'auto',padding:'8px 10px'}} className="tl-scroll">
-              <div style={{fontSize:7,color:P.gold,letterSpacing:.5,marginBottom:6}}>📜 LEGACY LOG</div>
-              {G.legacyEntries.length===0
-                ?<span style={{color:P.dim,fontSize:7}}>No entries yet. Complete a raid to record history.</span>
-                :G.legacyEntries.map((e,i)=>(
-                  <div key={i} style={{marginBottom:8,paddingBottom:8,borderBottom:i<G.legacyEntries.length-1?`1px solid ${P.border}20`:'none'}}>
-                    <div style={{color:P.goldDim,fontSize:6,marginBottom:2}}>Expedition {i+1}</div>
-                    <div style={{fontSize:7,lineHeight:1.6,color:P.text}}>{e}</div>
-                  </div>
-                ))
-              }
             </div>
           )}
 
@@ -4825,7 +4895,7 @@ function TidelinesApp(){
             </div>
           )}
 
-          {!G.showDebug&&!G.showLegacy&&<div style={{flex:'1 1 0'}}/>}
+          {!G.showDebug&&<div style={{flex:'1 1 0'}}/>}
 
           <div style={{padding:'6px 10px',textAlign:'center',borderTop:`1px solid ${P.border}`,fontSize:5,color:P.dim+'50'}}>TIDELINES {BUILD.version} · {BUILD.label} · {BUILD.build}</div>
         </div>
