@@ -113,8 +113,9 @@ const SCENE_SKY={
   aftermath_l:'linear-gradient(180deg,#141030 0%,#1a1640 20%,#201c48 40%,#1a1640 60%,#141030 80%,#100e28 100%)',
 };
 const STAR_POS=[[8,10,2,0],[22,6,1.5,1.2],[38,16,1,.5],[52,5,2,1.8],[68,12,1.5,.3],[82,8,1,2.1],[15,20,1,1.5],[72,3,1.5,.8],[45,14,1,2.5],[90,18,1.5,.7]];
-const BUILD={label:'PRIVATE ALPHA',version:'v1.3a',build:'PA-2026-03-15',feedbackEmail:'alpha-feedback@example.com'};
+const BUILD={label:'PRIVATE ALPHA',version:'v1.4a',build:'PA-2026-04-29',feedbackEmail:'alpha-feedback@example.com'};
 const ALPHA_LOG_KEY='tidelines_alpha_log_v1';
+const ACCESS_TEXT_KEY='tidelines_large_text_v2';
 const GFX2={
   canoeWarHull:'assets/graphics2/canoe_war_hull.svg',
   longhouse:'assets/graphics2/longhouse_main.svg',
@@ -187,6 +188,20 @@ const WORLD={
 };
 const PHASE_ROUTE_INDEX={0:0,1:2,2:3,3:3,4:4,5:5};
 const PHASE_LOCATION_KEY={0:'home',1:'channel',2:'cedar',3:'cedar',4:'headland',5:'homecoming'};
+function routeIdxForState(s,phase=phaseIdx(s?.step||'')){
+  const step=s?.step||'';
+  if(step.startsWith('aft')) return 5;
+  if(step.startsWith('wth')) return 4;
+  if(step.startsWith('enc')||step.startsWith('res')) return 3;
+  if(step==='trv_arrival'||step==='trv_form'||step==='trv_done') return 3;
+  if(step==='trv_trade_negotiate'||step==='trv_diplo_council') return 3;
+  if(step==='trv_event'||step==='trv_trade_event'||step==='trv_diplo_event') return 2;
+  if(step==='trv_route') return 1;
+  return PHASE_ROUTE_INDEX[phase]??0;
+}
+function routeNodeForState(s,phase=phaseIdx(s?.step||'')){
+  return WORLD.route[routeIdxForState(s,phase)]||WORLD.route[0];
+}
 
 /* ─ Onboarding hints (first raid only) ─ */
 const HINTS={
@@ -246,6 +261,27 @@ function campaignSeason(s){
   if(s.totalRaids>=1) return 'Season of Retaliation';
   return 'First Season of Answering';
 }
+function getLocationIdentityForState(s,phase){
+  const idx=routeIdxForState(s,phase);
+  if(idx===0) return WORLD.home;
+  if(idx===3) return WORLD.target;
+  if(idx===5) return {...WORLD.home,name:'Stoneshell Inlet',title:'Homecoming',badge:'Witness Beach',tone:'homecoming'};
+  const node=WORLD.route[idx]||WORLD.route[0];
+  return{
+    key:node.key,
+    name:node.label,
+    title:node.sub,
+    badge:node.water==='channel'?'Channel Water':node.water==='open'?'Outer Reach':node.water==='return'?'Homeward Arc':'Coastal Route',
+    subtitle:node.landmark,
+    atmosphere:node.water==='open'
+      ?'The canoe is exposed between settlements; distance feels real here.'
+      :node.water==='channel'
+      ?'Currents gather and separate villages. Water chooses the pace.'
+      :'The shoreline bends; the route itself becomes part of the story.',
+    tone:node.water,
+  };
+}
+function seasonNumber(s){return (s.totalRaids||0)+1;}
 function coastMemoryLine(s){
   if(!s.lastRun) return 'The wider coast is still listening for the shape of your first crossing.';
   if(s.lastRun.named_dead?.length) return `The coast still holds the names of ${s.lastRun.named_dead.join(', ')}.`;
@@ -256,6 +292,12 @@ function coastMemoryLine(s){
   return 'The channels are learning your rhythm.';
 }
 function routeStatusText(phase,s){
+  const idx=routeIdxForState(s,phase);
+  if(idx===1) return 'Leaving home water - Seal Narrows ahead';
+  if(idx===2) return 'In Grey Channel - exposed crossing';
+  if(idx===3) return `At ${WORLD.target.name} - ${feudName(s.feudEscalation)}`;
+  if(idx===4) return s.outcome.includes('VICTORY')?'Turning south with spoils and wounded':'Turning south with grief and silence';
+  if(idx===5) return 'Back inside Stoneshell Inlet - witnesses on the beach';
   if(phase===0) return 'War canoe beached in home water';
   if(phase===1) return 'Two waters from home · exposed crossing';
   if(phase===2||phase===3) return `At ${WORLD.target.name} · ${feudName(s.feudEscalation)}`;
@@ -271,12 +313,24 @@ function phaseTransitionCopy(phase,s){
   return {title:'SIGHTING HOME AGAIN',subtitle:'Witness fires, gathered families, and memory waiting on the beach.',place:WORLD.home.name};
 }
 function playContextLabel({playMode,isMobile,isPortrait}){
-  if(playMode&&isMobile&&isPortrait) return 'Play Mode · Mobile Portrait';
-  if(playMode&&isMobile) return 'Play Mode · Mobile Landscape';
-  if(playMode) return 'Play Mode · Desktop';
+  if(playMode&&isMobile&&isPortrait) return 'Full Screen · Mobile Portrait';
+  if(playMode&&isMobile) return 'Full Screen · Mobile Landscape';
+  if(playMode) return 'Full Screen · Desktop';
   if(isMobile&&isPortrait) return 'Windowed · Mobile Portrait';
   if(isMobile) return 'Windowed · Mobile Landscape';
   return 'Windowed · Desktop';
+}
+function quickStatusLines(G,phaseInfo){
+  const out=OUTCOME_LABEL[G.outcome]?.text;
+  const title=out&&phaseInfo.label==='Aftermath' ? `Aftermath: ${out}` : phaseInfo.label;
+  const lines=[
+    `${title} · Season ${seasonNumber(G)}`,
+    `Crew ${G.crewAlive}/${G.crewSize} · Morale ${Math.round(G.morale)}`,
+    `Prestige ${Math.round(G.prestige)} · Feud ${feudName(G.feudEscalation)}`,
+  ];
+  if(G.cargo>0) lines.push(`Cargo ${G.cargo}/${G.cargoCapacity}`);
+  else if(G.step.startsWith('vil')) lines.push(`Food ${Math.round(G.foodStores||0)} · Canoe prep ${Math.round(G.canoeReadiness||0)}`);
+  return lines;
 }
 function phaseProgressLabel(phase){return `Phase ${phase+1} of ${PHASES.length}`;}
 function firstRunObjective(phase){
@@ -300,7 +354,8 @@ function buildFeedbackHref(ctx){
     `Build: ${BUILD.version} (${BUILD.build})`,
     `Play context: ${ctx.playContext}`,
     `Current phase: ${ctx.phaseLabel}`,
-    `Raid: ${ctx.raidNumber}`,
+    `Season: ${ctx.seasonNumber}`,
+    `Expedition: ${ctx.expeditionNumber}`,
     `Outcome: ${ctx.outcome||'In progress'}`,
     `Strongest moment: ${ctx.strongestMoment||''}`,
     '',
@@ -370,6 +425,45 @@ function loadPersist(){try{const r=localStorage.getItem(SAVE_KEY);return r?JSON.
 function savePersist(d){try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){}}
 function clearPersist(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 function persistFromState(s){return{prestige:s.prestige,feudEscalation:s.feudEscalation,legacyEntries:s.legacyEntries,warTraits:s.warTraits,totalRaids:s.totalRaids,lastRun:s.lastRun,foodStores:s.foodStores,villageReadiness:s.villageReadiness,canoeReadiness:s.canoeReadiness,poleProgress:s.poleProgress};}
+
+function buildNextSeasonCarry(s){
+  const carry=persistFromState(s);
+  const effects=[];
+  let startMorale=65,startCanoeCondition=100,crewQuality=55,startIntimidationBonus=0;
+  const food=carry.foodStores??72,village=carry.villageReadiness??58,canoe=carry.canoeReadiness??60,pole=carry.poleProgress??12,feud=carry.feudEscalation??8;
+
+  if(food<30){startMorale-=12;crewQuality-=5;effects.push('Winter starts hungry: thin stores lower morale and leave the crew less ready.');}
+  else if(food<45){startMorale-=6;crewQuality-=2;effects.push('Food stores are tight. The next crew starts with a little less strength.');}
+  else if(food>80){startMorale+=6;crewQuality+=2;effects.push('Full smoke racks carry into the new season: morale and crew quality rise.');}
+
+  if(village<35){startMorale-=8;effects.push('The village is strained. Repairs, grieving, and winter work slow every preparation.');}
+  else if(village>75){startMorale+=4;effects.push('A strong village gives the new season a calmer, steadier start.');}
+
+  if(canoe<35){startCanoeCondition-=18;effects.push('The war canoe was neglected. It launches with old scrapes and tired lashings.');}
+  else if(canoe<50){startCanoeCondition-=8;effects.push('The canoe needs work. The next crossing begins with a weakened hull.');}
+  else if(canoe>80){startCanoeCondition+=5;effects.push('Careful canoe work pays off. The hull starts the season in excellent condition.');}
+
+  if(feud>12){startMorale-=4;effects.push('Cedar Creek arms for retaliation. The next raid will meet a harder shore.');}
+  else if(feud<=3){startMorale+=4;effects.push('The feud has cooled. People sleep easier, and the crew feels it.');}
+
+  if(pole>=70){startIntimidationBonus+=8;effects.push('The memorial pole now speaks before you arrive: your lineage carries visible authority.');}
+  else if(pole>=40){startIntimidationBonus+=4;effects.push('The growing pole strengthens your reputation along the coast.');}
+
+  if(s.lastRun?.outcome==='DECISIVE_VICTORY'){startMorale+=6;crewQuality+=3;effects.push("Last season's decisive victory becomes confidence at the paddles.");}
+  else if(s.lastRun?.outcome==='VICTORY'){startMorale+=3;effects.push('Victory carries forward. The crew begins with remembered courage.');}
+  else if(s.lastRun?.outcome==='DEFEAT'||s.lastRun?.outcome==='DEVASTATING_DEFEAT'){startMorale-=8;effects.push('Defeat follows the canoe home. The next season begins under grief and doubt.');}
+  else if(s.lastRun?.outcome==='TRADE_SUCCESS'){startMorale+=4;effects.push('Trade goods bought comfort and goodwill. The village starts warmer.');}
+  else if(s.lastRun?.outcome==='DIPLOMACY_SUCCESS'){startMorale+=5;effects.push('Peace talk lowers the breath in every room. The new season starts steadier.');}
+
+  return{
+    ...carry,
+    startMorale:cl(startMorale,25,90),
+    startCanoeCondition:cl(startCanoeCondition,35,100),
+    crewQuality:cl(crewQuality,35,75),
+    startIntimidationBonus,
+    seasonEffects:effects,
+  };
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    §5.5  AUDIO ENGINE — Web Audio API synth, fully self-contained
@@ -566,23 +660,33 @@ function doCasualties(s){
 /* ─── §8  State Factory ──────────────────────────────────────────────── */
 function initState(carry={}){
   const sv=carry._fromSave?carry:null;
+  const startPrestige=carry.prestige??sv?.prestige??200;
+  const startFeud=carry.feudEscalation??sv?.feudEscalation??8;
+  const feudPressure=startFeud>12
+    ?{crewSize:15,morale:65,quality:52,fortification:2,alliance:10}
+    :startFeud>5
+    ?{crewSize:13,morale:58,quality:48,fortification:1,alliance:7}
+    :{crewSize:12,morale:52,quality:45,fortification:0,alliance:5};
+  const seasonEffects=carry.seasonEffects||[];
   return{
     step:'vil_dawn',scene:'village',
     log:[L(''),L('Home Waters wakes under witness fires and low cedar smoke.'),L(''),
+         ...seasonEffects.map(t=>L(t,'gold','stat')),
+         ...(seasonEffects.length?[L('')]:[]),
          L('Before the war canoe is committed to Cedar Creek, the village must be steadied for the season ahead.'),L('')],
-    morale:65,fear:0,canoeCondition:100,cargo:0,cargoCapacity:40,
-    prestige:carry.prestige??sv?.prestige??200,
-    feudEscalation:carry.feudEscalation??sv?.feudEscalation??8,
+    morale:carry.startMorale??65,fear:0,canoeCondition:carry.startCanoeCondition??100,cargo:0,cargoCapacity:40,
+    prestige:startPrestige,
+    feudEscalation:startFeud,
     foodStores:carry.foodStores??sv?.foodStores??72,
     villageReadiness:carry.villageReadiness??sv?.villageReadiness??58,
     canoeReadiness:carry.canoeReadiness??sv?.canoeReadiness??60,
     poleProgress:carry.poleProgress??sv?.poleProgress??12,
-    crewSize:15,crewQuality:55,crewAlive:15,crewWounded:0,crewKilled:0,captivesTaken:0,
+    crewSize:15,crewQuality:carry.crewQuality??55,crewAlive:15,crewWounded:0,crewKilled:0,captivesTaken:0,
     intelQuality:'NONE',surpriseBonus:0,stealthBonus:0,
-    intimidationBonus:0,approachTime:'dawn',formation:'single',attackerTactic:'measured_push',
+    intimidationBonus:carry.startIntimidationBonus??0,approachTime:'dawn',formation:'single',attackerTactic:'measured_push',
     intimScore:0,resolveScore:0,intimDelta:0,intimResult:'',defenderFled:false,
     rounds:[],outcome:'',outcomeRatio:0,atkTotal:0,defTotal:0,turningPoint:null,prestigeChange:0,
-    defender:{name:'Cedar Creek',crewSize:12,morale:55,quality:45,canoeCombat:40,communitySize:35,leadership:40,fortification:0,alliance:5},
+    defender:{name:'Cedar Creek',crewSize:feudPressure.crewSize,morale:feudPressure.morale,quality:feudPressure.quality,canoeCombat:40,communitySize:35,leadership:40,fortification:feudPressure.fortification,alliance:feudPressure.alliance},
     namedCrew:[
       {id:'gwaay',name:'Gwaay',role:'Veteran',traits:['veteran'],alive:true,wounded:false},
       {id:'kaahl',name:'Kaahl',role:'War Singer',traits:['war_singer'],alive:true,wounded:false},
@@ -1393,6 +1497,8 @@ const INJCSS=`
 @keyframes tl-scene-pressure{0%,100%{transform:translateX(0) translateY(0) scale(1)}20%{transform:translateX(-.7px) translateY(.3px) scale(1.003)}55%{transform:translateX(.8px) translateY(-.4px) scale(1.005)}80%{transform:translateX(-.3px) translateY(.2px) scale(1.002)}}
 @keyframes tl-home-glow{0%,100%{opacity:.45}50%{opacity:.9}}
 @keyframes tl-goods-glint{0%,100%{opacity:.15;transform:translateX(-10%)}50%{opacity:.45;transform:translateX(10%)}}
+*,*::before,*::after{box-sizing:border-box}
+html,body,#root{width:100%;max-width:100%;overflow-x:hidden}
 /* ─ Home Waters village life animations ─ */
 @keyframes tl-fish-sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
 @keyframes tl-carve-strike{0%,100%{transform:rotate(0deg)}40%{transform:rotate(-12deg)}55%{transform:rotate(4deg)}}
@@ -1502,7 +1608,14 @@ const INJCSS=`
 .tl-scroll::-webkit-scrollbar-thumb{background:${P.border};border-radius:3px}
 .tl-scroll::-webkit-scrollbar-track{background:transparent}
 
-.tl-cmd{transition:all .2s ease!important;position:relative;overflow:hidden}
+.tl-cmd{transition:all .2s ease!important;position:relative;overflow:hidden;box-sizing:border-box;min-height:92px!important}
+.tl-cmd,.tl-cmd *{white-space:normal;overflow-wrap:anywhere}
+.tl-cmd-body{padding:11px 13px 10px!important}
+.tl-cmd-icon{font-size:17px!important}
+.tl-cmd-title{font-size:12px!important;line-height:1.45!important}
+.tl-cmd-flavor{font-size:9px!important;line-height:1.7!important;margin-left:23px!important}
+.tl-cmd-effect,.tl-cmd-risk{font-size:8.5px!important;line-height:1.6!important;margin-left:23px!important}
+.tl-cmd-archetype{font-size:7.5px!important;line-height:1.55!important;margin-left:23px!important}
 .tl-cmd::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 50%);pointer-events:none;opacity:0;transition:opacity .2s}
 .tl-cmd:hover{border-color:${P.gold}!important;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.5)}
 .tl-cmd:hover::before{opacity:1}
@@ -1544,10 +1657,12 @@ const INJCSS=`
 
 .tl-hint{animation:tl-hint-in .4s ease-out;overflow:hidden}
 
-.tl-screen{display:grid;grid-template-rows:auto auto 1fr auto;grid-template-columns:1fr;max-width:900px;width:100%;margin:0 auto}
+.tl-screen{display:grid;grid-template-rows:auto auto 1fr auto;grid-template-columns:1fr;max-width:100vw;width:100%;margin:0 auto}
 .tl-topbar,.tl-stage,.tl-sidebar,.tl-cmdarea,.tl-worldbar{min-width:0}
+.tl-topbar,.tl-cmdarea{max-width:100vw;overflow-x:hidden}
+.tl-cmd-grid{grid-template-columns:repeat(auto-fit,minmax(min(540px,100%),1fr))!important;gap:10px!important}
 @media(min-width:740px){
-  .tl-screen{grid-template-columns:1fr 240px;grid-template-rows:auto auto 1fr auto;max-height:100vh;overflow:hidden}
+  .tl-screen{grid-template-columns:minmax(0,1fr) 240px;grid-template-rows:auto auto 1fr auto;max-height:100vh;overflow:hidden}
   .tl-topbar{grid-column:1/-1}
   .tl-stage{grid-column:1/2;grid-row:2/4;overflow-y:auto}
   .tl-sidebar{grid-column:2/3;grid-row:2/4;border-left:1px solid ${P.border};overflow-y:auto}
@@ -1578,7 +1693,7 @@ const INJCSS=`
   .tl-playmode .tl-cmdarea{grid-column:1/-1;grid-row:3/4}
 }
 /* Play mode button */
-.tl-play-btn{transition:all .2s;border-radius:3px;padding:1px 6px;cursor:pointer;user-select:none}
+.tl-play-btn{transition:all .2s;border-radius:3px;padding:5px 10px!important;cursor:pointer;user-select:none;font-size:8px!important;letter-spacing:.4px}
 .tl-play-btn:hover{background:${P.gold}20}
 .tl-sidebar-toggle{transition:all .2s;border-radius:3px;padding:1px 5px;cursor:pointer;user-select:none}
 .tl-sidebar-toggle:hover{background:${P.dimHi}20}
@@ -1587,22 +1702,67 @@ const INJCSS=`
 
 /* ═══ INFO PANEL OVERLAY ═══ */
 .tl-infopanel-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:180;backdrop-filter:blur(2px);animation:tl-fadein .2s ease-out}
-.tl-infopanel{position:fixed;top:0;left:0;bottom:0;width:380px;max-width:92vw;z-index:185;
+.tl-infopanel{position:fixed;top:0;left:0;bottom:0;width:min(50vw,920px);max-width:96vw;z-index:185;
   background:${P.panel};border-right:2px solid ${P.gold}40;
   transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
-  display:flex;flex-direction:column;overflow:hidden;box-shadow:8px 0 40px rgba(0,0,0,.5)}
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:8px 0 40px rgba(0,0,0,.5);font-size:10px}
 .tl-infopanel.tl-infopanel-open{transform:translateX(0)}
 .tl-infopanel-tabs{display:flex;gap:0;border-bottom:1px solid ${P.border};background:${P.panelHi};flex-shrink:0}
-.tl-infopanel-tab{flex:1;padding:8px 4px;text-align:center;font-family:${font};font-size:7px;color:${P.dim};
+.tl-infopanel-tab{flex:1;padding:12px 6px;text-align:center;font-family:${font};font-size:10px;color:${P.dim};
   cursor:pointer;user-select:none;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;background:transparent;border:none;border-bottom:2px solid transparent}
 .tl-infopanel-tab:hover{color:${P.dimHi};background:${P.panelHi}}
 .tl-infopanel-tab.tl-tab-active{color:${P.gold};border-bottom-color:${P.gold};background:${P.panel}}
 .tl-infopanel-body{flex:1;overflow-y:auto;padding:0}
 .tl-infopanel .tl-worldbar{grid-template-columns:1fr;grid-template-areas:'campaign' 'location' 'chart'}
-.tl-info-btn{transition:all .2s;border-radius:3px;padding:2px 7px;cursor:pointer;user-select:none;
-  border:1px solid ${P.gold}40;background:${P.gold}10;color:${P.gold};font-family:${font};font-size:7px;letter-spacing:.4px}
+.tl-infopanel > div:first-child span{font-size:11px!important;line-height:1.5!important}
+.tl-infopanel-body *[style*="font-size"]{font-size:12px!important;line-height:1.75!important}
+.tl-infopanel-body [style*="font-size: 5px"],.tl-infopanel-body [style*="font-size:5px"]{font-size:10px!important;line-height:1.7!important}
+.tl-infopanel-body [style*="font-size: 6px"],.tl-infopanel-body [style*="font-size:6px"]{font-size:11px!important;line-height:1.75!important}
+.tl-infopanel-body [style*="font-size: 7px"],.tl-infopanel-body [style*="font-size:7px"]{font-size:12px!important;line-height:1.8!important}
+.tl-infopanel-body [style*="font-size: 8px"],.tl-infopanel-body [style*="font-size:8px"]{font-size:13px!important;line-height:1.75!important}
+.tl-infopanel-body [style*="font-size: 9px"],.tl-infopanel-body [style*="font-size:9px"]{font-size:14px!important;line-height:1.7!important}
+.tl-infopanel-body [style*="font-size: 10px"],.tl-infopanel-body [style*="font-size:10px"]{font-size:15px!important;line-height:1.65!important}
+.tl-infopanel-body p{font-size:12px!important;line-height:1.85!important}
+.tl-info-btn{transition:all .2s;border-radius:3px;padding:5px 10px;cursor:pointer;user-select:none;
+  border:1px solid ${P.gold}40;background:${P.gold}10;color:${P.gold};font-family:${font};font-size:8px;letter-spacing:.4px;line-height:1.35}
 .tl-info-btn:hover{background:${P.gold}25;border-color:${P.gold}60;transform:translateY(-1px)}
 .tl-info-btn:active{transform:translateY(0) scale(.97)}
+.tl-large-text .tl-cmd{min-height:104px!important}
+.tl-large-text .tl-cmd-body{padding:13px 15px 12px!important}
+.tl-large-text .tl-cmd-icon{font-size:19px!important}
+.tl-large-text .tl-cmd-title{font-size:13.5px!important;line-height:1.45!important}
+.tl-large-text .tl-cmd-flavor{font-size:10px!important;line-height:1.75!important;margin-left:25px!important}
+.tl-large-text .tl-cmd-effect,.tl-large-text .tl-cmd-risk{font-size:9.5px!important;line-height:1.65!important;margin-left:25px!important}
+.tl-large-text .tl-cmd-archetype{font-size:8.5px!important;line-height:1.6!important;margin-left:25px!important}
+.tl-large-text .tl-action{font-size:12px!important;min-height:52px!important;padding:12px 22px!important}
+.tl-large-text .tl-hint{font-size:8.5px!important;line-height:1.75!important;padding:7px 10px!important}
+.tl-large-text .tl-cmdarea{font-size:9px!important}
+.tl-large-text .tl-cmdarea>div>div:first-child{font-size:9px!important;line-height:1.7!important}
+.tl-large-text .tl-infopanel{width:min(58vw,1120px);font-size:12px}
+.tl-large-text .tl-infopanel-tab{font-size:12px!important;padding:14px 8px!important}
+.tl-large-text .tl-info-btn{font-size:10px!important;min-height:38px!important}
+.tl-large-text .tl-context-chip,.tl-large-text .tl-alpha-chip{font-size:6px!important}
+.tl-large-text .tl-topbar-title{font-size:14px!important}
+.tl-large-text .tl-infopanel > div:first-child span{font-size:13px!important;line-height:1.55!important}
+.tl-large-text .tl-infopanel-body *[style*="font-size"]{font-size:14px!important;line-height:1.85!important}
+.tl-large-text .tl-infopanel-body [style*="font-size: 5px"],.tl-large-text .tl-infopanel-body [style*="font-size:5px"]{font-size:12px!important;line-height:1.8!important}
+.tl-large-text .tl-infopanel-body [style*="font-size: 6px"],.tl-large-text .tl-infopanel-body [style*="font-size:6px"]{font-size:13px!important;line-height:1.85!important}
+.tl-large-text .tl-infopanel-body [style*="font-size: 7px"],.tl-large-text .tl-infopanel-body [style*="font-size:7px"]{font-size:14px!important;line-height:1.9!important}
+.tl-large-text .tl-infopanel-body [style*="font-size: 8px"],.tl-large-text .tl-infopanel-body [style*="font-size:8px"]{font-size:15px!important;line-height:1.85!important}
+.tl-large-text .tl-infopanel-body [style*="font-size: 9px"],.tl-large-text .tl-infopanel-body [style*="font-size:9px"]{font-size:16px!important;line-height:1.8!important}
+.tl-large-text .tl-infopanel-body [style*="font-size: 10px"],.tl-large-text .tl-infopanel-body [style*="font-size:10px"]{font-size:17px!important;line-height:1.75!important}
+.tl-large-text .tl-infopanel-body p{font-size:14px!important;line-height:1.9!important}
+.tl-large-text .tl-stage [style*="font-size: 5px"],.tl-large-text .tl-stage [style*="fontSize:5"]{font-size:7px!important}
+.tl-large-text .tl-stage [style*="font-size: 6px"],.tl-large-text .tl-stage [style*="fontSize:6"]{font-size:8px!important}
+.tl-large-text .tl-stage [style*="font-size: 7px"],.tl-large-text .tl-stage [style*="fontSize:7"]{font-size:9px!important}
+.tl-large-text .tl-stage [style*="font-size: 8px"],.tl-large-text .tl-stage [style*="fontSize:8"]{font-size:10px!important}
+.tl-large-text.tl-playmode .tl-cmd{min-height:104px!important}
+.tl-large-text.tl-playmode .tl-cmd-body{padding:13px 15px 12px!important}
+.tl-large-text.tl-playmode .tl-cmd-icon{font-size:19px!important}
+.tl-large-text.tl-playmode .tl-cmd-title{font-size:13.5px!important;line-height:1.45!important}
+.tl-large-text.tl-playmode .tl-cmd-flavor{font-size:10px!important;line-height:1.75!important}
+.tl-large-text.tl-playmode .tl-cmd-effect,.tl-large-text.tl-playmode .tl-cmd-risk{font-size:9.5px!important;line-height:1.65!important}
+.tl-large-text.tl-playmode .tl-cmd-archetype{font-size:8.5px!important;line-height:1.6!important}
 @media(max-width:520px){
   .tl-infopanel{width:100%;max-width:100%;border-right:none;border-radius:0}
 }
@@ -1635,7 +1795,7 @@ const INJCSS=`
   .tl-route-node{min-width:44px!important;max-width:58px!important;padding:3px 4px!important}
   .tl-worldbar{gap:3px;padding:4px 6px}
   .tl-worldpanel{min-height:54px;padding:5px 6px}
-  .tl-chart-box{height:44px!important}
+  .tl-chart-box{height:96px!important}
   .tl-chart-label{display:none}
   .tl-briefing{padding:5px 6px;gap:6px}
   .tl-briefing-main{font-size:5px;line-height:1.5}
@@ -1703,13 +1863,13 @@ const INJCSS=`
   .tl-playmode .tl-cmdarea{padding:5px 9px 6px!important}
   .tl-playmode .tl-cmd-grid{gap:5px!important}
   .tl-playmode .tl-cmd{margin-bottom:2px}
-  .tl-playmode .tl-cmd-body{padding:5px 8px 4px!important}
+  .tl-playmode .tl-cmd-body{padding:8px 10px 7px!important}
   .tl-playmode .tl-cmd-head{gap:4px!important}
-  .tl-playmode .tl-cmd-icon{font-size:10px!important}
-  .tl-playmode .tl-cmd-title{font-size:7px!important}
-  .tl-playmode .tl-cmd-flavor{font-size:5px!important;line-height:1.35!important}
-  .tl-playmode .tl-cmd-effect,.tl-playmode .tl-cmd-risk{font-size:5px!important}
-  .tl-playmode .tl-cmd-archetype{font-size:4px!important}
+  .tl-playmode .tl-cmd-icon{font-size:14px!important}
+  .tl-playmode .tl-cmd-title{font-size:10px!important;line-height:1.45!important}
+  .tl-playmode .tl-cmd-flavor{font-size:7px!important;line-height:1.55!important}
+  .tl-playmode .tl-cmd-effect,.tl-playmode .tl-cmd-risk{font-size:7px!important;line-height:1.5!important}
+  .tl-playmode .tl-cmd-archetype{font-size:6px!important;line-height:1.45!important}
   .tl-playmode .tl-sidebar.tl-sidebar-play{max-height:56vh!important;max-height:56dvh!important}
   .tl-playmode .tl-sheet-handle{margin-bottom:2px}
   .tl-playmode .tl-narrlog{max-height:42px!important;padding:2px 9px!important}
@@ -1741,8 +1901,23 @@ const INJCSS=`
 .tl-seg-hostile{background:linear-gradient(90deg,#3a1218,#621820)}
 .tl-seg-return{background:linear-gradient(90deg,#244060,#325478)}
 .tl-seg-homecoming{background:linear-gradient(90deg,#294458,#30586a)}
-.tl-chart-node{position:absolute;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid rgba(6,6,18,.9);box-shadow:0 0 0 1px rgba(255,255,255,.05)}
+.tl-chart-box{height:88px!important}
+.tl-chart-route{stroke-width:2.2!important}
+.tl-chart-done{stroke-width:3!important}
+.tl-chart-node{position:absolute;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid rgba(6,6,18,.9);box-shadow:0 0 0 1px rgba(255,255,255,.05)}
 .tl-chart-marker{animation:tl-chart-pulse 2.1s ease-in-out infinite}
+.tl-chart-label{font-size:7px!important;padding:4px 6px!important}
+.tl-chart-landmark{font-size:6px!important;text-shadow:0 1px 2px #050512}
+.tl-chart-current{font-size:7px!important}
+.tl-infopanel .tl-chart-box{height:190px!important}
+.tl-infopanel .tl-chart-node{width:20px;height:20px;border-width:3px}
+.tl-infopanel .tl-chart-label{font-size:11px!important;padding:6px 8px!important;border-width:2px!important}
+.tl-infopanel .tl-chart-landmark{font-size:9px!important}
+.tl-infopanel .tl-chart-current{font-size:10px!important}
+.tl-infopanel .tl-routebar{padding:10px 12px!important}
+.tl-infopanel .tl-route-node{min-width:84px!important;max-width:112px!important;padding:8px 9px!important}
+.tl-infopanel .tl-route-seg{height:12px}
+.tl-infopanel .tl-worldpanel{min-height:124px;padding:10px 12px}
 
 @media(max-width:739px){
   .tl-worldbar{grid-template-columns:1fr 1fr;grid-template-areas:'campaign chart' 'location location'}
@@ -3900,7 +4075,7 @@ function CampaignBanner({G,phase}){
       <div style={{display:'flex',gap:8,flexWrap:'wrap',fontSize:6,color:P.dim,marginBottom:5}}>
         <span>⚓ {WORLD.home.name}</span>
         <span>⚔ {WORLD.target.name}</span>
-        <span>📜 Raid {G.totalRaids+1}</span>
+        <span>📜 Season {seasonNumber(G)}</span>
       </div>
       <div style={{fontSize:6,color:P.dimHi,lineHeight:1.55}}>{memory}</div>
       <div style={{fontSize:5,color:phase>=2&&phase<=4?P.red:P.dim,marginTop:5,letterSpacing:.4}}>{routeStatusText(phase,G)}</div>
@@ -3908,8 +4083,8 @@ function CampaignBanner({G,phase}){
   );
 }
 
-function LocationCard({phase}){
-  const loc=getLocationIdentity(phase);
+function LocationCard({phase,G}){
+  const loc=G?getLocationIdentityForState(G,phase):getLocationIdentity(phase);
   const accent=loc.tone==='hostile'?P.red:loc.tone==='home'||loc.tone==='homecoming'?P.gold:P.blue;
   return(
     <div className="tl-worldpanel">
@@ -3927,31 +4102,32 @@ function LocationCard({phase}){
   );
 }
 
-function CoastalChart({phase}){
-  const currentIndex=routeIdxForPhase(phase);
+function CoastalChart({phase,G}){
+  const currentIndex=G?routeIdxForState(G,phase):routeIdxForPhase(phase);
   const previousIndex=Math.max(0,currentIndex-1);
+  const currentNode=WORLD.route[currentIndex]||WORLD.route[0];
   return(
     <div className="tl-worldpanel">
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
         <span style={{fontSize:6,color:P.goldDim,letterSpacing:.6}}>COASTAL CHART</span>
-        <span style={{fontSize:5,color:P.dim}}>{routeNodeForPhase(phase).landmark}</span>
+        <span className="tl-chart-current" style={{fontSize:5,color:P.dim}}>{currentNode.landmark}</span>
       </div>
       <div className="tl-chart-box" style={{position:'relative',height:56,border:`1px solid ${P.border}60`,borderRadius:4,overflow:'hidden',background:'linear-gradient(180deg,#0c1834,#0a1430)'}}>
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
           <path d="M0 100 L0 68 L8 60 L14 63 L20 55 L26 57 L32 45 L41 46 L53 31 L62 28 L73 12 L100 0 L100 100 Z" fill="#16243a" opacity=".92"/>
           <path d="M0 100 L0 82 L18 78 L27 70 L32 73 L43 60 L50 62 L59 52 L70 42 L85 32 L100 28" stroke="#35506c" strokeWidth="1.2" fill="none" opacity=".35"/>
-          <polyline points={WORLD.route.map(n=>`${n.x},${n.y}`).join(' ')} fill="none" stroke="#d4b020" strokeWidth="1.4" strokeDasharray="2.5 2" opacity=".9"/>
-          <polyline points={WORLD.route.slice(0,currentIndex+1).map(n=>`${n.x},${n.y}`).join(' ')} fill="none" stroke="#60e050" strokeWidth="1.7" opacity=".9"/>
+          <polyline className="tl-chart-route" points={WORLD.route.map(n=>`${n.x},${n.y}`).join(' ')} fill="none" stroke="#d4b020" strokeWidth="1.4" strokeDasharray="2.5 2" opacity=".9"/>
+          <polyline className="tl-chart-done" points={WORLD.route.slice(0,currentIndex+1).map(n=>`${n.x},${n.y}`).join(' ')} fill="none" stroke="#60e050" strokeWidth="1.7" opacity=".9"/>
         </svg>
-        {WORLD.landmarks.map((m,i)=><div key={i} style={{position:'absolute',left:m.x+'%',top:m.y+'%',transform:'translate(-50%,-50%)',fontSize:4,color:m.type==='hazard'?P.red:m.type==='home'?P.goldDim:P.dim,letterSpacing:.3}}>{m.label}</div>)}
+        {WORLD.landmarks.map((m,i)=><div key={i} className="tl-chart-landmark" style={{position:'absolute',left:m.x+'%',top:m.y+'%',transform:'translate(-50%,-50%)',fontSize:4,color:m.type==='hazard'?P.red:m.type==='home'?P.goldDim:P.dim,letterSpacing:.3}}>{m.label}</div>)}
         {WORLD.route.map((n,i)=>{
           const active=i===currentIndex;
           const done=i<currentIndex;
           const col=active?P.gold:done?P.green:P.dim;
           return <div key={n.key} className={active?'tl-chart-node tl-chart-marker':'tl-chart-node'} style={{left:n.x+'%',top:n.y+'%',background:col}}/>;
         })}
-        <div className="tl-chart-label" style={{position:'absolute',left:WORLD.route[currentIndex].x+'%',top:WORLD.route[currentIndex].y+'%',transform:'translate(8px,-16px)',fontSize:5,color:P.text,padding:'2px 4px',background:P.scrim,border:`1px solid ${P.gold}35`,borderRadius:3,whiteSpace:'nowrap'}}>
-          {WORLD.route[currentIndex].label}
+        <div className="tl-chart-label" style={{position:'absolute',left:currentNode.x+'%',top:currentNode.y+'%',transform:'translate(8px,-16px)',fontSize:5,color:P.text,padding:'2px 4px',background:P.scrim,border:`1px solid ${P.gold}35`,borderRadius:3,whiteSpace:'nowrap'}}>
+          {currentNode.label}
         </div>
         {phase===4&&<div style={{position:'absolute',left:WORLD.route[previousIndex].x+'%',top:WORLD.route[previousIndex].y+'%',transform:'translate(6px,8px)',fontSize:4,color:P.dim}}>astern</div>}
       </div>
@@ -3959,14 +4135,15 @@ function CoastalChart({phase}){
   );
 }
 
-function RouteStrip({phase}){
-  const currentIndex=routeIdxForPhase(phase);
-  const tension=phase>=2&&phase<=4;
+function RouteStrip({phase,G}){
+  const currentIndex=G?routeIdxForState(G,phase):routeIdxForPhase(phase);
+  const tension=currentIndex>=3&&currentIndex<=4;
+  const routeHeading=currentIndex>=4?'TURNING SOUTH TOWARD HOME':currentIndex>=3?'IN HOSTILE REACH':currentIndex>=1?'OUTBOUND FROM HOME WATER':'HOME WATER';
   return(
     <div className="tl-routebar" style={{padding:'5px 10px',background:P.panel,borderBottom:`1px solid ${P.border}`}}>
       <div className="tl-routebar-head" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
         <div style={{fontSize:6,color:P.goldDim,letterSpacing:.7}}>ROUTE OF THIS EXPEDITION</div>
-        <div style={{fontSize:5,color:tension?P.red:P.dim,letterSpacing:.4}}>{phase>=4?'TURNING SOUTH TOWARD HOME':phase>=2?'IN HOSTILE REACH':'OUTBOUND FROM HOME WATER'}</div>
+        <div style={{fontSize:5,color:tension?P.red:P.dim,letterSpacing:.4}}>{routeHeading}</div>
       </div>
       <div style={{display:'flex',alignItems:'center',gap:3}}>
         {WORLD.route.map((n,i)=>{
@@ -4429,7 +4606,7 @@ function TidelinesApp(){
   useEffect(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight;},[G.log.length]);
   const act=useCallback((fn,...a)=>setG(p=>fn(p,...a)),[]);
   const onContinue=useCallback(()=>{TL_Audio.sfxContinue();setG(p=>{const fn=CONT[p.step];return fn?fn(p):p;});},[]);
-  const onReset=useCallback(()=>setG(p=>initState({prestige:p.prestige,feudEscalation:p.feudEscalation,legacyEntries:p.legacyEntries,warTraits:p.warTraits,totalRaids:p.totalRaids,lastRun:p.lastRun,foodStores:p.foodStores,villageReadiness:p.villageReadiness,canoeReadiness:p.canoeReadiness,poleProgress:p.poleProgress})),[]);
+  const onReset=useCallback(()=>setG(p=>initState(buildNextSeasonCarry(p))),[]);
   const onFullReset=useCallback(()=>{clearPersist();setG(initState());},[]);
   const toggleDebug=useCallback(()=>{TL_Audio.sfxToggle();setG(p=>({...p,showDebug:!p.showDebug}));},[]);
   const toggleLegacy=useCallback(()=>{TL_Audio.sfxToggle();setG(p=>({...p,showLegacy:!p.showLegacy}));},[]);
@@ -4437,6 +4614,10 @@ function TidelinesApp(){
 
   /* ── §12.05  Audio state ── */
   const[audioMuted,setAudioMuted]=useState(TL_Audio.isMuted());
+  const[largeText,setLargeText]=useState(()=>{try{return localStorage.getItem(ACCESS_TEXT_KEY)==='on';}catch(e){return false;}});
+  const toggleLargeText=useCallback(()=>{
+    setLargeText(prev=>{const next=!prev;try{localStorage.setItem(ACCESS_TEXT_KEY,next?'on':'off');}catch(e){};TL_Audio.sfxToggle();return next;});
+  },[]);
   const toggleMute=useCallback(()=>{
     setAudioMuted(prev=>{const next=!prev;TL_Audio.setMute(next);if(!next)TL_Audio.sfxToggle();return next;});
   },[]);
@@ -4612,7 +4793,8 @@ function TidelinesApp(){
   const feedbackHref=buildFeedbackHref({
     playContext,
     phaseLabel:phaseProgressLabel(phase),
-    raidNumber:G.totalRaids+1,
+    seasonNumber:seasonNumber(G),
+    expeditionNumber:G.totalRaids+1,
     outcome:OUTCOME_LABEL[G.outcome]?.text||'',
     strongestMoment:strongestMomentLabel(G),
     memoryLine:coastMemoryLine(G),
@@ -4620,6 +4802,7 @@ function TidelinesApp(){
   const openFeedback=useCallback(()=>{
     logAlphaEvent('feedback_opened',{phase:G.step,outcome:G.outcome||'',context:playContext,build:BUILD.version});
   },[G.step,G.outcome,playContext]);
+  const quickStatus=quickStatusLines(G,phaseInfo);
 
   useEffect(()=>{
     if(phase===3) setBattleSummaryOpen(true);
@@ -4634,7 +4817,7 @@ function TidelinesApp(){
   },[G.step,phaseInfo.label,G.totalRaids]);
 
   return(
-    <div ref={appRef} className={playMode?'tl-playmode':''} style={{fontFamily:font,fontSize:10,lineHeight:1.6,color:P.text,background:P.bg,minHeight:'100vh'}}>
+    <div ref={appRef} className={`${playMode?'tl-playmode':''} ${largeText?'tl-large-text':''}`} style={{fontFamily:font,fontSize:10,lineHeight:1.6,color:P.text,background:P.bg,minHeight:'100vh'}}>
       <style>{INJCSS}</style>
 
       <ImpactFrame frame={G.impactFrame} onDismiss={dismissImpact}/>
@@ -4655,15 +4838,17 @@ function TidelinesApp(){
           </div>
           <div className="tl-topbar-actions" style={{display:'flex',alignItems:'center',gap:8}}>
             <span className="tl-context-chip" title="Current play context">{playContext}</span>
-            {G.totalRaids>0&&<span className="tl-mobile-hide" style={{fontSize:6,color:P.dim}}>Raid #{G.totalRaids+1}</span>}
+            <span className="tl-context-chip" title={campaignSeason(G)}>Season {seasonNumber(G)}</span>
+            <span className="tl-mobile-hide" style={{fontSize:6,color:P.dim}}>Expedition {G.totalRaids+1}</span>
             {G.warTraits.length>0&&<span className="tl-mobile-hide" style={{fontSize:6,color:P.goldDim}}>{G.warTraits.length} trait{G.warTraits.length>1?'s':''}</span>}
             <button className="tl-info-btn" onClick={toggleInfoPanel} title="Stats & Info (I)">{infoPanelOpen?'✕ CLOSE':'📊 INFO'}</button>
+            <button className="tl-info-btn" onClick={toggleLargeText} title="Toggle larger text">{largeText?'A+ BIGGER':'A+ NORMAL'}</button>
             <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Feedback"/>
             <span onClick={toggleLegacy} style={{fontSize:7,color:P.goldDim,cursor:'pointer',userSelect:'none'}} title="Legacy Log">📜</span>
             <span onClick={toggleDebug} style={{fontSize:6,color:P.dim+'80',cursor:'pointer',userSelect:'none'}} title="Debug">⚙</span>
             <span className="tl-mute-btn" onClick={toggleMute} style={{color:audioMuted?P.dim:P.dimHi}} title={audioMuted?'Unmute (M)':'Mute (M)'}>{audioMuted?'🔇':'🔊'}</span>
             {playMode&&<span className="tl-sidebar-toggle" onClick={()=>{setSidebarOpen(v=>{const n=!v;n?TL_Audio.sfxOpen():TL_Audio.sfxClose();return n;});}} style={{fontSize:8,color:sidebarOpen?P.gold:P.dimHi,letterSpacing:1}} title="Toggle Crew Panel">☰</span>}
-            <span className="tl-play-btn" onClick={togglePlayMode} style={{fontSize:7,color:playMode?P.gold:P.dimHi}} title={playMode?'Exit Play Mode (F)':'Enter Play Mode (F)'}>{playMode?(isFullscreen?'⊠ EXIT':'⊠ EXIT'):'\u25a3 PLAY'}</span>
+            <span className="tl-play-btn" onClick={togglePlayMode} style={{fontSize:7,color:playMode?P.gold:P.dimHi}} title={playMode?'Exit Full Screen (F)':'Enter Full Screen (F)'}>{playMode?'⊠ EXIT FULL SCREEN':'⛶ FULL SCREEN'}</span>
           </div>
         </div>
 
@@ -4746,11 +4931,11 @@ function TidelinesApp(){
               )}
             </>}
             {infoTab==='map'&&<>
-              <RouteStrip phase={phase}/>
+              <RouteStrip phase={phase} G={G}/>
               <div style={{padding:'0 6px'}} className="tl-worldbar">
                 <CampaignBanner G={G} phase={phase}/>
-                <LocationCard phase={phase}/>
-                <CoastalChart phase={phase}/>
+                <LocationCard phase={phase} G={G}/>
+                <CoastalChart phase={phase} G={G}/>
               </div>
               <div style={{padding:'8px 12px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
                 <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>COASTAL CONTEXT</div>
@@ -4864,9 +5049,11 @@ function TidelinesApp(){
           <div style={{padding:'8px 10px',borderBottom:`1px solid ${P.border}`,background:P.panelHi}}>
             <div style={{fontSize:6,color:P.goldDim,letterSpacing:.5,marginBottom:4}}>QUICK STATUS</div>
             <div style={{fontSize:7,color:P.dim,lineHeight:1.7}}>
-              <span style={{color:P.gold}}>{phaseInfo.icon} {phaseInfo.label}</span> · {G.crewAlive}/{G.crewSize} crew
-              {G.morale!==undefined&&<span> · Mor {G.morale}</span>}
-              {G.prestige>0&&<span> · ★{G.prestige}</span>}
+              {quickStatus.map((line,i)=>(
+                <div key={line} style={{color:i===0?P.gold:P.dimHi,marginBottom:i===0?3:1}}>
+                  {i===0?`${phaseInfo.icon} `:''}{line}
+                </div>
+              ))}
             </div>
             <button className="tl-info-btn" onClick={toggleInfoPanel} style={{marginTop:6,width:'100%'}}>📊 Open Full Stats & Info (I)</button>
           </div>
@@ -4884,7 +5071,7 @@ function TidelinesApp(){
 
           {G.showDebug&&(
             <div style={{flex:'1 1 0',overflowY:'auto',padding:'6px 8px',background:P.debugBg,fontSize:6,color:P.green,lineHeight:1.8}} className="tl-scroll">
-              <span style={{color:P.gold}}>Step:</span> {G.step} · Raid #{G.totalRaids+1}<br/>
+              <span style={{color:P.gold}}>Step:</span> {G.step} · Season {seasonNumber(G)} · Expedition {G.totalRaids+1}<br/>
               <span style={{color:P.gold}}>Forces:</span> ATK mor {G.morale} · DEF mor {G.defender.morale} · Crew {G.crewAlive}/{G.crewSize}<br/>
               <span style={{color:P.gold}}>Mods:</span> Intel {G.intelQuality} · Surp {G.surpriseBonus} · Stealth {G.stealthBonus} · Intim {G.intimidationBonus}<br/>
               <span style={{color:P.gold}}>Intim:</span> {G.intimScore} vs {G.resolveScore} Δ{G.intimDelta} {G.intimResult||'—'}<br/>
