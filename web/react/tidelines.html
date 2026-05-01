@@ -206,6 +206,7 @@ function routeNodeForState(s,phase=phaseIdx(s?.step||'')){
 /* ─ Onboarding hints (first raid only) ─ */
 const HINTS={
   vil_dawn:'Home Waters is your village-opening choice. It sets what kind of season you are walking into before you commit to conflict.',
+  vil_work:'Assign one real village work party before launch. These stores matter later for ceremony, winter, peace, and memory.',
   vil_expedition:'This determines the purpose of your voyage. Raiding is the old way. Trade and diplomacy build different kinds of power.',
   vil_intel:'This choice tells you what kind of shore you are sailing toward. Better intel makes the rest of the run easier to read.',
   vil_prep:'This is your last village decision before departure. Pick the advantage you want to feel most during the crossing and battle.',
@@ -325,11 +326,13 @@ function quickStatusLines(G,phaseInfo){
   const title=out&&phaseInfo.label==='Aftermath' ? `Aftermath: ${out}` : phaseInfo.label;
   const lines=[
     `${title} · Season ${seasonNumber(G)}`,
+    `Campaign ${seasonNumber(G)}/${CAMPAIGN_SEASON_LIMIT} · Day ${G.seasonDay||1}/${SEASON_DAYS}`,
     `Crew ${G.crewAlive}/${G.crewSize} · Morale ${Math.round(G.morale)}`,
     `Prestige ${Math.round(G.prestige)} · Feud ${feudName(G.feudEscalation)}`,
   ];
+  if((G.crisisFlags||[]).length)lines.push(`Crisis: ${G.crisisFlags.map(crisisLabel).join(', ')}`);
   if(G.cargo>0) lines.push(`Cargo ${G.cargo}/${G.cargoCapacity}`);
-  else if(G.step.startsWith('vil')) lines.push(`Food ${Math.round(G.foodStores||0)} · Canoe prep ${Math.round(G.canoeReadiness||0)}`);
+  else if(G.step.startsWith('vil')) lines.push(`Food ${Math.round(G.foodStores||0)} · Feast ${Math.round(G.feastStores||0)} · Weaving ${Math.round(G.wovenGoods||0)} · Carving ${Math.round(G.carvedWorks||0)}`);
   return lines;
 }
 function phaseProgressLabel(phase){return `Phase ${phase+1} of ${PHASES.length}`;}
@@ -421,16 +424,60 @@ function buildCasualtyExplain(s){
 
 /* ─── §5  Persistence  (UNCHANGED) ───────────────────────────────────── */
 const SAVE_KEY='tidelines_save_v1';
+const CAMPAIGN_SEASON_LIMIT=12;
+const SEASON_DAYS=6;
 function loadPersist(){try{const r=localStorage.getItem(SAVE_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function savePersist(d){try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){}}
 function clearPersist(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
-function persistFromState(s){return{prestige:s.prestige,feudEscalation:s.feudEscalation,legacyEntries:s.legacyEntries,warTraits:s.warTraits,totalRaids:s.totalRaids,lastRun:s.lastRun,foodStores:s.foodStores,villageReadiness:s.villageReadiness,canoeReadiness:s.canoeReadiness,poleProgress:s.poleProgress};}
+function persistFromState(s){return{prestige:s.prestige,feudEscalation:s.feudEscalation,legacyEntries:s.legacyEntries,warTraits:s.warTraits,totalRaids:s.totalRaids,lastRun:s.lastRun,foodStores:s.foodStores,villageReadiness:s.villageReadiness,canoeReadiness:s.canoeReadiness,poleProgress:s.poleProgress,feastStores:s.feastStores,wovenGoods:s.wovenGoods,carvedWorks:s.carvedWorks,hungerSeasons:s.hungerSeasons||0,crisisFlags:s.crisisFlags||[]};}
+
+function campaignEndingFor(carry,hungerSeasons=0){
+  const season=carry.totalRaids||0,food=carry.foodStores??72,village=carry.villageReadiness??58,canoe=carry.canoeReadiness??60,pole=carry.poleProgress??12,prestige=carry.prestige??200,feud=carry.feudEscalation??8;
+  if(prestige>=330&&pole>=100&&food>=30&&village>=30)return{kind:'LEGACY_VICTORY',title:'LEGACY SECURED',text:'The pole stands complete above a fed village. Canoes arriving from the water can read your season in cedar before anyone speaks.',tone:'win'};
+  if(feud<=0&&prestige>=260&&village>=35)return{kind:'PEACE_LEGACY',title:'PEACE HOLDS',text:'The feud has cooled into story instead of blood. Your house is remembered for ending a crossing that could have consumed both shores.',tone:'win'};
+  if(hungerSeasons>=2&&food<20)return{kind:'WINTER_HUNGER',title:'WINTER HUNGER',text:'Two hungry seasons in a row break the village rhythm. The smoke racks cannot answer every empty bowl, and no chief can paddle away from that.',tone:'loss'};
+  if(feud>18&&village<35)return{kind:'BLOOD_FEUD_COLLAPSE',title:'THE FEUD COMES HOME',text:'Cedar Creek no longer waits across the water. Retaliation reaches Stoneshell Inlet while the village is too strained to meet it cleanly.',tone:'loss'};
+  if(canoe<15&&food<35)return{kind:'BROKEN_CANOE',title:'NO SAFE CROSSING',text:'The canoe cannot take the season, and the stores cannot repair it. The sea closes before your house is ready.',tone:'loss'};
+  if(prestige<110&&village<30)return{kind:'LEADERSHIP_CHALLENGED',title:'THE HOUSE TURNS AWAY',text:'Low stores, low standing, and repeated strain make the village stop listening. Another voice is asked to lead the next crossing.',tone:'loss'};
+  if(season>=CAMPAIGN_SEASON_LIMIT){
+    if(prestige>=280&&village>=35&&food>=30)return{kind:'SEASON_LIMIT_WIN',title:'A CHIEF REMEMBERED',text:'After twelve seasons, your house still stands fed, witnessed, and known along the coast. The next generation inherits more than trouble.',tone:'win'};
+    return{kind:'SEASON_LIMIT_RECKONING',title:'THE RECKONING SEASON',text:'Twelve seasons have passed. The village survives, but the legacy is unfinished: too much strain, too little ceremony, too many debts still on the water.',tone:'mixed'};
+  }
+  return null;
+}
+
+function crisisFlagsFor(carry,hungerSeasons=0){
+  const flags=[];
+  if((carry.foodStores??72)<25)flags.push('hunger');
+  if(hungerSeasons>0)flags.push('thin_winter');
+  if((carry.villageReadiness??58)<30)flags.push('strained_village');
+  if((carry.canoeReadiness??60)<30)flags.push('weak_canoe');
+  if((carry.feudEscalation??8)>14)flags.push('retaliation');
+  if((carry.prestige??200)<140)flags.push('prestige_doubt');
+  return flags;
+}
+
+function crisisLabel(flag){
+  return{
+    hunger:'Food crisis',
+    thin_winter:'Winter hunger remembered',
+    strained_village:'Village strain',
+    weak_canoe:'Weak canoe',
+    retaliation:'Retaliation likely',
+    prestige_doubt:'Leadership doubted',
+  }[flag]||flag;
+}
 
 function buildNextSeasonCarry(s){
   const carry=persistFromState(s);
   const effects=[];
-  let startMorale=65,startCanoeCondition=100,crewQuality=55,startIntimidationBonus=0;
-  const food=carry.foodStores??72,village=carry.villageReadiness??58,canoe=carry.canoeReadiness??60,pole=carry.poleProgress??12,feud=carry.feudEscalation??8;
+  const hungerSeasons=(carry.foodStores??72)<20?(carry.hungerSeasons||0)+1:0;
+  const ending=campaignEndingFor(carry,hungerSeasons);
+  let startMorale=65,startCanoeCondition=100,crewQuality=55,startCrewSize=15,startIntimidationBonus=0;
+  const food=carry.foodStores??72,village=carry.villageReadiness??58,canoe=carry.canoeReadiness??60,pole=carry.poleProgress??12,feud=carry.feudEscalation??8,feast=carry.feastStores??12,woven=carry.wovenGoods??8,carved=carry.carvedWorks??6;
+  const crisisFlags=crisisFlagsFor(carry,hungerSeasons);
+
+  if(ending)return{...carry,hungerSeasons,crisisFlags,ending,seasonEffects:[]};
 
   if(food<30){startMorale-=12;crewQuality-=5;effects.push('Winter starts hungry: thin stores lower morale and leave the crew less ready.');}
   else if(food<45){startMorale-=6;crewQuality-=2;effects.push('Food stores are tight. The next crew starts with a little less strength.');}
@@ -443,8 +490,18 @@ function buildNextSeasonCarry(s){
   else if(canoe<50){startCanoeCondition-=8;effects.push('The canoe needs work. The next crossing begins with a weakened hull.');}
   else if(canoe>80){startCanoeCondition+=5;effects.push('Careful canoe work pays off. The hull starts the season in excellent condition.');}
 
+  if(feast>45){startMorale+=4;effects.push('Feast stores carry confidence into the new season. People remember being fed.');}
+  if(woven>35){crewQuality+=2;effects.push('Good woven gifts give your house more room to trade and speak with dignity.');}
+  if(carved>30){startIntimidationBonus+=2;effects.push('Carved works travel as reputation. Even before landing, your house has a visible name.');}
+
   if(feud>12){startMorale-=4;effects.push('Cedar Creek arms for retaliation. The next raid will meet a harder shore.');}
   else if(feud<=3){startMorale+=4;effects.push('The feud has cooled. People sleep easier, and the crew feels it.');}
+
+  if(crisisFlags.includes('hunger')){startMorale-=8;startCrewSize-=2;effects.push('Hunger changes the launch. Some paddlers stay ashore to feed their families.');}
+  if(crisisFlags.includes('strained_village')){startMorale-=6;crewQuality-=3;effects.push('The village is strained enough that every voyage now has an argument behind it.');}
+  if(crisisFlags.includes('weak_canoe')){startCanoeCondition-=12;effects.push('The canoe launches under warning: the lashings will not forgive reckless water.');}
+  if(crisisFlags.includes('retaliation'))effects.push('Watchers report Cedar Creek canoes moving south. A bad season may bring the feud home.');
+  if(crisisFlags.includes('prestige_doubt')){startMorale-=4;effects.push('People still obey, but quietly. Your standing needs proof.');}
 
   if(pole>=70){startIntimidationBonus+=8;effects.push('The memorial pole now speaks before you arrive: your lineage carries visible authority.');}
   else if(pole>=40){startIntimidationBonus+=4;effects.push('The growing pole strengthens your reputation along the coast.');}
@@ -460,7 +517,10 @@ function buildNextSeasonCarry(s){
     startMorale:cl(startMorale,25,90),
     startCanoeCondition:cl(startCanoeCondition,35,100),
     crewQuality:cl(crewQuality,35,75),
+    startCrewSize:cl(startCrewSize,8,15),
     startIntimidationBonus,
+    hungerSeasons,
+    crisisFlags,
     seasonEffects:effects,
   };
 }
@@ -575,7 +635,54 @@ function dup(s){
     legacyEntries:[...s.legacyEntries],warTraits:[...s.warTraits],
     lastRun:s.lastRun?{...s.lastRun}:null,
     statDeltas:{...s.statDeltas},
-    tradeEventId:s.tradeEventId,diploEventId:s.diploEventId};
+    tradeEventId:s.tradeEventId,diploEventId:s.diploEventId,
+    crisisFlags:[...(s.crisisFlags||[])],
+    voyageForecast:s.voyageForecast?{...s.voyageForecast}:null,
+    ending:s.ending?{...s.ending}:null};
+}
+
+function makeVoyageForecast(s){
+  const late=(s.seasonDay||1)>=4;
+  const stormBase=late?0.18:0;
+  const weak=(s.canoeReadiness||60)<35?0.12:0;
+  const signs=[
+    {tide:'Flood tide',current:'with you',weather:'clear',storm:0.05+weak,openBonus:2,coastDays:2,channelDays:1,openDays:1},
+    {tide:'Falling tide',current:'against you',weather:'fog banks',storm:0.18+stormBase+weak,openBonus:0,coastDays:3,channelDays:2,openDays:1},
+    {tide:'Slack tide',current:'uncertain',weather:'low cloud',storm:0.12+stormBase+weak,openBonus:1,coastDays:2,channelDays:2,openDays:1},
+    {tide:'Storm tide',current:'cross-current',weather:'squalls likely',storm:0.30+stormBase+weak,openBonus:-2,coastDays:3,channelDays:2,openDays:1},
+  ];
+  const f=pick(signs);
+  return{...f,label:`${f.tide} - ${f.weather} - current ${f.current}`};
+}
+
+function routeRiskFor(s,route){
+  const f=s.voyageForecast||makeVoyageForecast(s);
+  if(route==='coast')return{days:f.coastDays,storm:Math.max(0,f.storm-0.18),canoeLoss:6,moraleLoss:2,surprise:0,label:'Safe water, slow season time'};
+  if(route==='channel')return{days:f.channelDays,storm:cl(f.storm+0.12,0,0.75),canoeLoss:12,moraleLoss:5,surprise:3,label:'Balanced water, tide-sensitive'};
+  return{days:f.openDays,storm:cl(f.storm+0.28,0,0.9),canoeLoss:22,moraleLoss:8,surprise:8+(f.openBonus||0),label:'Fast water, dangerous if signs are wrong'};
+}
+
+function spendSeasonDays(s,days,reason){
+  const old=s.seasonDay||1;
+  s.seasonDay=cl(old+days,1,SEASON_DAYS+8);
+  s.statDeltas={...(s.statDeltas||{}),seasonDay:(s.seasonDay||1)-old};
+  if(s.seasonDay>SEASON_DAYS){
+    const over=(s.seasonDay-SEASON_DAYS)-Math.max(0,old-SEASON_DAYS);
+    const foodLoss=Math.max(0,over*5);
+    s.foodStores=Math.max(0,(s.foodStores||0)-foodLoss);
+    s.morale=cl((s.morale||0)-over*3,0,100);
+    if(over>0)s.log.push(L(`${reason} pushes past the good season. Stores are opened early. -${foodLoss} Food, -${over*3} Morale.`,'red','stat'));
+  }
+}
+
+function lateSeasonOverrun(s){return Math.max(0,(s.seasonDay||1)-SEASON_DAYS);}
+function applyLateSeasonStrain(s,reason){
+  const over=lateSeasonOverrun(s);
+  if(over<=0)return;
+  const canoeLoss=Math.min(18,over*3),moraleLoss=Math.min(12,over*2);
+  s.canoeCondition=cl((s.canoeCondition||0)-canoeLoss,0,100);
+  s.morale=cl((s.morale||0)-moraleLoss,0,100);
+  s.log.push(L(`${reason}: late-season cold and tired paddlers bite now. -${canoeLoss} Canoe, -${moraleLoss} Morale.`,'red','stat'));
 }
 
 /* ─── §7  Engine  (UNCHANGED — pure math) ─────────────────────────────── */
@@ -660,6 +767,24 @@ function doCasualties(s){
 /* ─── §8  State Factory ──────────────────────────────────────────────── */
 function initState(carry={}){
   const sv=carry._fromSave?carry:null;
+  if(carry.ending){
+    return{
+      step:'cmp_end',scene:'village',
+      log:[L(''),L(carry.ending.title,carry.ending.tone==='loss'?'red':'gold','stat'),L(carry.ending.text),L(''),L('This campaign is complete. Start a new game to try a different legacy.')],
+      morale:0,fear:0,canoeCondition:carry.canoeReadiness??0,cargo:0,cargoCapacity:40,
+      prestige:carry.prestige??0,feudEscalation:carry.feudEscalation??0,
+      foodStores:carry.foodStores??0,villageReadiness:carry.villageReadiness??0,canoeReadiness:carry.canoeReadiness??0,poleProgress:carry.poleProgress??0,
+      feastStores:carry.feastStores??0,wovenGoods:carry.wovenGoods??0,carvedWorks:carry.carvedWorks??0,villageWork:null,
+      crewSize:0,crewQuality:0,crewAlive:0,crewWounded:0,crewKilled:0,captivesTaken:0,
+      intelQuality:'NONE',surpriseBonus:0,stealthBonus:0,intimidationBonus:0,approachTime:'dawn',formation:'single',attackerTactic:'measured_push',
+      intimScore:0,resolveScore:0,intimDelta:0,intimResult:'',defenderFled:false,rounds:[],outcome:'',outcomeRatio:0,atkTotal:0,defTotal:0,turningPoint:null,prestigeChange:0,
+      defender:{name:'Cedar Creek',crewSize:0,morale:0,quality:0,canoeCombat:0,communitySize:0,leadership:0,fortification:0,alliance:0},
+      namedCrew:[],legacyEntries:carry.legacyEntries?[...carry.legacyEntries]:[],warTraits:carry.warTraits?[...carry.warTraits]:[],
+      totalRaids:carry.totalRaids??0,lastRun:carry.lastRun??null,traitsEarned:[],spoils:[],showDebug:false,showLegacy:false,impactFrame:null,statDeltas:{},
+      expeditionType:'',voyageRoute:'',voyageWeather:'',voyageEventId:null,tradeEventId:null,tradeGoodsQuality:0,diploEventId:null,diploTrust:0,
+      seasonDay:SEASON_DAYS,seasonLimit:CAMPAIGN_SEASON_LIMIT,hungerSeasons:carry.hungerSeasons||0,crisisFlags:carry.crisisFlags||[],ending:carry.ending,
+    };
+  }
   const startPrestige=carry.prestige??sv?.prestige??200;
   const startFeud=carry.feudEscalation??sv?.feudEscalation??8;
   const feudPressure=startFeud>12
@@ -681,7 +806,10 @@ function initState(carry={}){
     villageReadiness:carry.villageReadiness??sv?.villageReadiness??58,
     canoeReadiness:carry.canoeReadiness??sv?.canoeReadiness??60,
     poleProgress:carry.poleProgress??sv?.poleProgress??12,
-    crewSize:15,crewQuality:carry.crewQuality??55,crewAlive:15,crewWounded:0,crewKilled:0,captivesTaken:0,
+    feastStores:carry.feastStores??sv?.feastStores??12,
+    wovenGoods:carry.wovenGoods??sv?.wovenGoods??8,
+    carvedWorks:carry.carvedWorks??sv?.carvedWorks??6,
+    crewSize:carry.startCrewSize??15,crewQuality:carry.crewQuality??55,crewAlive:carry.startCrewSize??15,crewWounded:0,crewKilled:0,captivesTaken:0,
     intelQuality:'NONE',surpriseBonus:0,stealthBonus:0,
     intimidationBonus:carry.startIntimidationBonus??0,approachTime:'dawn',formation:'single',attackerTactic:'measured_push',
     intimScore:0,resolveScore:0,intimDelta:0,intimResult:'',defenderFled:false,
@@ -699,6 +827,7 @@ function initState(carry={}){
     traitsEarned:[],spoils:[],showDebug:false,showLegacy:false,impactFrame:null,
     statDeltas:{},expeditionType:'raid',voyageRoute:'coast',voyageWeather:'calm',voyageEventId:null,
     tradeEventId:null,tradeGoodsQuality:50,diploEventId:null,diploTrust:50,
+    seasonDay:1,seasonLimit:CAMPAIGN_SEASON_LIMIT,hungerSeasons:carry.hungerSeasons??sv?.hungerSeasons??0,crisisFlags:carry.crisisFlags??sv?.crisisFlags??[],ending:null,voyageForecast:null,villageWork:null,
   };
 }
 
@@ -709,6 +838,7 @@ function initState(carry={}){
 
 function pickHomeWaters(prev,id){
   const s=dup(prev); s.statDeltas={};
+  spendSeasonDays(s,1,'Village work');
   switch(id){
     case'provision_village':
       s.foodStores=Math.min(100,s.foodStores+18);
@@ -734,7 +864,71 @@ function pickHomeWaters(prev,id){
       s.log.push(L(''));s.log.push(L('Readiness ▲ · Canoe ▲ · Morale ▲','green','stat'));
       break;
   }
-  s.log.push(L(''));s.log.push(L('The village is steadied. Now: what purpose drives this season\u2019s voyage?'));
+  s.log.push(L(''));s.log.push(L('The village is steadied. One work party can still prepare the season before the canoe launches.'));
+  s.step='vil_work';s.scene='village';
+  return s;
+}
+
+function pickVillageWork(prev,id){
+  const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,1,'Village work party');
+  const old={
+    foodStores:s.foodStores||0,feastStores:s.feastStores||0,wovenGoods:s.wovenGoods||0,carvedWorks:s.carvedWorks||0,
+    villageReadiness:s.villageReadiness||0,poleProgress:s.poleProgress||0,prestige:s.prestige||0,morale:s.morale||0,canoeReadiness:s.canoeReadiness||0
+  };
+  switch(id){
+    case'gathering':
+      s.foodStores=cl((s.foodStores||0)+8,0,100);
+      s.wovenGoods=cl((s.wovenGoods||0)+5,0,100);
+      s.villageReadiness=cl((s.villageReadiness||0)+4,0,100);
+      s.log.push(L('Gatherers follow the tide line, filling baskets with beach foods, roots, and cedar bark for later work.'));
+      s.log.push(L(''));s.log.push(L('+8 Food Stores · +5 Woven Goods · +4 Village Readiness','green','stat'));
+      break;
+    case'fishing':
+      s.foodStores=cl((s.foodStores||0)+12,0,100);
+      s.feastStores=cl((s.feastStores||0)+10,0,100);
+      s.morale=cl(s.morale+2,0,100);
+      s.log.push(L('Fishers set hooks and tend the smoke. Oil, halibut, and salmon begin to stack toward the feast.'));
+      s.log.push(L(''));s.log.push(L('+12 Food Stores · +10 Feast Stores · +2 Morale','green','stat'));
+      break;
+    case'hunting':
+      s.feastStores=cl((s.feastStores||0)+14,0,100);
+      s.prestige+=4;
+      if(Math.random()<0.22){
+        s.morale=cl(s.morale-3,0,100);
+        s.log.push(L('Hunters return with meat, but one ankle is wrapped tight. The feast grows while the village feels the risk.'));
+      }else{
+        s.log.push(L('Hunters return before dusk with meat for the feast and hides for gifts. The story travels before the canoe does.'));
+      }
+      s.log.push(L(''));s.log.push(L('+14 Feast Stores · +4 Prestige','gold','stat'));
+      break;
+    case'weaving':
+      s.wovenGoods=cl((s.wovenGoods||0)+14,0,100);
+      s.prestige+=5;
+      s.log.push(L('Weavers split cedar bark, shape baskets and mats, and set aside gifts that will speak well at any fire.'));
+      s.log.push(L(''));s.log.push(L('+14 Woven Goods · +5 Prestige','gold','stat'));
+      break;
+    case'carving':
+      s.carvedWorks=cl((s.carvedWorks||0)+12,0,100);
+      s.poleProgress=cl((s.poleProgress||0)+6,0,100);
+      s.prestige+=5;
+      s.log.push(L('Carvers open the shed. Cedar chips gather at their feet while a figure begins to find its face.'));
+      s.log.push(L(''));s.log.push(L('+12 Carved Works · +6 Pole Progress · +5 Prestige','gold','stat'));
+      break;
+  }
+  s.villageWork=id;
+  s.statDeltas={
+    foodStores:Math.round((s.foodStores||0)-old.foodStores),
+    feastStores:Math.round((s.feastStores||0)-old.feastStores),
+    wovenGoods:Math.round((s.wovenGoods||0)-old.wovenGoods),
+    carvedWorks:Math.round((s.carvedWorks||0)-old.carvedWorks),
+    villageReadiness:Math.round((s.villageReadiness||0)-old.villageReadiness),
+    poleProgress:Math.round((s.poleProgress||0)-old.poleProgress),
+    prestige:Math.round((s.prestige||0)-old.prestige),
+    morale:Math.round((s.morale||0)-old.morale),
+    canoeReadiness:Math.round((s.canoeReadiness||0)-old.canoeReadiness),
+  };
+  s.log.push(L(''));s.log.push(L('The work is done for now. Choose the purpose of this season\'s voyage.'));
   s.step='vil_expedition';s.scene='village';
   return s;
 }
@@ -750,12 +944,14 @@ function pickExpedition(prev,id){
       s.step='vil_intel';s.scene='village';
       break;
     case'trade':
+      spendSeasonDays(s,1,'Loading trade goods');
       s.log.push(L('Canoe loaded with oil, dried fish, and woven cedar. The northern settlements trade copper and shell.'));
       s.log.push(L(''));s.log.push(L('Expedition: TRADE \u2014 profit without blood.','green','stat'));
       s.morale+=5;
       s.step='vil_done';s.scene='village';
       break;
     case'diplomacy':
+      spendSeasonDays(s,1,'Preparing the speaking staff and gifts');
       s.log.push(L('An elder boards the canoe carrying gifts and a carved speaking staff. Words are stronger than war sometimes.'));
       s.log.push(L(''));s.log.push(L('Expedition: DIPLOMACY \u2014 seek peace or alliance.','blue','stat'));
       s.prestige+=5;s.morale+=3;
@@ -769,38 +965,41 @@ function pickExpedition(prev,id){
 function pickRoute(prev,id){
   const s=dup(prev); s.statDeltas={};
   const oldCanoe=s.canoeCondition,oldMorale=s.morale;
+  const risk=routeRiskFor(s,id);
   s.voyageRoute=id;
+  spendSeasonDays(s,risk.days,`The ${id==='coast'?'coastal route':id==='channel'?'channel crossing':'open-water crossing'}`);
   switch(id){
     case'coast':
       s.voyageWeather='calm';
       s.log.push(L('The canoe hugs the shore, slipping between kelp beds and rocky points. Slow but steady.'));
-      s.log.push(L(''));s.log.push(L('Route: COASTAL \u2014 safe water, longer crossing.','dim','stat'));
+      s.log.push(L(''));s.log.push(L(`Route: COASTAL - ${risk.days} day(s). ${risk.label}.`,'dim','stat'));
       break;
     case'channel':
-      s.voyageWeather=Math.random()<0.35?'squall':'chop';
+      s.voyageWeather=Math.random()<risk.storm?'squall':'chop';
       if(s.voyageWeather==='squall'){
-        s.canoeCondition=Math.max(0,s.canoeCondition-12);s.morale=cl(s.morale-5,0,100);
+        s.canoeCondition=Math.max(0,s.canoeCondition-risk.canoeLoss);s.morale=cl(s.morale-risk.moraleLoss,0,100);
         s.log.push(L('The channel opens wide and dark. Halfway across, the wind turns. Whitecaps slam the hull.','red'));
-        s.log.push(L(''));s.log.push(L('Squall! \u221212 Canoe \u00b7 \u22125 Morale','red','stat'));
+        s.log.push(L(''));s.log.push(L(`Squall! -${risk.canoeLoss} Canoe -${risk.moraleLoss} Morale`,'red','stat'));
       }else{
+        s.surpriseBonus+=risk.surprise;
         s.log.push(L('The main channel runs grey and choppy. Your crew leans into the swells, paddles cutting white water.'));
-        s.log.push(L(''));s.log.push(L('Route: CHANNEL \u2014 moderate risk, moderate speed.','dim','stat'));
+        s.log.push(L(''));s.log.push(L(`Route: CHANNEL - ${risk.days} day(s). +${risk.surprise} Surprise.`,'dim','stat'));
       }
       break;
     case'open':
-      s.voyageWeather=Math.random()<0.50?'squall':'clear';
+      s.voyageWeather=Math.random()<risk.storm?'squall':'clear';
       if(s.voyageWeather==='squall'){
-        s.canoeCondition=Math.max(0,s.canoeCondition-20);s.morale=cl(s.morale-8,0,100);
+        s.canoeCondition=Math.max(0,s.canoeCondition-risk.canoeLoss);s.morale=cl(s.morale-risk.moraleLoss,0,100);
         s.log.push(L('Open ocean. The swells build. A grey wall of rain sweeps across the bow and the canoe drops into a trough.','red'));
-        s.log.push(L(''));s.log.push(L('Storm! \u221220 Canoe \u00b7 \u22128 Morale','red','stat'));
+        s.log.push(L(''));s.log.push(L(`Storm! -${risk.canoeLoss} Canoe -${risk.moraleLoss} Morale`,'red','stat'));
       }else{
-        s.surpriseBonus+=8;
+        s.surpriseBonus+=risk.surprise;
         s.log.push(L('Open water. No land in sight. The crew paddles in silence under an enormous sky. You arrive from a direction no one expects.'));
-        s.log.push(L(''));s.log.push(L('Route: OPEN CROSSING \u2014 fastest, +8 Surprise.','green','stat'));
+        s.log.push(L(''));s.log.push(L(`Route: OPEN CROSSING - fastest, +${risk.surprise} Surprise.`,'green','stat'));
       }
       break;
   }
-  s.statDeltas={canoe:s.canoeCondition-oldCanoe,morale:s.morale-oldMorale};
+  s.statDeltas={canoe:s.canoeCondition-oldCanoe,morale:s.morale-oldMorale,foodStores:(s.foodStores||0)-(prev.foodStores||0),seasonDay:(s.seasonDay||1)-(prev.seasonDay||1)};
   s.log.push(L(''));
   /* Branch by expedition type after route */
   if(s.expeditionType==='trade'){
@@ -822,6 +1021,7 @@ function pickRoute(prev,id){
 /* ── Mid-Voyage Event ── */
 function resolveVoyageEvent(prev,id){
   const s=dup(prev); s.statDeltas={};
+  spendSeasonDays(s,1,'Mid-voyage delay');
   const oldMorale=s.morale,oldSurp=s.surpriseBonus,oldCanoe=s.canoeCondition;
   const evt=s.voyageEventId;
   switch(evt){
@@ -889,7 +1089,7 @@ function resolveVoyageEvent(prev,id){
       }
       break;
   }
-  s.statDeltas={morale:s.morale-oldMorale,surprise:s.surpriseBonus-oldSurp,canoe:s.canoeCondition-oldCanoe};
+  s.statDeltas={morale:s.morale-oldMorale,surprise:s.surpriseBonus-oldSurp,canoe:s.canoeCondition-oldCanoe,seasonDay:(s.seasonDay||1)-(prev.seasonDay||1),foodStores:(s.foodStores||0)-(prev.foodStores||0)};
   s.log.push(L(''));
   s.step='trv_arrival';
   return s;
@@ -897,6 +1097,7 @@ function resolveVoyageEvent(prev,id){
 
 function pickIntel(prev,id){
   const s=dup(prev); s.statDeltas={};
+  spendSeasonDays(s,1,'Gathering intelligence');
   const oldMorale=s.morale;
   switch(id){
     case'scouts':
@@ -915,11 +1116,14 @@ function pickIntel(prev,id){
   }
   s.statDeltas.morale=s.morale-oldMorale;
   s.statDeltas.surprise=s.surpriseBonus;
+  s.statDeltas.seasonDay=(s.seasonDay||1)-(prev.seasonDay||1);
+  s.statDeltas.foodStores=(s.foodStores||0)-(prev.foodStores||0);
   s.log.push(L(''));s.log.push(L('Your war canoe is loaded. Fifteen warriors sit at the paddles.'));
   s.step='vil_prep';return s;
 }
 function pickPrep(prev,id){
   const s=dup(prev); s.statDeltas={};
+  spendSeasonDays(s,1,'Final preparation');
   const oldMorale=s.morale,oldIntim=s.intimidationBonus,oldCanoe=s.canoeCondition,oldCap=s.cargoCapacity,oldSurp=s.surpriseBonus;
   switch(id){
     case'war_paint':s.intimidationBonus+=10;s.morale=cl(s.morale+5,0,100);
@@ -932,12 +1136,13 @@ function pickPrep(prev,id){
       s.log.push(L('The spiritual advisor places cedar on the fire. "The spirits walk with you."'));
       s.log.push(L('+8 Morale · +5 Surprise','green','stat'));break;
   }
-  s.statDeltas={morale:s.morale-oldMorale,intimidation:s.intimidationBonus-oldIntim,canoe:s.canoeCondition-oldCanoe,cargo:s.cargoCapacity-oldCap,surprise:s.surpriseBonus-oldSurp};
+  s.statDeltas={morale:s.morale-oldMorale,intimidation:s.intimidationBonus-oldIntim,canoe:s.canoeCondition-oldCanoe,cargo:s.cargoCapacity-oldCap,surprise:s.surpriseBonus-oldSurp,seasonDay:(s.seasonDay||1)-(prev.seasonDay||1),foodStores:(s.foodStores||0)-(prev.foodStores||0)};
   s.step='vil_done';return s;
 }
 function enterTravel(prev){
   const s=dup(prev);s.scene='travel';s.statDeltas={};
   s.step='trv_route';
+  s.voyageForecast=makeVoyageForecast(s);
   /* ── Home Waters carry-forward: village prep buffs the expedition ── */
   const cReady=s.canoeReadiness||60;
   const fStores=s.foodStores||72;
@@ -953,12 +1158,16 @@ function enterTravel(prev){
   }else{
     s.log.push(L("The canoe leaves Stoneshell Inlet under the eyes of the witness poles. Cedar Creek lies beyond Seal Narrows and the long grey crossing north."));
   }
-  s.log.push(L(''));s.log.push(L('Choose your route across the water.'));
+  s.log.push(L(''));
+  s.log.push(L(`Sea reading: ${s.voyageForecast.label}.`,'gold','stat'));
+  if((s.crisisFlags||[]).includes('weak_canoe'))s.log.push(L('The steersman warns that reckless water could break the hull this season.','red'));
+  s.log.push(L('Choose your route across the water.'));
   s.impactFrame={type:'phase_enter',phase:1,...phaseTransitionCopy(1,s)};
   return s;
 }
 function pickArrival(prev,id){
   const s=dup(prev);s.statDeltas={};
+  if(id!=='night')spendSeasonDays(s,1,'Waiting for the right landing');
   const oldSurp=s.surpriseBonus,oldStealth=s.stealthBonus,oldCanoe=s.canoeCondition;
   switch(id){
     case'dawn':s.approachTime='dawn';s.surpriseBonus+=15;
@@ -969,11 +1178,13 @@ function pickArrival(prev,id){
     case'fog':s.approachTime='fog';s.surpriseBonus+=20;s.stealthBonus+=5;
       s.log.push(L('The fog is a gift. Your canoe slides through it like a spirit between shorelines. You hear Cedar Creek before you see it.'));break;
   }
-  s.statDeltas={surprise:s.surpriseBonus-oldSurp,stealth:s.stealthBonus-oldStealth,canoe:s.canoeCondition-oldCanoe};
+  applyLateSeasonStrain(s,'The approach');
+  s.statDeltas={surprise:s.surpriseBonus-oldSurp,stealth:s.stealthBonus-oldStealth,canoe:s.canoeCondition-oldCanoe,seasonDay:(s.seasonDay||1)-(prev.seasonDay||1),foodStores:(s.foodStores||0)-(prev.foodStores||0),morale:s.morale-(prev.morale||0)};
   s.log.push(L(''));s.step='trv_form';return s;
 }
 function pickFormation(prev,id){
   const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,1,'Arranging the approach');
   const oldIntim=s.intimidationBonus,oldStealth=s.stealthBonus;
   if(id==='stealth'){s.formation='stealth';s.stealthBonus+=10;s.intimidationBonus-=5;
     s.log.push(L('One canoe. One chance. Every paddle dips in unison, silent as breathing.'));
@@ -982,11 +1193,12 @@ function pickFormation(prev,id){
     s.log.push(L('Your canoe fans out, war crests visible. Anyone watching will see not a raid but an invasion.'));
     s.log.push(L('+15 Intimidation · −10 Stealth','dim','stat'));
   }
-  s.statDeltas={intimidation:s.intimidationBonus-oldIntim,stealth:s.stealthBonus-oldStealth};
+  s.statDeltas={intimidation:s.intimidationBonus-oldIntim,stealth:s.stealthBonus-oldStealth,seasonDay:(s.seasonDay||1)-(prev.seasonDay||1),foodStores:(s.foodStores||0)-(prev.foodStores||0),morale:s.morale-(prev.morale||0)};
   s.step='trv_done';return s;
 }
 function enterEncounter(prev){
   const s=dup(prev);s.scene='encounter';s.statDeltas={};
+  applyLateSeasonStrain(s,'Beach arrival');
   s.log.push(L(''));
   s.log.push(L("Cedar Creek's beach is no longer an idea on the horizon. Your canoe has crossed into another settlement's reach."));
   s.log.push(L(''));
@@ -1018,6 +1230,7 @@ function enterEncounter(prev){
 }
 function pickTactic(prev,id){
   const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,1,'The beach standoff');
   const oldMorale=s.morale;
   switch(id){
     case'overwhelming':s.attackerTactic='overwhelming_assault';
@@ -1030,10 +1243,14 @@ function pickTactic(prev,id){
       s.log.push(L('"We did not come for your lives," you say. "We came for what is owed. Return it, and we leave."'));s.feudEscalation-=1;break;
   }
   s.statDeltas.morale=s.morale-oldMorale;
+  s.statDeltas.seasonDay=(s.seasonDay||1)-(prev.seasonDay||1);
+  s.statDeltas.foodStores=(s.foodStores||0)-(prev.foodStores||0);
   s.step='enc_done';return s;
 }
 function enterResolution(prev){
   const s=dup(prev);s.scene='battle';s.statDeltas={};
+  spendSeasonDays(s,1,'Battle on the beach');
+  applyLateSeasonStrain(s,'The fight');
   s.log.push(L(''));
   if(s.outcome==='DECISIVE_VICTORY'){
     s.log.push(L('Cedar Creek surrendered before battle was joined.','green'));
@@ -1064,6 +1281,8 @@ function enterResolution(prev){
 }
 function enterWithdrawal(prev){
   const s=dup(prev);s.scene='travel';s.statDeltas={};
+  spendSeasonDays(s,1,'Turning homeward');
+  applyLateSeasonStrain(s,'The return crossing');
   s.log.push(L(''));
   const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
   if(!isWin){
@@ -1081,6 +1300,7 @@ function enterWithdrawal(prev){
 }
 function pickWithdrawal(prev,id){
   const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,id==='quick'?1:2,id==='quick'?'Quick loading':'Lingering on hostile shore');
   const oldCargo=s.cargo,oldPrestige=s.prestige,oldFeud=s.feudEscalation,oldCrew=s.crewAlive,oldMorale=s.morale;
   switch(id){
     case'quick':s.cargo=Math.floor(s.cargo*0.6);
@@ -1093,11 +1313,12 @@ function pickWithdrawal(prev,id){
       s.log.push(L('Your crest, facing their longhouse. Every morning, their chief will see it.'));
       s.log.push(L('+10 Prestige · +3 Feud','gold','stat'));break;
   }
-  s.statDeltas={cargo:s.cargo-oldCargo,prestige:s.prestige-oldPrestige,feud:s.feudEscalation-oldFeud,crew:s.crewAlive-oldCrew,morale:s.morale-oldMorale};
+  s.statDeltas={cargo:s.cargo-oldCargo,prestige:s.prestige-oldPrestige,feud:s.feudEscalation-oldFeud,crew:s.crewAlive-oldCrew,morale:s.morale-oldMorale,seasonDay:(s.seasonDay||1)-(prev.seasonDay||1),foodStores:(s.foodStores||0)-(prev.foodStores||0)};
   s.step='wth_done';return s;
 }
 function enterAftermath(prev){
   const s=dup(prev);s.scene='village';s.statDeltas={};
+  const over=lateSeasonOverrun(s);
   s.log.push(L(''));
   const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
   const vReady=s.villageReadiness||58;
@@ -1114,6 +1335,12 @@ function enterAftermath(prev){
   }
   s.log.push(L(''));
   s.log.push(L(coastMemoryLine(s),'dim'));
+  if(over>0){
+    const extraFood=over*4,extraVillage=over*3;
+    s.foodStores=Math.max(0,(s.foodStores||0)-extraFood);
+    s.villageReadiness=Math.max(0,(s.villageReadiness||0)-extraVillage);
+    s.log.push(L(`The canoe returned ${over} day${over>1?'s':''} past the good season. Families opened winter stores early. -${extraFood} Food, -${extraVillage} Village Readiness.`,'red','stat'));
+  }
   s.log.push(L(''));
   s.traitsEarned=[];
   if(s.crewKilled>0&&!s.warTraits.includes('grief_hardened'))s.traitsEarned.push('grief_hardened');
@@ -1175,21 +1402,29 @@ function enterAftermath(prev){
 /* ── Ceremony / Potlatch choice ── */
 function pickCeremony(prev,id){
   const s=dup(prev); s.statDeltas={};
+  spendSeasonDays(s,id==='potlatch'?2:1,id==='potlatch'?'Preparing the feast':'Aftermath work');
   const isWin=s.outcome==='DECISIVE_VICTORY'||s.outcome==='VICTORY';
   switch(id){
     case'potlatch':{
       const spent=Math.min(s.cargo,Math.round(s.cargo*0.6));
-      const pGain=Math.round(spent*1.5);
-      s.cargo-=spent;s.prestige+=pGain;s.morale=cl(s.morale+10,0,100);
-      s.foodStores=Math.min(100,(s.foodStores||72)+8);
+      const feastSpent=Math.min(s.feastStores||0,18);
+      const wovenSpent=Math.min(s.wovenGoods||0,10);
+      const moraleGain=10+Math.floor(feastSpent/8);
+      const pGain=Math.round(spent*1.5+feastSpent*1.1+wovenSpent*1.3);
+      s.cargo-=spent;s.feastStores=Math.max(0,(s.feastStores||0)-feastSpent);s.wovenGoods=Math.max(0,(s.wovenGoods||0)-wovenSpent);
+      s.prestige+=pGain;s.morale=cl(s.morale+moraleGain,0,100);
+      s.foodStores=Math.min(100,(s.foodStores||72)+4);
       s.log.push(L('The feast fires burn high. Dried fish and cedar bark are laid out for every family. Songs rise. Names are spoken.'));
-      s.log.push(L(`You redistribute ${spent} cargo — the village remembers generosity.`));
-      s.log.push(L(''));s.log.push(L(`+${pGain} Prestige · +10 Morale · +8 Food · −${spent} Cargo`,'gold','stat'));
+      s.log.push(L(`You redistribute ${spent} cargo, ${feastSpent} feast stores, and ${wovenSpent} woven goods. The village remembers generosity.`));
+      s.log.push(L(''));s.log.push(L(`+${pGain} Prestige · +${moraleGain} Morale · +4 Food · -${spent} Cargo`,'gold','stat'));
       break;}
     case'advance_pole':{
-      const pAdv=isWin?12:6;
+      const carvedSpent=Math.min(s.carvedWorks||0,12);
+      const pAdv=(isWin?12:6)+Math.round(carvedSpent*0.6);
+      const prestigeGain=8+Math.floor(carvedSpent/4);
+      s.carvedWorks=Math.max(0,(s.carvedWorks||0)-carvedSpent);
       s.poleProgress=Math.min(100,(s.poleProgress||12)+pAdv);
-      s.prestige+=8;
+      s.prestige+=prestigeGain;
       if(s.poleProgress>=80){
         s.log.push(L('🪵 The memorial pole stands almost complete. Its figures tell the story of every crossing, every loss, every victory.','gold'));
         s.log.push(L('When it is raised, the coast will see your lineage from the water.','gold'));
@@ -1197,15 +1432,20 @@ function pickCeremony(prev,id){
         s.log.push(L('The carvers work through the night. Cedar chips pile around the base of the growing pole.'));
         s.log.push(L('New figures emerge: the canoe, the warriors, the shore at Cedar Creek.'));
       }
-      s.log.push(L(''));s.log.push(L(`+${pAdv} Pole Progress · +8 Prestige`,'gold','stat'));
+      s.log.push(L(''));s.log.push(L(`+${pAdv} Pole Progress · +${prestigeGain} Prestige · -${carvedSpent} Carved Works`,'gold','stat'));
       break;}
     case'peace_offering':{
-      const fReduce=Math.min(3,s.feudEscalation);
+      const wovenSpent=Math.min(s.wovenGoods||0,8);
+      const carvedSpent=Math.min(s.carvedWorks||0,4);
+      s.wovenGoods=Math.max(0,(s.wovenGoods||0)-wovenSpent);
+      s.carvedWorks=Math.max(0,(s.carvedWorks||0)-carvedSpent);
+      const prestigeGain=5+Math.floor(wovenSpent/4);
+      const fReduce=Math.min(3+Math.floor((wovenSpent+carvedSpent)/6),s.feudEscalation);
       s.feudEscalation=Math.max(0,s.feudEscalation-fReduce);
-      s.prestige+=5;s.morale+=5;
+      s.prestige+=prestigeGain;s.morale+=5;
       s.log.push(L('A message-canoe is sent south with gifts: oil, woven blankets, and a carved peace speaker.'));
       s.log.push(L('It will not end the feud. But it may slow the next retaliation.'));
-      s.log.push(L(''));s.log.push(L(`−${fReduce} Feud · +5 Prestige · +5 Morale`,'green','stat'));
+      s.log.push(L(''));s.log.push(L(`-${fReduce} Feud · +${prestigeGain} Prestige · +5 Morale · -${wovenSpent} Woven · -${carvedSpent} Carved`,'green','stat'));
       break;}
     case'reserve_stores':{
       const fGain=Math.round((s.cargo||0)*0.4);
@@ -1225,6 +1465,7 @@ function pickCeremony(prev,id){
    ══════════════════════════════════════════════════════════════════════ */
 function pickTradeEvent(prev,id){
   const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,1,'Trade waters');
   const oldMorale=s.morale,oldCargo=s.cargo,oldCanoe=s.canoeCondition;
   const evt=s.tradeEventId;
   switch(evt){
@@ -1285,13 +1526,14 @@ function pickTradeEvent(prev,id){
       }
       break;
   }
-  s.statDeltas={morale:s.morale-oldMorale,cargo:s.cargo-oldCargo,canoe:s.canoeCondition-oldCanoe};
+  s.statDeltas={morale:s.morale-oldMorale,cargo:s.cargo-oldCargo,canoe:s.canoeCondition-oldCanoe,seasonDay:(s.seasonDay||1)-(prev.seasonDay||1),foodStores:(s.foodStores||0)-(prev.foodStores||0)};
   s.log.push(L(''));s.log.push(L('The northern settlement appears ahead. How will you approach the trade?'));
   s.step='trv_trade_negotiate';return s;
 }
 
 function pickTradeNegotiation(prev,id){
   const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,1,'Trade bargaining');
   const quality=s.tradeGoodsQuality||50;
   let profitBase=ri(12,28);
   let prestigeGain=0,foodGain=0,moraleGain=0;
@@ -1346,6 +1588,7 @@ function pickTradeNegotiation(prev,id){
    ══════════════════════════════════════════════════════════════════════ */
 function pickDiploEvent(prev,id){
   const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,1,'Diplomatic approach');
   const oldMorale=s.morale,oldPrestige=s.prestige;
   const evt=s.diploEventId;
   switch(evt){
@@ -1400,13 +1643,14 @@ function pickDiploEvent(prev,id){
       }
       break;
   }
-  s.statDeltas={morale:s.morale-oldMorale,prestige:s.prestige-oldPrestige};
+  s.statDeltas={morale:s.morale-oldMorale,prestige:s.prestige-oldPrestige,seasonDay:(s.seasonDay||1)-(prev.seasonDay||1),foodStores:(s.foodStores||0)-(prev.foodStores||0)};
   s.log.push(L(''));s.log.push(L('The council fire is prepared on the far shore. How will you approach?'));
   s.step='trv_diplo_council';return s;
 }
 
 function pickDiploCouncil(prev,id){
   const s=dup(prev);s.statDeltas={};
+  spendSeasonDays(s,1,'Council talks');
   const trust=s.diploTrust||50;
   let feudReduce=ri(2,4),prestigeGain=0,moraleGain=0;
   switch(id){
@@ -4046,10 +4290,87 @@ function VillageProvisionScene({G,sceneH}){
 /* Routes to the appropriate phase scene using shared building blocks.
    Each scene is 320px tall, using the same visual language.
    Pass G and phase so scenes can react to game state (outcome, etc). */
+function BasketCluster({left='10%',bottom=0,scale=1,zIndex=8}){
+  return <SceneLayer zIndex={zIndex} style={{left,bottom,width:Math.round(64*scale),height:Math.round(42*scale),transform:`scale(${scale})`,transformOrigin:'bottom left'}}>
+    <svg viewBox="0 0 64 42" width="64" height="42" style={{overflow:'visible'}}>
+      <defs><linearGradient id="vw-basket" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#b09058"/><stop offset="100%" stopColor="#65482a"/></linearGradient></defs>
+      {[{x:8,y:13,w:18,h:22},{x:28,y:8,w:22,h:27},{x:47,y:17,w:14,h:18}].map((b,i)=><g key={i} className="tl-goods-shimmer" style={{animationDelay:i*.2+'s'}}>
+        <path d={`M${b.x},${b.y+b.h*.28} Q${b.x+b.w*.1},${b.y} ${b.x+b.w*.5},${b.y} Q${b.x+b.w*.9},${b.y} ${b.x+b.w},${b.y+b.h*.28} L${b.x+b.w*.86},${b.y+b.h} Q${b.x+b.w*.5},${b.y+b.h+3} ${b.x+b.w*.14},${b.y+b.h}Z`} fill="url(#vw-basket)" stroke="#44301c" strokeWidth=".7"/>
+        {[.25,.5,.75].map((p,j)=><line key={'v'+j} x1={b.x+b.w*p} y1={b.y+3} x2={b.x+b.w*p} y2={b.y+b.h} stroke="#7a5b36" strokeWidth=".45" opacity=".55"/>)}
+        {[.38,.58,.78].map((p,j)=><line key={'h'+j} x1={b.x+2} y1={b.y+b.h*p} x2={b.x+b.w-2} y2={b.y+b.h*p} stroke="#d0ad6a" strokeWidth=".35" opacity=".35"/>)}
+      </g>)}
+      {[{x:16,y:10,c:'#5ed060'},{x:23,y:8,c:'#7ed66e'},{x:39,y:5,c:'#c09050'},{x:45,y:6,c:'#d0b070'},{x:53,y:14,c:'#66c85a'}].map((p,i)=><path key={i} d={`M${p.x},${p.y} q4,-5 8,0 q-4,2 -8,0Z`} fill={p.c} opacity=".8"/>)}
+    </svg>
+  </SceneLayer>;
+}
+
+function FishingCanoeSceneAsset({left='8%',bottom=0,zIndex=8}){
+  return <SceneLayer zIndex={zIndex} className="tl-canoe-rock" style={{left,bottom,width:160,height:64}}>
+    <SimpleCanoe x={0} bottom={0} w={142} rocking={false} zIndex={zIndex}/>
+    {[26,54,82,110].map((x,i)=><CanoeCrewFigure key={i} x={x} bottom={i%2?20:7} side={i%2?'far':'near'} zIndex={zIndex+2} delay={i*.12}/>)}
+    {[34,62,94].map((x,i)=><svg key={i} viewBox="0 0 28 42" width="28" height="42" style={{position:'absolute',left:x,bottom:-18,overflow:'visible'}}>
+      <path d="M7,2 Q12,18 10,36" fill="none" stroke="#8b6a42" strokeWidth="1.3"/>
+      <line x1="10" y1="36" x2="17" y2="30" stroke="#b8a070" strokeWidth=".7"/>
+      <ellipse className="tl-fish-sway" cx="18" cy="30" rx="4" ry="2" fill="#b96f42" opacity=".85" style={{animationDelay:i*.25+'s'}}/>
+    </svg>)}
+    <WakeTrail left="-6%" bottom="-2" width={150} strength="medium" zIndex={zIndex-1}/>
+  </SceneLayer>;
+}
+
+function HuntingTrailAsset({left='12%',bottom=0,zIndex=8}){
+  return <SceneLayer zIndex={zIndex} style={{left,bottom,width:220,height:98}}>
+    <svg viewBox="0 0 220 98" width="220" height="98" style={{overflow:'visible'}}>
+      <path d="M0,86 C40,60 72,92 110,68 C145,46 174,62 220,36" fill="none" stroke="rgba(180,150,90,.18)" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M0,86 C40,60 72,92 110,68 C145,46 174,62 220,36" fill="none" stroke="rgba(80,55,28,.35)" strokeWidth="2" strokeLinecap="round"/>
+      {[20,48,82,128,160,194].map((x,i)=><g key={i} opacity=".55"><ellipse cx={x} cy={78-(i%3)*11} rx="2.3" ry="3.8" fill="#26190f" transform={`rotate(${i%2?18:-18} ${x} ${78-(i%3)*11})`}/><ellipse cx={x+5} cy={75-(i%3)*11} rx="2.3" ry="3.8" fill="#26190f" transform={`rotate(${i%2?18:-18} ${x+5} ${75-(i%3)*11})`}/></g>)}
+      <g className="tl-scene-float-in" style={{animationDelay:'.15s'}}><circle cx="76" cy="45" r="3.5" fill="#c8a870"/><rect x="73" y="49" width="6" height="15" rx="2" fill="#2a2018"/><line x1="78" y1="54" x2="104" y2="42" stroke="#7a5830" strokeWidth="1.5"/><path d="M104,42 q7,-5 14,-1" fill="none" stroke="#b09058" strokeWidth="1"/><line x1="75" y1="64" x2="68" y2="82" stroke="#2a2018" strokeWidth="2"/><line x1="79" y1="64" x2="88" y2="82" stroke="#2a2018" strokeWidth="2"/></g>
+      <g className="tl-scene-float-in" style={{animationDelay:'.35s'}}><circle cx="118" cy="55" r="3.3" fill="#c8a870"/><rect x="115" y="59" width="6" height="14" rx="2" fill="#3a2818"/><line x1="116" y1="64" x2="98" y2="70" stroke="#7a5830" strokeWidth="1.2"/><line x1="117" y1="73" x2="110" y2="89" stroke="#3a2818" strokeWidth="2"/><line x1="121" y1="73" x2="130" y2="88" stroke="#3a2818" strokeWidth="2"/></g>
+      <g opacity=".75"><ellipse cx="172" cy="42" rx="18" ry="8" fill="#6b4a2d"/><circle cx="188" cy="38" r="5" fill="#6b4a2d"/><line x1="184" y1="34" x2="178" y2="24" stroke="#7a5634" strokeWidth="1.2"/><line x1="191" y1="34" x2="197" y2="24" stroke="#7a5634" strokeWidth="1.2"/><line x1="162" y1="48" x2="158" y2="61" stroke="#5a3c24" strokeWidth="2"/><line x1="180" y1="48" x2="184" y2="61" stroke="#5a3c24" strokeWidth="2"/></g>
+    </svg>
+  </SceneLayer>;
+}
+
+function WeavingFrameAsset({left='54%',bottom=0,zIndex=8}){
+  return <SceneLayer zIndex={zIndex} style={{left,bottom,width:120,height:92}}>
+    <svg viewBox="0 0 120 92" width="120" height="92" style={{overflow:'visible'}}>
+      <defs><linearGradient id="vw-weave" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#d1b16a"/><stop offset="52%" stopColor="#8a6a40"/><stop offset="100%" stopColor="#5f4630"/></linearGradient></defs>
+      <line x1="18" y1="10" x2="18" y2="84" stroke="#6b4728" strokeWidth="4"/><line x1="96" y1="10" x2="96" y2="84" stroke="#6b4728" strokeWidth="4"/><line x1="14" y1="14" x2="100" y2="14" stroke="#8b6238" strokeWidth="4"/><line x1="14" y1="80" x2="100" y2="80" stroke="#5a3a20" strokeWidth="4"/>
+      {Array.from({length:13},(_,i)=>20+i*6).map((x,i)=><line key={i} x1={x} y1="17" x2={x} y2="78" stroke="#c5ad78" strokeWidth=".8" opacity={i%2?.55:.8}/>)}
+      {Array.from({length:8},(_,i)=>24+i*6).map((y,i)=><rect key={i} className="tl-goods-shimmer" x="21" y={y} width="72" height="2.2" fill="url(#vw-weave)" opacity=".82" style={{animationDelay:i*.08+'s'}}/>)}
+      <g className="tl-worker-bend"><circle cx="48" cy="55" r="4" fill="#c8a870"/><rect x="44" y="60" width="8" height="17" rx="2" fill="#342418"/><line x1="52" y1="63" x2="72" y2="56" stroke="#b09058" strokeWidth="2"/></g>
+      <g className="tl-worker-bend" style={{animationDelay:'.45s'}}><circle cx="75" cy="58" r="3.6" fill="#c8a870"/><rect x="71" y="62" width="7" height="15" rx="2" fill="#2e241a"/><line x1="72" y1="66" x2="56" y2="58" stroke="#b09058" strokeWidth="1.8"/></g>
+    </svg>
+  </SceneLayer>;
+}
+
+function VillageWorkScene({G,sceneH}){
+  const H=sceneH||220;
+  const work=G?.villageWork||'overview';
+  const skyH=H*0.22,landTop=H*0.42,groundH=H*0.34,waterTop=landTop+groundH,waterH=H-waterTop,gb=waterH+groundH;
+  const isGather=work==='gathering'||work==='overview',isFish=work==='fishing'||work==='overview',isHunt=work==='hunting',isWeave=work==='weaving'||work==='overview',isCarve=work==='carving'||work==='overview';
+  return <div className="tl-scene-arrival" style={{height:H,position:'relative',overflow:'hidden',background:'linear-gradient(180deg,#21165f 0%,#302a78 30%,#2b4b68 58%,#193a36 100%)'}}>
+    <StarField count={20} region={22}/><SceneMoon right="11%" top="4%" size={18}/>
+    <MountainRange yTop={skyH-8} height={34} fill1="#1b2640" fill2="#223250"/>
+    <ForestLine yTop={skyH+18} height={52} color="#183824" altColor="#14301f" density={95} zIndex={3}/>
+    {isHunt&&<ForestLine yTop={skyH+42} height={88} color="#102918" altColor="#19331f" density={130} zIndex={5}/>}
+    <div style={{position:'absolute',top:landTop,left:0,right:0,height:groundH,zIndex:4,background:isHunt?'linear-gradient(180deg,#173018,#142416 70%,#101c12)':'linear-gradient(180deg,#1f3719,#1b3017 54%,#223118)'}}/>
+    <WaterBody top={waterTop} gradient="linear-gradient(180deg,#225174 0%,#1d486d 34%,#173c62 68%,#102d50 100%)" waveCount={6} phosphorCount={isFish?12:4}/>
+    <SurfBand top={waterTop-4} height={11} foam="226,214,188" undertow="120,150,180" intensity={0.74} zIndex={6}/>
+    {isFish&&<><FishingCanoeSceneAsset left={work==='fishing'?'18%':'4%'} bottom={H-waterTop+18} zIndex={9}/><div className="tl-scene-float-in tl-rack-sway" style={{position:'absolute',right:'9%',bottom:gb+2,width:work==='fishing'?88:58,height:work==='fishing'?96:64,zIndex:8}}><img src={GFX2.dryingRack} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',pointerEvents:'none'}}/></div></>}
+    {isGather&&<><BasketCluster left={work==='gathering'?'20%':'15%'} bottom={gb+3} scale={work==='gathering'?1.55:1} zIndex={8}/><VillageWorkers bottom={gb+1} zIndex={8}/>{[78,84,90].map((x,i)=><SceneLayer key={i} zIndex={7} style={{left:x+'%',bottom:gb+8+i*5,width:18,height:20}}><svg viewBox="0 0 18 20" width="18" height="20"><path d="M4,14 q4,-12 10,0" fill="none" stroke="#80c86a" strokeWidth="1.6"/><path d="M8,10 q-7,-4 -5,-9 q7,2 5,9Z" fill="#5fb65d" opacity=".8"/><path d="M10,9 q7,-5 6,-1 q-3,5 -6,1Z" fill="#76c36b" opacity=".78"/></svg></SceneLayer>)}</>}
+    {isHunt&&<HuntingTrailAsset left="10%" bottom={gb-18} zIndex={9}/>}
+    {isWeave&&<><WeavingFrameAsset left={work==='weaving'?'48%':'56%'} bottom={gb-2} zIndex={9}/><BasketCluster left={work==='weaving'?'18%':'72%'} bottom={gb+2} scale={work==='weaving'?1.15:.72} zIndex={8}/></>}
+    {isCarve&&<><CarverWorkshop x={work==='carving'?'40%':'46%'} bottom={gb+2} zIndex={9}/><CanoeWorkshop x={work==='carving'?'12%':'28%'} bottom={gb} zIndex={8}/><div className="tl-scene-float-in tl-pole-grow-pulse" style={{position:'absolute',right:'8%',bottom:gb,width:22,height:78,zIndex:9}}><img src={GFX2.poleMemorialGrowing} alt="" draggable="false" style={{width:'100%',height:'100%',objectFit:'contain',pointerEvents:'none'}}/></div></>}
+    {work==='overview'&&<TradeGoodsPile x="82%" bottom={gb+2} zIndex={8}/>}
+    <CeremonialFire x={work==='hunting'?'7%':'50%'} bottom={gb+2} size="small" zIndex={8} mood="warm"/><DawnSmoke x="50%" bottom={gb+24} zIndex={5}/><FireGlow x="46%" bottom={gb-4} r={64} intensity={0.14} zIndex={5}/><Vignette color="6,8,18" intensity={0.08} focus={work==='hunting'?'42% 48%':'50% 56%'}/>
+  </div>;
+}
+
 function Scene({type,tall,G,phase,sceneH}){
   /* ── Step-specific featured SVG scenes ── */
   if(G&&G.step==='trv_trade_negotiate') return <TradeNegotiationScene G={G} sceneH={sceneH}/>;
   if(G&&G.step==='trv_diplo_council') return <DiplomacyCouncilScene G={G} sceneH={sceneH}/>;
+  if(G&&(G.step==='vil_work'||(G.step==='vil_expedition'&&G.villageWork))) return <VillageWorkScene G={G} sceneH={sceneH}/>;
   if(G&&G.step==='aft_show'){
     const isWin=G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY'||G.outcome==='TRADE_SUCCESS'||G.outcome==='DIPLOMACY_SUCCESS';
     if(isWin) return <PotlatchScene G={G} sceneH={sceneH}/>;
@@ -4180,6 +4501,8 @@ const STAT_TOOLTIPS={
   prestige:'Standing among nations',feud:'Cedar Creek hatred',cargo:'Spoils for home',
   crew:'Warriors ready',canoe:'Hull condition',
   village:'Village season readiness',food:'Dried fish and oil stores',canoeReady:'War canoe preparation',pole:'Memorial pole carving',
+  feast:'Food set aside for ceremony and winter memory',woven:'Woven gifts for potlatch, trade, and peace',carved:'Carved works for memory, prestige, and diplomacy',
+  season:'How much of this season has been spent',
 };
 function HudBar({G,phase,isFirstRaid}){
   const fearVal=cl(G.fear+(G.intimDelta<0?-G.intimDelta:0),0,100);
@@ -4197,10 +4520,14 @@ function HudBar({G,phase,isFirstRaid}){
     food:{icon:'🐟',label:'FOOD',val:G.foodStores||0,max:100,col:P.gold,warn:v=>v<30,delta:d.foodStores},
     canoeReady:{icon:'🛶',label:'CANOE PREP',val:G.canoeReadiness||0,max:100,col:P.blue,warn:v=>v<30,delta:d.canoeReadiness},
     pole:{icon:'🪵',label:'POLE',val:G.poleProgress||0,max:100,col:P.purple,warn:()=>false,delta:d.poleProgress},
+    feast:{icon:'🍽',label:'FEAST',val:G.feastStores||0,max:100,col:P.gold,warn:v=>v<12,delta:d.feastStores},
+    woven:{icon:'🧺',label:'WOVEN',val:G.wovenGoods||0,max:100,col:P.green,warn:v=>v<8,delta:d.wovenGoods},
+    carved:{icon:'🪵',label:'CARVED',val:G.carvedWorks||0,max:100,col:P.purple,warn:v=>v<6,delta:d.carvedWorks},
+    season:{icon:'⌛',label:'DAY',val:G.seasonDay||1,max:SEASON_DAYS,col:P.gold,warn:v=>v>SEASON_DAYS,delta:d.seasonDay},
   };
-  const isHomeWaters=G.step==='vil_dawn';
+  const isHomeWaters=G.step==='vil_dawn'||G.step==='vil_work';
   const primary=isHomeWaters?HOME_WATERS_STATS:(PHASE_STATS[phase]||PHASE_STATS[0]);
-  const all=['morale','crew','canoe','cargo','prestige','feud','village','food','canoeReady','pole'];  const secondary=all.filter(k=>!primary.includes(k));
+  const all=['morale','crew','canoe','cargo','prestige','feud','village','food','canoeReady','pole','feast','woven','carved','season'];  const secondary=all.filter(k=>!primary.includes(k));
   const renderDelta=(delta)=>{
     if(!delta||delta===0)return null;
     const col=delta>0?P.greenBright:P.redBright;
@@ -4781,7 +5108,8 @@ function TidelinesApp(){
     return()=>document.removeEventListener('keydown',h);
   },[G.impactFrame,toggleMute,toggleInfoPanel]);
 
-  const phase=phaseIdx(G.step);
+  const rawPhase=phaseIdx(G.step);
+  const phase=rawPhase<0?0:rawPhase;
   const hasCont=!!CONT[G.step];
   const accent=PHASE_ACCENT[phase]||P.gold;
   const phaseInfo=PHASES[phase]||PHASES[0];
@@ -5093,6 +5421,30 @@ function TidelinesApp(){
           borderTop:`2px solid ${accent}`,
         }}>
 
+          {/* ─ Campaign End ─ */}
+          {G.step==='cmp_end'&&G.ending&&(
+            <div style={{display:'grid',gap:10,justifyItems:'start',padding:'10px 12px',border:`1px solid ${G.ending.tone==='loss'?P.red:P.gold}55`,background:G.ending.tone==='loss'?P.red+'12':P.gold+'10',borderRadius:5}}>
+              <div style={{fontSize:12,color:G.ending.tone==='loss'?P.red:P.gold,letterSpacing:.8}}>{G.ending.title}</div>
+              <div style={{fontSize:9,color:P.text,lineHeight:1.8,maxWidth:980}}>{G.ending.text}</div>
+              <div style={{fontSize:8,color:P.dimHi,lineHeight:1.7}}>
+                Final season {seasonNumber(G)} · Prestige {Math.round(G.prestige)} · Food {Math.round(G.foodStores||0)} · Village {Math.round(G.villageReadiness||0)} · Feud {feudName(G.feudEscalation)}
+              </div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                <FeedbackButton href={feedbackHref} onOpen={openFeedback} label="Send feedback"/>
+                <button className="tl-action" style={{
+                  display:'inline-block',background:P.panelHi,color:P.dim,border:`1px solid ${P.border}`,
+                  borderRadius:4,padding:'10px 18px',fontFamily:font,fontSize:8,cursor:'pointer',
+                }} onClick={onFullReset}>✖  New Game</button>
+              </div>
+            </div>
+          )}
+
+          {G.step!=='cmp_end'&&((G.seasonDay||1)>SEASON_DAYS||(G.crisisFlags||[]).length>0)&&(
+            <div style={{fontSize:8,lineHeight:1.7,color:(G.seasonDay||1)>SEASON_DAYS?P.red:P.goldDim,marginBottom:8,padding:'7px 9px',border:`1px solid ${(G.seasonDay||1)>SEASON_DAYS?P.red:P.gold}45`,background:((G.seasonDay||1)>SEASON_DAYS?P.red:P.gold)+'12',borderRadius:4}}>
+              {(G.seasonDay||1)>SEASON_DAYS?`Late season: day ${G.seasonDay}/${SEASON_DAYS}. Every delay now costs food, morale, and canoe strength.`:`Pressure: ${(G.crisisFlags||[]).map(crisisLabel).join(', ')}.`}
+            </div>
+          )}
+
           {/* ─ Home Waters: Dawn ─ */}
           {G.step==='vil_dawn'&&<>
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
@@ -5120,6 +5472,42 @@ function TidelinesApp(){
                 effect="+6 Village · +8 Canoe · +2 Morale"
                 archetype="Ready for what comes"
                 onClick={()=>act(pickHomeWaters,'quiet_war_prep')}/>
+            </div>
+          </>}
+
+          {/* ─ Village: Work Party ─ */}
+          {G.step==='vil_work'&&<>
+            <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
+              Assign one work party before the expedition. These stores will change ceremony, winter, and diplomacy later.
+            </div>
+            <Hint text={hint}/>
+            <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:6}}>
+              <CommandCard icon="🧺" title="Gather Shore & Cedar"
+                flavor="Families follow the tide line for beach foods, roots, medicine plants, and cedar bark for later weaving."
+                effect="+8 Food Stores · +5 Woven Goods · +4 Village"
+                archetype="Patient preparation"
+                onClick={()=>act(pickVillageWork,'gathering')}/>
+              <CommandCard icon="🐟" title="Send Fishers"
+                flavor="Hooks set deep, smoke racks tended, oil rendered. The feast begins before anyone calls it a feast."
+                effect="+12 Food Stores · +10 Feast Stores · +2 Morale"
+                archetype="Feed the season"
+                onClick={()=>act(pickVillageWork,'fishing')}/>
+              <CommandCard icon="🦌" title="Organize Hunters"
+                flavor="Hunters move inland and along the shore for feast meat, hides, and gifts with a story behind them."
+                effect="+14 Feast Stores · +4 Prestige"
+                risk="Small chance of morale loss from injury"
+                archetype="Risk for abundance"
+                onClick={()=>act(pickVillageWork,'hunting')}/>
+              <CommandCard icon="🧶" title="Set Weavers to Work"
+                flavor="Cedar bark becomes baskets, mats, and gifts. Good woven goods make trade and ceremony stronger."
+                effect="+14 Woven Goods · +5 Prestige"
+                archetype="Gifts that speak"
+                onClick={()=>act(pickVillageWork,'weaving')}/>
+              <CommandCard icon="🪵" title="Open the Carving Shed"
+                flavor="Cedar chips gather around the carvers. Pole work, house memory, and speaking gifts take shape."
+                effect="+12 Carved Works · +6 Pole Progress · +5 Prestige"
+                archetype="Memory made visible"
+                onClick={()=>act(pickVillageWork,'carving')}/>
             </div>
           </>}
 
@@ -5205,23 +5593,27 @@ function TidelinesApp(){
             <div style={{fontSize:7,color:P.dim,marginBottom:5,letterSpacing:.3}}>
               {isFirstRaid?'Three routes cross to Cedar Creek. Each carries different risks.':'Choose your crossing route:'}
             </div>
+            {G.voyageForecast&&<div style={{fontSize:7,color:P.goldDim,marginBottom:7,lineHeight:1.6,padding:'6px 8px',border:`1px solid ${P.gold}30`,background:P.gold+'10',borderRadius:4}}>
+              Sea reading: <span style={{color:P.text}}>{G.voyageForecast.label}</span>
+              {(G.crisisFlags||[]).length>0&&<span style={{color:P.red}}> · {G.crisisFlags.map(crisisLabel).join(', ')}</span>}
+            </div>}
             <Hint text={hint}/>
             <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
               <CommandCard icon="🏖" title="Hug the Coast"
                 flavor="Kelp beds, rocky points, sheltered coves. Slow but the hull never leaves sight of land. Calm water most of the way."
-                effect="Safe passage — no weather risk"
+                effect={`${routeRiskFor(G,'coast').days} day(s) · lowest storm risk`}
                 archetype="The cautious commander"
                 onClick={()=>act(pickRoute,'coast')}/>
               <CommandCard icon="🌊" title="Cross the Channel"
                 flavor="The main channel runs grey and deep. Current pushes the canoe but the open water can turn choppy fast."
-                effect="Moderate speed"
-                risk="35% squall — canoe damage + morale loss"
+                effect={`${routeRiskFor(G,'channel').days} day(s) · +${routeRiskFor(G,'channel').surprise} Surprise if clear`}
+                risk={`${Math.round(routeRiskFor(G,'channel').storm*100)}% squall risk`}
                 archetype="The experienced navigator"
                 onClick={()=>act(pickRoute,'channel')}/>
               <CommandCard icon="⚡" title="Open Water Crossing"
                 flavor="Straight across. No land in sight. If the weather holds, you arrive from a direction no one expects."
-                effect="Fastest route — +8 Surprise if clear"
-                risk="50% storm — heavy canoe damage + morale loss"
+                effect={`${routeRiskFor(G,'open').days} day(s) · +${routeRiskFor(G,'open').surprise} Surprise if clear`}
+                risk={`${Math.round(routeRiskFor(G,'open').storm*100)}% storm risk`}
                 archetype="The bold risk-taker"
                 onClick={()=>act(pickRoute,'open')}/>
             </div>
@@ -5609,18 +6001,18 @@ function TidelinesApp(){
               <Hint text={hint}/>
               <div className="tl-cmd-grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:6}}>
                 <CommandCard icon="🍽" title="Hold a Potlatch"
-                  flavor="Feast fires. Songs. Names spoken before witnesses. Redistribute the spoils and let generosity build your standing."
-                  effect="Cargo → Prestige (1.5×) · +10 Morale · +8 Food"
+                  flavor="Feast fires. Songs. Names spoken before witnesses. Cargo, feast stores, and woven gifts become standing."
+                  effect="Cargo + Feast + Woven → Prestige · Morale"
                   archetype="Generosity is power"
                   onClick={()=>act(pickCeremony,'potlatch')}/>
                 <CommandCard icon="🪵" title="Advance the Pole"
-                  flavor="Cedar chips pile around the base. New figures emerge: the canoe, the warriors, the far shore."
-                  effect={`+${(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY')?12:6} Pole Progress · +8 Prestige`}
+                  flavor="Carved works are carried to the pole. New figures emerge: the canoe, the warriors, the far shore."
+                  effect={`Carved Works → +${(G.outcome==='DECISIVE_VICTORY'||G.outcome==='VICTORY')?12:6}+ Pole Progress · Prestige`}
                   archetype="Memory carved in cedar"
                   onClick={()=>act(pickCeremony,'advance_pole')}/>
                 <CommandCard icon="🕊" title="Send a Peace Offering"
-                  flavor="A message-canoe sent south with oil and blankets. It will not end the feud — but it may slow retaliation."
-                  effect="−Feud · +5 Prestige · +5 Morale"
+                  flavor="A message-canoe goes south with woven goods and a carved speaker. It may slow retaliation."
+                  effect="Woven + Carved → less Feud · Prestige · Morale"
                   archetype="The long view"
                   onClick={()=>act(pickCeremony,'peace_offering')}/>
                 <CommandCard icon="🏠" title="Store for Winter"

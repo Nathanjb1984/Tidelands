@@ -111,6 +111,18 @@ The current aftermath already hints at witness fires, prestige, poles, memorials
 - pole commissioning and raising as capstone moments
 - generosity converting wealth into standing
 
+### Village work scene backlog
+
+These should become real preparation scenes that feed ceremony and survival, not flavor-only labels:
+
+- **Gathering:** beach foods, berries, roots, cedar bark, medicines, and basket loads. Rewards food, village readiness, and weaving material. Bad choices can overwork families, miss tides, or damage next-season supplies.
+- **Fishing:** smoke racks, halibut hooks, salmon runs, oil rendering, and canoe crews close to home. Rewards feast stores and food. Bad weather or rushing can cost canoe condition, morale, or a full day.
+- **Hunting:** forest and shoreline hunting for feast meat, hide, bone, and prestige gifts. Rewards feast stores and standing. Failure can wound a hunter, lower morale, or create a food shortfall.
+- **Weaving:** cedar bark, mats, baskets, blankets, regalia, and gift goods. Rewards woven goods for potlatch, trade, diplomacy, and peace offerings. Neglect should make ceremonies smaller and trade weaker.
+- **Carving:** poles, house posts, boxes, canoe work, and speaking gifts. Rewards carved works, pole progress, prestige, and memory. Rushing can waste cedar or delay the voyage.
+
+Prototype target for this backlog: add a **Village Work** screen before expedition selection, then make potlatch / pole / peace choices spend feast stores, woven goods, and carved works.
+
 ### Prototype target
 
 Add a **ceremony scene** after successful returns, with choices that spend cargo for prestige, alliance, memory, or future stability.
